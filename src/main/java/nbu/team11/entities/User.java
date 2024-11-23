@@ -9,7 +9,7 @@ import nbu.team11.entities.enums.Role;
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long userId;
+    private Integer id;
 
     private String username;
     private String password;

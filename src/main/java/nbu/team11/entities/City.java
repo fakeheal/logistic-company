@@ -1,17 +1,15 @@
 package nbu.team11.entities;
 
 import jakarta.persistence.*;
-import lombok.Data;
 
-
-@Entity
-@Data
-public class Employee {
+public class City {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Integer id;
+
+    private String name;
 
     @OneToOne
-    @JoinColumn(name = "user_id")
-    private User user;
+    @JoinColumn(name = "id")
+    private Country country;
 }
