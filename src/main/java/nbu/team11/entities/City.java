@@ -1,7 +1,10 @@
 package nbu.team11.entities;
 
 import jakarta.persistence.*;
+import lombok.Data;
 
+@Entity
+@Data
 public class City {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
