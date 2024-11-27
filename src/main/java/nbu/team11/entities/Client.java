@@ -13,4 +13,8 @@ public class Client {
     @OneToOne
     @JoinColumn(name = "user_id")
     private User user;
+
+    private String firstName;
+    private String lastName;
+    private String phoneNumber;
 }

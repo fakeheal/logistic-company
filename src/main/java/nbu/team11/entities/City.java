@@ -13,6 +13,6 @@ public class City {
     private String name;
 
     @OneToOne
-    @JoinColumn(name = "id")
+    @JoinColumn(name = "country_id")
     private Country country;
 }
