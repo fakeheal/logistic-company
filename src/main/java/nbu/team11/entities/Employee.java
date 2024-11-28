@@ -14,16 +14,14 @@ public class Employee {
     private Integer id;
 
     @OneToOne
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
     @ManyToOne
-    @JoinColumn(name = "office_id")
+    @JoinColumn(name = "office_id",nullable = false)
     private Office office;
 
     @Enumerated(EnumType.STRING)
     private PositionType positionType;
 
-    private String firstName;
-    private String lastName;
 }

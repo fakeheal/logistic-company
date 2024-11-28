@@ -3,7 +3,10 @@ package nbu.team11.entities;
 import jakarta.persistence.*;
 import lombok.Data;
 import nbu.team11.entities.enums.Status;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 
 @Entity
@@ -22,6 +25,9 @@ public class ShipmentStatus {
     @Column(name = "Status", nullable = false)
     private Status status;
 
-    @Column(name = "CreatedOn", nullable = false)
-    private LocalDateTime createdOn;
+    @CreationTimestamp
+    private Instant createdOn;
+    @UpdateTimestamp
+    private Instant modifiedOn;
+
 }
