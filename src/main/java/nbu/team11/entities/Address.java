@@ -2,7 +2,6 @@ package nbu.team11.entities;
 
 import jakarta.persistence.*;
 import lombok.Data;
-import nbu.team11.entities.enums.AddressType;
 
 
 @Entity
@@ -20,8 +19,4 @@ public class Address {
 
     @Column(name = "PostalCode", nullable = false)
     private String postalCode;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "AddressType", nullable = false)
-    private AddressType addressType;
 }
