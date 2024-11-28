@@ -1,22 +1,15 @@
 package nbu.team11.entities;
-
 import jakarta.persistence.*;
-import java.math.BigDecimal;
-
 import lombok.Data;
-import nbu.team11.entities.Address;
-import nbu.team11.entities.Office;
-import nbu.team11.entities.Employee;
-import nbu.team11.entities.City;
-import nbu.team11.entities.Client;
+
+import java.math.BigDecimal;
 
 @Entity
 @Data
 public class Shipment {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Integer id;
 
     @ManyToOne
     @JoinColumn(name = "EmployeeId", nullable = false)

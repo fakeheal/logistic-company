@@ -12,7 +12,7 @@ public class ShipmentStatus {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Integer id;
 
     @OneToOne
     @JoinColumn(name = "ShipmentId", nullable = false)
