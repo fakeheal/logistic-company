@@ -17,12 +17,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 @SpringBootApplication
 public class MyApplication {
 
-// uncomment if you want to return a string/json
-
-//    @RequestMapping("/")
-//    String home() {
-//        return "Hello World!";
-//    }
+    @GetMapping("/")
+    String index() {
+        return "index";
+    }
 
     @GetMapping("/hello")
     String hello(@RequestParam(name = "name", required = false, defaultValue = "World") String name, Model model) {
