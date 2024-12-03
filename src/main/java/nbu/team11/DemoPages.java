@@ -33,10 +33,31 @@ public class DemoPages {
         return withAppLayout(model);
     }
 
+    @GetMapping("/demo/forgotten-password")
+    public String forgottenPassword(Model model) {
+        model.addAttribute("title", "Forgotten password");
+        model.addAttribute("content", "demo/forgotten-password");
+        return withAppLayout(model);
+    }
+
+    @GetMapping("/demo/reset-password")
+    public String resetPassword(Model model) {
+        model.addAttribute("title", "Reset password");
+        model.addAttribute("content", "demo/reset-password");
+        return withAppLayout(model);
+    }
+
     @GetMapping("/demo/track")
     public String track(Model model) {
         model.addAttribute("title", "Track package");
         model.addAttribute("content", "demo/track");
+        return withAppLayout(model);
+    }
+
+    @GetMapping("/demo/contact")
+    public String privacyPolicy(Model model) {
+        model.addAttribute("title", "Contact");
+        model.addAttribute("content", "demo/contact");
         return withAppLayout(model);
     }
 }
