@@ -57,7 +57,28 @@ public class DemoPages {
     @GetMapping("/demo/contact")
     public String privacyPolicy(Model model) {
         model.addAttribute("title", "Contact");
-        model.addAttribute("content", "demo/contact");
+        model.addAttribute("content", "demo/pages/contact");
+        return withAppLayout(model);
+    }
+
+    @GetMapping("/demo/employee")
+    public String employee(Model model) {
+        model.addAttribute("title", "All employees");
+        model.addAttribute("content", "demo/pages/employee/index");
+        return withAppLayout(model);
+    }
+
+    @GetMapping("/demo/employee/create")
+    public String createEmployee(Model model) {
+        model.addAttribute("title", "Create employee");
+        model.addAttribute("content", "demo/pages/employee/create");
+        return withAppLayout(model);
+    }
+
+    @GetMapping("/demo/employee/view")
+    public String viewEmployee(Model model) {
+        model.addAttribute("title", "View employee");
+        model.addAttribute("content", "demo/pages/employee/view");
         return withAppLayout(model);
     }
 }
