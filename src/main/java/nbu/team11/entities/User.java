@@ -3,6 +3,10 @@ package nbu.team11.entities;
 import jakarta.persistence.*;
 import lombok.Data;
 import nbu.team11.entities.enums.Role;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
+import java.time.Instant;
 
 @Entity
 @Data
@@ -16,14 +20,22 @@ public class User {
     @Column(name = "LastName", nullable = false)
     private String lastName;
 
+    @Column(name = "username", nullable = false, unique = true)
     private String username;
-
+    @Column(name = "password", nullable = false)
     private String password;
-
+    @Column(name = "email", nullable = false, unique = true)
     private String email;
 
     @Enumerated(EnumType.STRING)
     private Role role;
+
+    @CreationTimestamp
+    @Column(name = "created_on", nullable = false, updatable = false)
+    private Instant createdOn;
+    @UpdateTimestamp
+    @Column(name = "updated_on", nullable = false)
+    private Instant updatedOn;
 
     public User(){
 

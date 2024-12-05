@@ -26,8 +26,17 @@ public class ShipmentStatus {
     private Status status;
 
     @CreationTimestamp
+    @Column(name = "created_on", nullable = false, updatable = false)
     private Instant createdOn;
     @UpdateTimestamp
-    private Instant modifiedOn;
+    @Column(name = "updated_on", nullable = false)
+    private Instant updatedOn;
 
+    public void setStatus(Status status) {
+        this.status = status;
+    }
+
+    public void setShipment(Shipment savedShipment) {
+        this.shipment = savedShipment;
+    }
 }

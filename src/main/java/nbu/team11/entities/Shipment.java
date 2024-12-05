@@ -1,8 +1,11 @@
 package nbu.team11.entities;
 import jakarta.persistence.*;
 import lombok.Data;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 
 @Entity
 @Data
@@ -40,4 +43,17 @@ public class Shipment {
 
     @Column(name = "Price", nullable = false)
     private BigDecimal price;
+
+    @CreationTimestamp
+    @Column(name = "created_on", nullable = false, updatable = false)
+    private Instant createdOn;
+    @UpdateTimestamp
+    @Column(name = "updated_on", nullable = false)
+    private Instant updatedOn;
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+
 }
