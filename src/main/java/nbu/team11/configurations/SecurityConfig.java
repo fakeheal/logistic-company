@@ -20,12 +20,12 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 //such mechanisms are required by the application.
 @EnableWebSecurity
 public class SecurityConfig {
-
     @Autowired
     CustomUserDetailsService customUserDetailsService;
 
     //Works based on the Blowfish cipher
     //Generates salt, appends it and then hashes it
+    //TODO: Check if password encryption settings can be managed by us - hashing, encr, decr keys
     @Bean
     public static PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
@@ -37,28 +37,26 @@ public class SecurityConfig {
         return authenticationConfiguration.getAuthenticationManager();
     }
 
-    @SuppressWarnings("removal")
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-
-        http.csrf().disable().authorizeHttpRequests()
-                //Tells the security module which routes can be accessed by all users
-                .requestMatchers("/register").permitAll()
-                .requestMatchers("/home").permitAll()
-                .and()
-                //Enables form based authentication
-                .formLogin()
-                .loginPage("/login")
-                //States the controller action for login processing
-                .loginProcessingUrl("/login")
-                .defaultSuccessUrl("/home", true).permitAll()
-                .and()
-                //Enables logout
-                .logout()
-                .invalidateHttpSession(true)
-                .clearAuthentication(true)
-                .logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
-                .logoutSuccessUrl("/login?logout").permitAll();
+        http
+                .authorizeHttpRequests(authorize -> authorize
+                        .requestMatchers("/register", "/home").permitAll()
+                        .anyRequest().authenticated()
+                )
+                .formLogin(form -> form
+                        .loginPage("/login")
+                        .loginProcessingUrl("/login")
+                        .defaultSuccessUrl("/home", true)
+                        .permitAll()
+                )
+                .logout(logout -> logout
+                        .invalidateHttpSession(true)
+                        .clearAuthentication(true)
+                        .logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
+                        .logoutSuccessUrl("/login?logout")
+                        .permitAll()
+                );
 
         return http.build();
     }
