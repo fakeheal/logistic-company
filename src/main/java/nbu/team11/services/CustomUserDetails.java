@@ -10,6 +10,7 @@ public class CustomUserDetails implements UserDetails {
     private String username;
     private String password;
     private String email;
+    private String role;
     private Collection<? extends GrantedAuthority> authorities;
 
     public CustomUserDetails(String username, String password, String email, Collection<? extends GrantedAuthority> authorities) {
@@ -17,6 +18,7 @@ public class CustomUserDetails implements UserDetails {
         this.password = password;
         this.email = email;
         this.authorities = authorities;
+        this.role = role;
     }
 
 
@@ -39,6 +41,11 @@ public class CustomUserDetails implements UserDetails {
     }
 
     public String getEmail() {
+        // TODO Auto-generated method stub
+        return email;
+    }
+
+    public String getRole() {
         // TODO Auto-generated method stub
         return email;
     }
