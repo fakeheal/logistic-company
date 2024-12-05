@@ -4,6 +4,10 @@ import jakarta.persistence.*;
 import lombok.Data;
 import nbu.team11.entities.enums.PositionType;
 import nbu.team11.entities.enums.Role;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
+import java.time.Instant;
 
 
 @Entity
@@ -14,15 +18,22 @@ public class Employee {
     private Integer id;
 
     @OneToOne
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
     @ManyToOne
-    @JoinColumn(name = "office_id")
+    @JoinColumn(name = "office_id", nullable = false)
     private Office office;
 
     @Enumerated(EnumType.STRING)
     private PositionType positionType;
+
+    @CreationTimestamp
+    @Column(name = "created_on", nullable = false, updatable = false)
+    private Instant createdOn;
+    @UpdateTimestamp
+    @Column(name = "updated_on", nullable = false)
+    private Instant updatedOn;
 
     private String firstName;
     private String lastName;

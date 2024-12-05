@@ -2,6 +2,10 @@ package nbu.team11.entities;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
+import java.time.Instant;
 
 @Entity
 @Data
@@ -15,6 +19,13 @@ public class Office {
     @OneToOne
     @JoinColumn(name = "address_id",nullable = false)
     private Address address;
+
+    @CreationTimestamp
+    @Column(name = "created_on", nullable = false, updatable = false)
+    private Instant createdOn;
+    @UpdateTimestamp
+    @Column(name = "updated_on", nullable = false)
+    private Instant updatedOn;
 
     public Integer getId() {
         return id;

@@ -3,6 +3,10 @@ package nbu.team11.entities;
 import jakarta.persistence.*;
 import lombok.Data;
 import nbu.team11.entities.enums.AddressType;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
+import java.time.Instant;
 
 
 @Entity
@@ -24,6 +28,13 @@ public class Address {
     @Enumerated(EnumType.STRING)
     @Column(name = "AddressType", nullable = false)
     private AddressType addressType;
+
+    @CreationTimestamp
+    @Column(name = "created_on", nullable = false, updatable = false)
+    private Instant createdOn;
+    @UpdateTimestamp
+    @Column(name = "updated_on", nullable = false)
+    private Instant updatedOn;
 
     public Integer getId() {
         return id;
