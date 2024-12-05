@@ -1,8 +1,9 @@
 plugins {
     id 'java'
     id 'org.springframework.boot' version '3.3.5'
-}
 
+    id('com.github.node-gradle.node') version '7.1.0'
+}
 apply plugin: 'io.spring.dependency-management'
 
 group = 'com.example'
@@ -16,4 +17,25 @@ repositories {
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+
+    compileOnly 'org.springframework.boot:spring-boot-devtools'
 }
+
+// frontend tasks
+node {
+    download = true
+    version = '20.11.0'
+}
+
+// Task for generating Tailwind CSS
+tasks.register('tailwindcss', NpxTask) {
+    command = 'tailwindcss'
+    args = ['--input', './src/main/resources/assets/app.css', '--output', './src/main/resources/static/output.css']
+}
+
+tasks.register('rollup', NpxTask) {
+    command = 'rollup'
+    args = ['-c']
+}
+
+bootRun.dependsOn 'tailwindcss', 'rollup'

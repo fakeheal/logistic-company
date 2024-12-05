@@ -35,6 +35,18 @@
 Необходимо е да се посочат задачите, които са били изпълнени от всеки от участниците в
 екипа.
 
+## Reference
+- [Spring Boot](https://spring.io/projects/spring-boot)
+- [Hibernate ORM](https://hibernate.org/orm/)
+- [thymeleaf](https://www.thymeleaf.org/)
+- [gradle-node-plugin](https://github.com/node-gradle/gradle-node-plugin)
+- [tailwindcss](https://tailwindcss.com/)
+
+## Run
+
+```bash
+./gradlew npmInstall tailwindcss rollup bootRun
+```
 
 ## Deploy
 
