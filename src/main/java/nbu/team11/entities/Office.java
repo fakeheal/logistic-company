@@ -15,4 +15,24 @@ public class Office {
     @OneToOne
     @JoinColumn(name = "address_id",nullable = false)
     private Address address;
+
+    public Integer getId() {
+        return id;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public Address getAddress() {
+        return address;
+    }
+
+    public void setAddress(Address address) {
+        this.address = address;
+    }
 }
