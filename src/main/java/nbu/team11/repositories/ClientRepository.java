@@ -5,5 +5,6 @@ import nbu.team11.entities.*;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface ClientRepository extends JpaRepository<Client, Long> {
+public interface ClientRepository extends JpaRepository<Client, Integer> {
+    Client findByUserId(Integer userId);
 }
