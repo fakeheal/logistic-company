@@ -25,6 +25,7 @@ dependencies {
     annotationProcessor 'org.projectlombok:lombok:1.18.30'
     implementation 'org.springframework.cloud:spring-cloud-starter-bootstrap'
     compileOnly 'org.springframework.boot:spring-boot-devtools'
+    implementation 'org.modelmapper:modelmapper:3.1.1'
 }
 
 // frontend tasks
