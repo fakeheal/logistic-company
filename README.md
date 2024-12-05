@@ -35,6 +35,35 @@
 Необходимо е да се посочат задачите, които са били изпълнени от всеки от участниците в
 екипа.
 
+### Development - Prerequisites
+Java 21, Gradle 8.1 - language SDK and build tool
+
+### SQL Server Authentication - Setup
+In the application.properties file of the project are used environment variables for the SQL Server
+authentication and accessing the database:
+URL (Example: jdbc:mysql://localhost:3306/logistic_company), Username, Password
+
+The environment variables should be set up as follows:
+#### Windows
+Open cmd -> Execute the following commands:
+
+```cmd
+setx LOGISTIC_COMPANY_DB_URL {your-db-url}
+
+setx LOGISTIC_COMPANY_DB_USERNAME {your-db-username}
+
+setx LOGISTIC_COMPANY_DB_PASSWORD {your-db-password}
+```
+#### Linux & Mac
+Open Terminal -> Execute the Following Commands:
+
+```terminal
+export LOGISTIC_COMPANY_DB_URL={your-db-url}
+
+export LOGISTIC_COMPANY_DB_USERNAME={your-db-username}
+
+export LOGISTIC_COMPANY_DB_PASSWORD={your-db-password}
+```
 
 ## Deploy
 
