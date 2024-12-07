@@ -1,12 +1,14 @@
 plugins {
     id 'java'
     id 'org.springframework.boot' version '3.3.5'
+    id('com.github.node-gradle.node') version '7.1.0'
 }
 
 apply plugin: 'io.spring.dependency-management'
 
 group = 'com.example'
 version = '0.0.1-SNAPSHOT'
+sourceCompatibility = JavaVersion.VERSION_21
 
 repositories {
     mavenCentral()
@@ -15,4 +17,34 @@ repositories {
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'mysql:mysql-connector-java:8.0.33'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.springframework.boot:spring-boot-starter-jdbc'
+    compileOnly 'org.projectlombok:lombok:1.18.30'
+    annotationProcessor 'org.projectlombok:lombok:1.18.30'
+    implementation 'org.springframework.cloud:spring-cloud-starter-bootstrap'
+    compileOnly 'org.springframework.boot:spring-boot-devtools'
+    implementation 'org.modelmapper:modelmapper:3.1.1'
 }
+
+// frontend tasks
+node {
+    download = true
+    version = '20.11.0'
+}
+
+
+
+// Task for generating Tailwind CSS
+tasks.register('tailwindcss', NpxTask) {
+    command = 'tailwindcss'
+    args = ['--input', './src/main/resources/assets/app.css', '--output', './src/main/resources/static/output.css']
+}
+
+tasks.register('rollup', NpxTask) {
+    command = 'rollup'
+    args = ['-c']
+}
+
+bootRun.dependsOn 'tailwindcss', 'rollup'

@@ -22,3 +22,4 @@ README.html
 .DS_Store
 out/
 .micronaut/
+src/main/resources/static/
