@@ -36,6 +36,12 @@ public class UserService implements IUserService {
     @Override
     public UserDto getByUsername(String username) {
         User user = userRepository.findByUsername(username);
+
+        if(user == null)
+        {
+            return null;
+        }
+
         UserDto userDto = this.modelMapper.map(user, UserDto.class);
 
         return userDto;
@@ -74,7 +80,8 @@ public class UserService implements IUserService {
     //TODO: Return automap user dto
     @Override
     public User create(UserDto userDto) {
-        User user = new User(Role.CLIENT, userDto.getEmail(), passwordEncoder.encode(userDto.getPassword()), userDto.getUsername());
+
+        User user = new User(Role.CLIENT, userDto.getEmail(), passwordEncoder.encode(userDto.getPassword()), userDto.getUsername(), userDto.getFirstName(), userDto.getLastName());
         return userRepository.save(user);
     }
 }

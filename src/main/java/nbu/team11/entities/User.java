@@ -41,11 +41,13 @@ public class User {
 
     }
 
-    public User(Role role, String email, String password, String username) {
+    public User(Role role, String email, String password, String username, String firstName, String lastName) {
         this.role = role;
         this.email = email;
         this.password = password;
         this.username = username;
+        this.firstName = firstName;
+        this.lastName = lastName;
     }
 
     public Role getRole() {

@@ -7,13 +7,14 @@ public class UserDto {
     private String password;
     private String email;
     private Role role;
+    private String firstName;
+    private String lastName;
 
     public UserDto() {
 
     }
 
     public UserDto(String username, String password, String email, Role role) {
-
         this.username = username;
         this.password = password;
         this.email = email;
@@ -56,5 +57,21 @@ public class UserDto {
 
     public void setRole(Role role) {
         this.role = role;
+    }
+
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
     }
 }
