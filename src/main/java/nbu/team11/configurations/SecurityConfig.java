@@ -42,6 +42,7 @@ public class SecurityConfig {
         http
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/register", "/home", "/demo").permitAll()
+                        .requestMatchers(new AntPathRequestMatcher("/assets/**")).permitAll()
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form
@@ -57,6 +58,7 @@ public class SecurityConfig {
                         .logoutSuccessUrl("/login?logout")
                         .permitAll()
                 );
+
 
         return http.build();
     }

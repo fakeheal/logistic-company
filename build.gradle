@@ -23,7 +23,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-jdbc'
     compileOnly 'org.projectlombok:lombok:1.18.30'
     annotationProcessor 'org.projectlombok:lombok:1.18.30'
-    implementation 'org.springframework.cloud:spring-cloud-starter-bootstrap'
+    implementation 'org.springframework.cloud:spring-cloud-starter-bootstrap:4.1.3'
     compileOnly 'org.springframework.boot:spring-boot-devtools'
     implementation 'org.modelmapper:modelmapper:3.1.1'
 }
@@ -39,7 +39,7 @@ node {
 // Task for generating Tailwind CSS
 tasks.register('tailwindcss', NpxTask) {
     command = 'tailwindcss'
-    args = ['--input', './src/main/resources/assets/app.css', '--output', './src/main/resources/static/output.css']
+    args = ['--input', './src/main/resources/assets/app.css', '--output', './src/main/resources/static/assets/output.css']
 }
 
 tasks.register('rollup', NpxTask) {

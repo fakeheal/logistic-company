@@ -5,7 +5,7 @@ export default {
     context: 'window',
     input: './src/main/resources/assets/app.js',
     output: {
-        file: './src/main/resources/static/bundle.js',
+        file: './src/main/resources/static/assets/bundle.js',
         format: 'umd',
     },
     plugins: [

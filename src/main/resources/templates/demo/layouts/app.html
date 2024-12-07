@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <title th:text="${title}">nbcont</title>
-    <link rel="stylesheet" href="/output.css"/>
+    <link rel="stylesheet" href="assets/output.css"/>
     <script>
         if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
             document.documentElement.classList.add('dark');
@@ -21,6 +21,6 @@
 </main>
 <div th:insert="~{demo/fragments/footer :: footer}"></div>
 
-<script src="/bundle.js"></script>
+<script src="assets/bundle.js"></script>
 </body>
 </html>
