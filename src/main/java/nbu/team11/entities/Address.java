@@ -2,7 +2,6 @@ package nbu.team11.entities;
 
 import jakarta.persistence.*;
 import lombok.Data;
-import nbu.team11.entities.enums.AddressType;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -24,10 +23,6 @@ public class Address {
 
     @Column(name = "PostalCode", nullable = false)
     private String postalCode;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "AddressType", nullable = false)
-    private AddressType addressType;
 
     @CreationTimestamp
     @Column(name = "created_on", nullable = false, updatable = false)
@@ -64,11 +59,4 @@ public class Address {
         this.postalCode = postalCode;
     }
 
-    public AddressType getAddressType() {
-        return addressType;
-    }
-
-    public void setAddressType(AddressType addressType) {
-        this.addressType = addressType;
-    }
 }
