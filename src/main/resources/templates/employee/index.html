@@ -1,4 +1,4 @@
-<!--/*@thymesVar id="employees" type="org.springframework.data.domain.Page<nbu.team11.entities.Employee>"*/-->
+<!--/*@thymesVar id="employees" type="org.springframework.data.domain.Page<nbu.team11.dtos.EmployeeDto>"*/-->
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <body>
@@ -46,17 +46,17 @@
                 <tbody>
                 <tr th:each="employee : ${employees}"
                     class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
-                    <th th:text="${employee.getUser().getFullName()}" scope="row"
+                    <th th:text="${employee.getUserFullName()}" scope="row"
                         class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
                         Jane Doe
                     </th>
-                    <td th:text="${employee.getPositionTypeFormatted()}" class="px-6 py-4">
+                    <td th:text="${employee.getPosition()}" class="px-6 py-4">
                         Coordinator
                     </td>
-                    <td th:text="${employee.getUser().getEmail()}" class="px-6 py-4">
+                    <td th:text="${employee.getUserFullName()}" class="px-6 py-4">
                         jane.doe@nbucont.eu
                     </td>
-                    <td th:text="${employee.getOffice().getTitle()}" class="px-6 py-4">
+                    <td th:text="${employee.getOfficeTitle()}" class="px-6 py-4">
                         Sofia
                     </td>
                     <td class="px-6 py-4 text-right">
