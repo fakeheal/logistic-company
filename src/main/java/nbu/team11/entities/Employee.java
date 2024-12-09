@@ -2,8 +2,9 @@ package nbu.team11.entities;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import nbu.team11.entities.enums.PositionType;
-import nbu.team11.entities.enums.Role;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -13,18 +14,25 @@ import java.time.Instant;
 @Entity
 @Data
 public class Employee {
+    @Getter
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
+    @Getter
+    @Setter
     @OneToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    @Getter
+    @Setter
     @ManyToOne
     @JoinColumn(name = "office_id", nullable = false)
     private Office office;
 
+    @Setter
+    @Getter
     @Enumerated(EnumType.STRING)
     private PositionType positionType;
 
@@ -35,50 +43,21 @@ public class Employee {
     @Column(name = "updated_on", nullable = false)
     private Instant updatedOn;
 
-    private String firstName;
-    private String lastName;
 
-    public void setUser(User user) {
-        this.user = user;
+    public String getPositionTypeFormatted() {
+        switch (this.getPositionType()) {
+            case PositionType.ADMIN -> {
+                return "Administrator";
+            }
+            case PositionType.COORDINATOR -> {
+                return "Coordinator";
+            }
+            case PositionType.DELIVERYMAN -> {
+                return "Employee";
+            }
+        }
+
+        return "N/A";
     }
 
-    public void setOffice(Office office) {
-        this.office = office;
-    }
-
-    public void setPositionType(PositionType positionType) {
-        this.positionType = positionType;
-    }
-
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
-    }
-
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
-    }
-
-    public Integer getId() {
-        return id;
-    }
-
-    public User getUser() {
-        return user;
-    }
-
-    public Office getOffice() {
-        return office;
-    }
-
-    public PositionType getPositionType() {
-        return positionType;
-    }
-
-    public String getFirstName() {
-        return firstName;
-    }
-
-    public String getLastName() {
-        return lastName;
-    }
 }
