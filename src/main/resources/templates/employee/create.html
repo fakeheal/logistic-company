@@ -1,74 +1,41 @@
+<!--/*@thymesVar id="form" type="nbu.team11.controllers.forms.CreateEmployeeForm"*/-->
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <body>
 <div th:fragment="employeeCreatePage">
-    <form class="max-w-sm mx-auto my-24 p-6 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
+    <form class="max-w-sm mx-auto my-24 p-6 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700"
+          method="post"
+          th:action="@{/employee/store}"
+          th:object="${form}">
+
         <h2 class="font-bold text-xl mb-4">New Employee</h2>
-        <div class="mb-5">
-            <label for="first_name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">First
-                Name</label>
-            <input type="text" id="first_name"
-                   class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                   required/>
-        </div>
-        <div class="mb-5">
-            <label for="last_name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Last
-                Name</label>
-            <input type="text" id="last_name"
-                   class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                   required/>
-        </div>
-        <div class="mb-5">
-            <label for="countries" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Select
-                position</label>
-            <select id="countries"
-                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+        <div class="mb-5"
+             th:insert="~{ /ui/forms :: textInput(labelText='First Name', inputName='firstName', inputType='text') }"></div>
+        <div class="mb-5"
+             th:insert="~{ /ui/forms :: textInput(labelText='Last Name', inputName='lastName', inputType='text') }"></div>
 
-                <option>Coordinator</option>
-                <option>Courier</option>
-            </select>
-        </div>
-        <div class="mb-5">
-            <label for="office" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Select
-                office</label>
-            <select id="office"
-                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+        <!--/*@thymesVar id="positions" type="java.util.List<nbu.team11.controllers.forms.ui.SelectOption>"*/-->
+        <div class="mb-5"
+             th:insert="~{ /ui/forms :: select(labelText='Position', inputName='position', options=${positions}) }"></div>
 
-                <option>Sofia, Monastery meadows</option>
-                <option>Sofia, Shooting range</option>
-            </select>
-        </div>
-        <div class="mb-5">
-            <label for="email" class="block mb-2 text-sm font-medium text-green-700 dark:text-green-500">Email</label>
-            <input type="email" id="email"
-                   class="bg-green-50 border border-green-500 text-green-900 dark:text-green-400 placeholder-green-700 dark:placeholder-green-500 text-sm rounded-lg focus:ring-green-500 focus:border-green-500 block w-full p-2.5 dark:bg-gray-700 dark:border-green-500"
-                   required>
-            <p class="mt-2 text-sm text-green-600 dark:text-green-500"><span class="font-medium">Alright!</span> Email
-                available!</p>
-        </div>
-        <div class="mb-5">
-            <label for="password" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Password</label>
-            <input type="password" id="password"
-                   class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                   required
-                   value="654321"/>
-        </div>
-        <div class="mb-5">
-            <label for="repeat-password" class="block mb-2 text-sm font-medium text-red-700 dark:text-red-500">Repeat
-                password</label>
-            <input type="password" id="repeat-password"
-                   class="bg-red-50 border border-red-500 text-red-900 placeholder-red-700 text-sm rounded-lg focus:ring-red-500 dark:bg-gray-700 focus:border-red-500 block w-full p-2.5 dark:text-red-500 dark:placeholder-red-500 dark:border-red-500"
-                   value="123456" required>
-            <p class="mt-2 text-sm text-red-600 dark:text-red-500"><span class="font-medium">Oops!</span> Passwords
-                don't match!</p>
-        </div>
+        <!--/*@thymesVar id="positions" type="java.util.List<nbu.team11.controllers.forms.ui.SelectOption>"*/-->
+        <div class="mb-5"
+             th:insert="~{ /ui/forms :: select(labelText='Offices', inputName='officeId', options=${offices}) }"></div>
+        <div class="mb-5"
+             th:insert="~{ /ui/forms :: textInput(labelText='Username', inputName='username', inputType='text') }"></div>
+        <div class="mb-5"
+             th:insert="~{ /ui/forms :: textInput(labelText='Email', inputName='email', inputType='email') }"></div>
+        <div class="mb-5"
+             th:insert="~{ /ui/forms :: textInput(labelText='Password', inputName='password', inputType='password') }"></div>
+        <div class="mb-5"
+             th:insert="~{ /ui/forms :: textInput(labelText='Repeat Password', inputName='confirmPassword', inputType='password') }"></div>
         <div class="flex flex-col md:flex-row justify-between items-center space-y-2 md:space-y-0">
             <button type="submit"
                     class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
                 Create
             </button>
 
-            <a href="/demo/employee" class="font-medium text-blue-600 dark:text-blue-500 hover:underline">Cancel</a>
+            <a href="/employee" class="font-medium text-blue-600 dark:text-blue-500 hover:underline">Cancel</a>
         </div>
     </form>
 </div>

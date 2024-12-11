@@ -9,6 +9,7 @@ import java.time.Instant;
 @Getter
 @Setter
 public class OfficeDto {
+    private Integer id;
     private String title;
     private Instant createdOn;
     private Instant updatedOn;

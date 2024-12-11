@@ -19,4 +19,12 @@ public class EmployeeService implements IEmployeeService {
         Page<Employee> employees = employeeRepository.findAll(PageRequest.of(page, size));
         return employees.map(employee -> (new ModelMapperConfig()).modelMapper().map(employee, EmployeeDto.class));
     }
+
+    @Override
+    public EmployeeDto create(EmployeeDto employeeDto) {
+
+//        this.employeeRepository.
+
+        return null;
+    }
 }

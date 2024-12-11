@@ -1,0 +1,44 @@
+<!DOCTYPE html SYSTEM "http://www.thymeleaf.org/dtd/xhtml1-strict-thymeleaf-4.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<body>
+<th:block th:fragment="textInput(labelText, inputName, inputType)">
+    <!--/*@thymesVar id="labelText" type="String"*/-->
+    <label for="inputLabel" th:for="${inputName}" th:text="${labelText}"
+           class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+        Input Label
+    </label>
+    <!--/*@thymesVar id="inputName" type="String"*/-->
+    <input type="text" th:type="${inputType}"
+           id="inputLabel" th:id="${inputName}"
+           name="inputLabel" th:name="${inputName}"
+           th:classappend="${#fields.hasErrors(inputName)} ? 'bg-red-50 border border-red-500 text-red-900 placeholder-red-700 focus:ring-red-500 dark:bg-gray-700 dark:text-red-500 dark:placeholder-red-500 dark:border-red-500 focus:border-red-500' : 'bg-gray-50 border border-gray-300 text-gray-900 text-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:focus:ring-blue-500 dark:focus:border-blue-500'"
+           class="block w-full p-2.5 dark:text-white rounded-lg"
+           th:value="*{__${inputName}__}"
+    />
+    <p th:if="${#fields.hasErrors(inputName)}"
+       th:errors="*{__${inputName}__}"
+       class="mt-2 text-sm text-red-600 dark:text-red-500">
+        Text Input Error
+    </p>
+</th:block>
+
+<th:block th:fragment="select(labelText, inputName, options)">
+    <label for="select" th:for="${inputName}" th:text="${labelText}"
+           class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+        Select value
+    </label>
+    <select
+            id="select" th:id="${inputName}"
+            name="select" th:name="${inputName}"
+            th:classappend="${#fields.hasErrors(inputName)} ? 'bg-red-50 border border-red-500 text-red-900 placeholder-red-700 focus:ring-red-500 dark:bg-gray-700 dark:text-red-500 dark:placeholder-red-500 dark:border-red-500 focus:border-red-500' : 'bg-gray-50 border border-gray-300 text-gray-900 text-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:focus:ring-blue-500 dark:focus:border-blue-500'"
+            class="block w-full p-2.5 dark:text-white rounded-lg"
+    >
+        <th:block th:each="option : ${options}">
+            <!--/*@thymesVar id="option" type="java.util.List<nbu.team11.controllers.forms.ui.SelectOption>"*/-->
+            <option th:value="${option.value}" th:text="${option.label}"></option>
+        </th:block>
+    </select>
+</th:block>
+</body>
+</html>

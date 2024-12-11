@@ -5,4 +5,6 @@ import org.springframework.data.domain.Page;
 
 public interface IEmployeeService {
     Page<EmployeeDto> paginate(int page, int size);
+
+    EmployeeDto create(EmployeeDto employeeDto);
 }
