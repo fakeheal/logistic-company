@@ -19,6 +19,9 @@ public class EmployeeDto {
     private String userEmail;
     private String officeTitle;
 
+    private Integer officeId;
+    private Integer userId;
+
     public EmployeeDto() {
     }
 }

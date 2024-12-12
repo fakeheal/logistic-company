@@ -39,6 +39,11 @@
             <option th:value="${option.value}" th:text="${option.label}"></option>
         </th:block>
     </select>
+    <p th:if="${#fields.hasErrors(inputName)}"
+       th:errors="*{__${inputName}__}"
+       class="mt-2 text-sm text-red-600 dark:text-red-500">
+        Select Error
+    </p>
 </th:block>
 </body>
 </html>

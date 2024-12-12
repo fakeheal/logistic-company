@@ -13,13 +13,16 @@
         }
     </script>
 </head>
-<body class="bg-white dark:bg-gray-600 text-black dark:text-white">
-<div th:insert="~{demo/fragments/header :: header}"></div>
+<body class="bg-white dark:bg-gray-600 text-black dark:text-white relative">
+<!--/*@thymesVar id="successMessage" type="String"*/-->
+<!--/*@thymesVar id="errorMessage" type="String"*/-->
+<div th:insert="~{/fragments/alerts :: toast}"></div>
+<div th:insert="~{/fragments/header :: header}"></div>
 
 <main>
     <div th:insert="~{${content}}"></div>
 </main>
-<div th:insert="~{demo/fragments/footer :: footer}"></div>
+<div th:insert="~{/fragments/footer :: footer}"></div>
 
 <script src="/assets/bundle.js"></script>
 </body>

@@ -8,6 +8,8 @@ import nbu.team11.dtos.OfficeDto;
 import nbu.team11.entities.enums.PositionType;
 import nbu.team11.services.EmployeeService;
 import nbu.team11.services.OfficeService;
+import nbu.team11.services.exceptions.EmailNotAvailable;
+import nbu.team11.services.exceptions.UsernameNotAvailable;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -33,11 +35,12 @@ public class EmployeeController {
     public String index(
             Model model,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
+            @RequestParam(defaultValue = "10") int size,
+            RedirectAttributes attributes
     ) {
         Page<EmployeeDto> employees = employeeService.paginate(page, size);
 
-        model.addAttribute("title", "All Employees ");
+        model.addAttribute("title", "All Employees");
         model.addAttribute("content", "employee/index");
         model.addAttribute("employees", employees);
 
@@ -57,9 +60,6 @@ public class EmployeeController {
             model.addAttribute("form", new CreateEmployeeForm());
         }
 
-
-        model.getAttribute("form");
-
         return "layouts/app";
     }
 
@@ -71,7 +71,16 @@ public class EmployeeController {
             return "redirect:/employee/create";
         }
 
-        attributes.addFlashAttribute("message", "Employee created successfully");
+        try {
+            employeeService.create(createEmployeeForm.toEmployeeDto(), createEmployeeForm.toUserDto());
+        } catch (UsernameNotAvailable | EmailNotAvailable e) {
+            attributes.addFlashAttribute("org.springframework.validation.BindingResult.form", bindingResult);
+            attributes.addFlashAttribute("form", createEmployeeForm);
+            attributes.addFlashAttribute("errorMessage", e.getMessage());
+            return "redirect:/employee/create";
+        }
+
+        attributes.addFlashAttribute("successMessage", "Employee created successfully");
         return "redirect:/employee";
     }
 

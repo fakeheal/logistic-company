@@ -5,6 +5,10 @@ import jakarta.validation.constraints.*;
 import lombok.Getter;
 import lombok.Setter;
 import nbu.team11.controllers.forms.constraints.PasswordConfirmed;
+import nbu.team11.dtos.EmployeeDto;
+import nbu.team11.dtos.UserDto;
+import nbu.team11.entities.enums.PositionType;
+import nbu.team11.entities.enums.Role;
 
 @Getter
 @Setter
@@ -18,10 +22,8 @@ public class CreateEmployeeForm {
     @Size(min = 3, max = 50)
     private String lastName;
 
-    @NotBlank
     //@TODO: Find a way to reuse the enum PositionType
-    @Pattern(regexp = "^(ADMIN|COORDINATOR|DELIVERYMAN)$")
-    private String position;
+    private PositionType position;
 
     @NotNull
     private Integer officeId;
@@ -39,5 +41,23 @@ public class CreateEmployeeForm {
 
     @NotBlank
     private String confirmPassword;
+
+    public EmployeeDto toEmployeeDto() {
+        EmployeeDto employeeDto = new EmployeeDto();
+        employeeDto.setPosition(this.position);
+        employeeDto.setOfficeId(this.officeId);
+        return employeeDto;
+    }
+
+    public UserDto toUserDto() {
+        UserDto userDto = new UserDto();
+        userDto.setRole(Role.EMPLOYEE);
+        userDto.setFirstName(this.firstName);
+        userDto.setLastName(this.lastName);
+        userDto.setUsername(this.username);
+        userDto.setEmail(this.email);
+        userDto.setPassword(this.password);
+        return userDto;
+    }
 }
 

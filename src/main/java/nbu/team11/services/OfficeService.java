@@ -3,6 +3,7 @@ package nbu.team11.services;
 import lombok.AllArgsConstructor;
 import nbu.team11.configurations.ModelMapperConfig;
 import nbu.team11.dtos.OfficeDto;
+import nbu.team11.entities.Office;
 import nbu.team11.repositories.OfficeRepository;
 import nbu.team11.services.contracts.IOfficeService;
 import org.springframework.stereotype.Service;
