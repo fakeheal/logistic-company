@@ -19,6 +19,7 @@ public class ModelMapperConfig {
                             mapping.map(src -> src.getUser().getFullName(), EmployeeDto::setUserFullName);
                             mapping.map(src -> src.getUser().getEmail(), EmployeeDto::setUserEmail);
                             mapping.map(src -> src.getOffice().getTitle(), EmployeeDto::setOfficeTitle);
+                            mapping.map(src -> src.getUser().getId(), EmployeeDto::setUserId);
                         }
                 );
 

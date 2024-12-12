@@ -15,8 +15,11 @@ public class EmployeeDto {
     private Instant createdOn;
     private Instant updatedOn;
 
+    private String userFirstName;
+    private String userLastName;
     private String userFullName;
     private String userEmail;
+    private String userUsername;
     private String officeTitle;
 
     private Integer officeId;

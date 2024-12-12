@@ -1,14 +1,15 @@
 <!--/*@thymesVar id="form" type="nbu.team11.controllers.forms.EmployeeForm"*/-->
+<!--/*@thymesVar id="employee" type="nbu.team11.dtos.EmployeeDto"*/-->
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <body>
 <div th:fragment="employeeCreatePage">
     <form class="max-w-sm mx-auto my-24 p-6 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700"
           method="post"
-          th:action="@{/employee/store}"
+          th:action="@{'/employee/' + ${employee.getId()} + '/update'}"
           th:object="${form}">
 
-        <h2 class="font-bold text-xl mb-4">New Employee</h2>
+        <h2 class="font-bold text-xl mb-4">Edit Employee</h2>
         <div class="mb-5"
              th:insert="~{ /ui/forms :: textInput(labelText='First Name', inputName='firstName', inputType='text') }"></div>
         <div class="mb-5"
@@ -32,10 +33,10 @@
         <div class="flex flex-col md:flex-row justify-between items-center space-y-2 md:space-y-0">
             <button type="submit"
                     class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
-                Create
+                Update
             </button>
 
-            <a href="/employee" class="font-medium text-blue-600 dark:text-blue-500 hover:underline">Cancel</a>
+            <a th:href="'/employee/' + ${employee.getId()}" class="font-medium text-blue-600 dark:text-blue-500 hover:underline">Cancel</a>
         </div>
     </form>
 </div>

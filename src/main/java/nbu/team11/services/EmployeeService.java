@@ -4,12 +4,15 @@ import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import nbu.team11.configurations.ModelMapperConfig;
 import nbu.team11.dtos.EmployeeDto;
+import nbu.team11.dtos.OfficeDto;
 import nbu.team11.dtos.UserDto;
 import nbu.team11.entities.Employee;
+import nbu.team11.entities.Office;
 import nbu.team11.entities.User;
 import nbu.team11.repositories.EmployeeRepository;
 import nbu.team11.services.contracts.IEmployeeService;
 import nbu.team11.services.exceptions.EmailNotAvailable;
+import nbu.team11.services.exceptions.ResourceNotFound;
 import nbu.team11.services.exceptions.UsernameNotAvailable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -20,6 +23,7 @@ import org.springframework.stereotype.Service;
 public class EmployeeService implements IEmployeeService {
     private final EmployeeRepository employeeRepository;
     private final UserService userService;
+    private final OfficeService officeService;
 
     public Page<EmployeeDto> paginate(int page, int size) {
         Page<Employee> employees = employeeRepository.findAll(PageRequest.of(page, size));
@@ -40,7 +44,18 @@ public class EmployeeService implements IEmployeeService {
     }
 
     @Override
-    public EmployeeDto getById(Integer id) {
-        return (new ModelMapperConfig()).modelMapper().map(employeeRepository.getReferenceById(id), EmployeeDto.class);
+    public void update(EmployeeDto employeeDto, UserDto userDto) throws UsernameNotAvailable, EmailNotAvailable, ResourceNotFound {
+        this.userService.update(userDto);
+        Employee employee = this.employeeRepository.findById(employeeDto.getId()).orElseThrow(ResourceNotFound::new);
+
+        OfficeDto officeDto = this.officeService.getById(employeeDto.getOfficeId());
+        employee.setPositionType(employeeDto.getPosition());
+        employee.setOffice((new ModelMapperConfig()).modelMapper().map(officeDto, Office.class));
+        this.employeeRepository.save(employee);
+    }
+
+    @Override
+    public EmployeeDto getById(Integer id) throws ResourceNotFound {
+        return (new ModelMapperConfig()).modelMapper().map(employeeRepository.findById(id).orElseThrow(ResourceNotFound::new), EmployeeDto.class);
     }
 }
