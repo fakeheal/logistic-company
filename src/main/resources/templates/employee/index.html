@@ -53,7 +53,7 @@
                     <td th:text="${employee.getPosition()}" class="px-6 py-4">
                         Coordinator
                     </td>
-                    <td th:text="${employee.getUserFullName()}" class="px-6 py-4">
+                    <td th:text="${employee.getUserEmail()}" class="px-6 py-4">
                         jane.doe@nbucont.eu
                     </td>
                     <td th:text="${employee.getOfficeTitle()}" class="px-6 py-4">
@@ -67,53 +67,40 @@
                 </tbody>
             </table>
         </div>
-        <div class="border-t-2 border-neutral-100 p-4 dark:border-white/10"  th:if="${employees.getTotalPages() > 1}">
-            <nav aria-label="pagination">
-                <ul class="flex items-center -space-x-px h-8 text-sm">
-                    <li>
-                        <a href="#"
-                           class="flex items-center justify-center px-3 h-8 ms-0 leading-tight text-gray-500 bg-white border border-e-0 border-gray-300 rounded-s-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">
-                            <span class="sr-only">Previous</span>
-                            <svg class="w-2.5 h-2.5 rtl:rotate-180" aria-hidden="true"
-                                 xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
-                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
-                                      stroke-width="2" d="M5 1 1 5l4 4"/>
-                            </svg>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="#"
-                           class="flex items-center justify-center px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">1</a>
-                    </li>
-                    <li>
-                        <a href="#"
-                           class="flex items-center justify-center px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">2</a>
-                    </li>
-                    <li>
-                        <a href="#" aria-current="page"
-                           class="z-10 flex items-center justify-center px-3 h-8 leading-tight text-blue-600 border border-blue-300 bg-blue-50 hover:bg-blue-100 hover:text-blue-700 dark:border-gray-700 dark:bg-gray-700 dark:text-white">3</a>
-                    </li>
-                    <li>
-                        <a href="#"
-                           class="flex items-center justify-center px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">4</a>
-                    </li>
-                    <li>
-                        <a href="#"
-                           class="flex items-center justify-center px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">5</a>
-                    </li>
-                    <li>
-                        <a href="#"
-                           class="flex items-center justify-center px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300 rounded-e-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">
-                            <span class="sr-only">Next</span>
-                            <svg class="w-2.5 h-2.5 rtl:rotate-180" aria-hidden="true"
-                                 xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
-                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
-                                      stroke-width="2" d="m1 9 4-4-4-4"/>
-                            </svg>
-                        </a>
-                    </li>
-                </ul>
-            </nav>
+        <div class="border-t-2 border-neutral-100 p-4 dark:border-white/10" th:if="${employees.getTotalPages() > 1}">
+            <div class="flex items-center justify-center mt-4">
+                <nav aria-label="Page navigation example">
+                    <ul class="inline-flex -space-x-px text-sm">
+
+                        <!-- Previous Button -->
+                        <li>
+                            <a th:href="@{${employees.number > 0} ? ('/employee?page=' + ${employees.number - 1}) : ''}"
+                               th:classappend="${employees.first} ? 'pointer-events-none text-gray-400' : ''"
+                               class="flex items-center justify-center px-3 h-8 ml-0 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">
+                                Previous
+                            </a>
+                        </li>
+
+                        <!-- Page Numbers -->
+                        <li th:each="i : ${#numbers.sequence(0, employees.totalPages - 1)}">
+                            <a th:href="@{'employee?page=' + ${i}}"
+                               th:classappend="${i == employees.number} ? 'text-blue-600 border-blue-300 bg-blue-50 dark:border-gray-700 dark:bg-gray-700 dark:text-white' : ''"
+                               class="flex items-center justify-center px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
+                               th:text="${i + 1}">
+                            </a>
+                        </li>
+
+                        <!-- Next Button -->
+                        <li>
+                            <a th:href="@{${employees.number < employees.totalPages - 1} ? ('employee?page=' + ${employees.number + 1}) : ''}"
+                               th:classappend="${employees.last} ? 'pointer-events-none text-gray-400' : ''"
+                               class="flex items-center justify-center px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">
+                                Next
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
         </div>
     </div>
 </div>

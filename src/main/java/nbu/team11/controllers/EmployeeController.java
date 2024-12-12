@@ -35,8 +35,7 @@ public class EmployeeController {
     public String index(
             Model model,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
-            RedirectAttributes attributes
+            @RequestParam(defaultValue = "20") int size
     ) {
         Page<EmployeeDto> employees = employeeService.paginate(page, size);
 
