@@ -1,3 +1,4 @@
+<!--/*@thymesVar id="employee" type="nbu.team11.dtos.EmployeeDto"*/-->
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <body>
@@ -9,7 +10,7 @@
                     <div class="border-b-2 border-neutral-100 p-4 dark:border-white/10">
                         <div class="flex justify-between items-center">
                             <h2 class="font-semibold text-lg">Jane Doe</h2>
-                            <a href="/demo/employee/create"
+                            <a th:href="@{'/employee/' + ${employee.getId()} + '/edit'}"
                                class="flex items-center text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                      stroke-width="1.5"
@@ -26,19 +27,19 @@
                         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-4">
                             <div>
                                 <div class="italic text-sm text-gray-600 dark:text-gray-400">email</div>
-                                <div>jane.doe@nbcont.eu</div>
+                                <div th:text="${employee.getUserEmail()}">jane.doe@nbcont.eu</div>
                             </div>
                             <div>
                                 <div class="italic text-sm text-gray-600 dark:text-gray-400">position</div>
-                                <div>Coordinator</div>
+                                <div th:text="${employee.getPosition()}">Coordinator</div>
                             </div>
                             <div>
                                 <div class="italic text-sm text-gray-600 dark:text-gray-400">office</div>
-                                <div>Sofia</div>
+                                <div th:text="${employee.getOfficeTitle()}">Sofia</div>
                             </div>
                             <div>
                                 <div class="italic text-sm text-gray-600 dark:text-gray-400">last login</div>
-                                <div>2024-11-18 24:44:59</div>
+                                <div>N/A</div>
                             </div>
                             <div>
                                 <div class="italic text-sm text-gray-600 dark:text-gray-400">rating</div>

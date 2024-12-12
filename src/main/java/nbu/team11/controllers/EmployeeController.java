@@ -14,10 +14,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
@@ -83,4 +80,14 @@ public class EmployeeController {
         return "redirect:/employee";
     }
 
+    @GetMapping("/{id}")
+    public String view(@PathVariable String id, Model model) {
+        EmployeeDto employee = employeeService.getById(Integer.parseInt(id));
+
+        model.addAttribute("title", employee.getUserFullName() + " - View Employee");
+        model.addAttribute("content", "employee/view");
+        model.addAttribute("employee", employee);
+
+        return "layouts/app";
+    }
 }

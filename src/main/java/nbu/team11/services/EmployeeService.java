@@ -28,7 +28,7 @@ public class EmployeeService implements IEmployeeService {
 
     @Override
     @Transactional
-    public EmployeeDto create(EmployeeDto employeeDto, UserDto userDto) throws UsernameNotAvailable, EmailNotAvailable {
+    public void create(EmployeeDto employeeDto, UserDto userDto) throws UsernameNotAvailable, EmailNotAvailable {
         User user = this.userService.create(userDto);
         employeeDto.setUserId(user.getId());
 
@@ -37,7 +37,10 @@ public class EmployeeService implements IEmployeeService {
                         .modelMapper()
                         .map(employeeDto, Employee.class)
         );
+    }
 
-        return null;
+    @Override
+    public EmployeeDto getById(Integer id) {
+        return (new ModelMapperConfig()).modelMapper().map(employeeRepository.getReferenceById(id), EmployeeDto.class);
     }
 }
