@@ -3,6 +3,9 @@ import java.security.Principal;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
+import nbu.team11.entities.enums.Role;
+import nbu.team11.services.exceptions.EmailNotAvailable;
+import nbu.team11.services.exceptions.UsernameNotAvailable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -64,8 +67,13 @@ public class UserController {
             model.addAttribute("userexist", matchedUser);
             return "register";
         }
-
-        userService.create(userDto);
+        userDto.setRole(Role.CLIENT);
+        try {
+            userService.create(userDto);
+        } catch (UsernameNotAvailable | EmailNotAvailable e) {
+            // @TODO: Handle exception
+            throw new RuntimeException(e);
+        }
         authenticateUserAndSetSession(userDto, request);
         return "redirect:/home";
     }

@@ -15,7 +15,7 @@ if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localS
 // https://flowbite.com/docs/customize/dark-mode/
 var themeToggleBtn = document.getElementById('theme-toggle');
 
-themeToggleBtn.addEventListener('click', function() {
+themeToggleBtn.addEventListener('click', function () {
 
     // toggle icons inside button
     themeToggleDarkIcon.classList.toggle('hidden');
@@ -42,4 +42,12 @@ themeToggleBtn.addEventListener('click', function() {
         }
     }
 
+});
+
+// Auto dismiss alert messages
+let alertDismiss = document.querySelectorAll('.auto-dismiss');
+alertDismiss.forEach(function (alert) {
+    setTimeout(() => {
+        (new Dismiss(alert, null, {}, {})).hide();
+    }, 3000);
 });

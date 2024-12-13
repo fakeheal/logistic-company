@@ -10,6 +10,7 @@ import java.util.List;
 @Repository
 public interface OfficeRepository extends JpaRepository<Office, Integer> {
     Office findByTitle(String title);
+
     //List<Office> findByCity(Integer cityId);
     //List<Office> findByCountry(Integer countryId);
 }

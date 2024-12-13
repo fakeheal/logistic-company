@@ -37,7 +37,7 @@ public class User {
     @Column(name = "updated_on", nullable = false)
     private Instant updatedOn;
 
-    public User(){
+    public User() {
 
     }
 
@@ -84,5 +84,9 @@ public class User {
 
     public Integer getId() {
         return id;
+    }
+
+    public String getFullName() {
+        return this.getFirstName() + " " + this.getLastName();
     }
 }

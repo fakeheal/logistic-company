@@ -1,17 +1,20 @@
 package nbu.team11.services;
-import nbu.team11.configurations.ModelMapperConfig;
+
+import nbu.team11.dtos.UserDto;
+import nbu.team11.entities.User;
 import nbu.team11.entities.enums.Role;
+import nbu.team11.repositories.UserRepository;
 import nbu.team11.services.contracts.IUserService;
+import nbu.team11.services.exceptions.EmailNotAvailable;
+import nbu.team11.services.exceptions.ResourceNotFound;
+import nbu.team11.services.exceptions.UsernameNotAvailable;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import nbu.team11.dtos.UserDto;
-import nbu.team11.entities.*;
-import nbu.team11.repositories.UserRepository;
-
 import java.util.List;
+import java.util.Objects;
 
 //TODO: Revise all methods
 //TODO: Test all methods
@@ -37,8 +40,7 @@ public class UserService implements IUserService {
     public UserDto getByUsername(String username) {
         User user = userRepository.findByUsername(username);
 
-        if(user == null)
-        {
+        if (user == null) {
             return null;
         }
 
@@ -60,15 +62,30 @@ public class UserService implements IUserService {
     }
 
     @Override
-    public boolean update(UserDto updatedUser) {
-        User user = userRepository.findByUsername(updatedUser.getUsername());
-        if (user == null) return false;
+    public UserDto update(UserDto userDto) throws UsernameNotAvailable, EmailNotAvailable, ResourceNotFound {
+        User user = this.userRepository.findByUsername(userDto.getUsername());
+        if (user != null && !Objects.equals(user.getId(), userDto.getId())) {
+            throw new UsernameNotAvailable();
+        }
 
-        user.setEmail(updatedUser.getEmail());
-        user.setRole(updatedUser.getRole());
-        userRepository.save(user);
+        user = this.userRepository.findByEmail(userDto.getEmail());
+        if (user != null && !Objects.equals(user.getId(), userDto.getId())) {
+            throw new EmailNotAvailable();
+        }
 
-        return true;
+        User userToUpdate = userRepository.findById(userDto.getId()).orElseThrow(ResourceNotFound::new);
+
+        userToUpdate.setRole(userDto.getRole());
+        userToUpdate.setEmail(userDto.getEmail());
+        userToUpdate.setUsername(userDto.getUsername());
+        userToUpdate.setFirstName(userDto.getFirstName());
+        userToUpdate.setLastName(userDto.getLastName());
+
+        if (userDto.getPassword() != null) {
+            userToUpdate.setPassword(passwordEncoder.encode(userDto.getPassword()));
+        }
+
+        return this.modelMapper.map(userRepository.save(userToUpdate), UserDto.class);
     }
 
 
@@ -79,9 +96,16 @@ public class UserService implements IUserService {
 
     //TODO: Return automap user dto
     @Override
-    public User create(UserDto userDto) {
+    public User create(UserDto userDto) throws UsernameNotAvailable, EmailNotAvailable {
+        if (this.userRepository.findByUsername(userDto.getUsername()) != null) {
+            throw new UsernameNotAvailable();
+        }
 
-        User user = new User(Role.CLIENT, userDto.getEmail(), passwordEncoder.encode(userDto.getPassword()), userDto.getUsername(), userDto.getFirstName(), userDto.getLastName());
+        if (this.userRepository.findByEmail(userDto.getEmail()) != null) {
+            throw new EmailNotAvailable();
+        }
+
+        User user = new User(userDto.getRole(), userDto.getEmail(), passwordEncoder.encode(userDto.getPassword()), userDto.getUsername(), userDto.getFirstName(), userDto.getLastName());
         return userRepository.save(user);
     }
 }
