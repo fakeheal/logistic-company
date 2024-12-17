@@ -40,6 +40,10 @@ public class UserController {
         this.userService = userService;
     }
 
+    private String withAppLayout(Model model) {
+        return "layouts/app";
+    }
+
     @GetMapping("/home")
     public String home(Model model, Principal principal) {
         UserDetails userDetails = userDetailsService.loadUserByUsername(principal.getName());
@@ -50,14 +54,18 @@ public class UserController {
     @GetMapping("/login")
     public String login(Model model, UserDto userDto) {
         model.addAttribute("user", userDto);
-        return "login";
+        model.addAttribute("title", "Login");
+        model.addAttribute("content", "user/login");
+        return withAppLayout(model);
     }
 
 
     @GetMapping("/register")
     public String register(Model model, UserDto userDto) {
         model.addAttribute("user", userDto);
-        return "register";
+        model.addAttribute("title", "Register");
+        model.addAttribute("content", "user/register");
+        return withAppLayout(model);
     }
 
     @PostMapping("/register")
@@ -65,7 +73,7 @@ public class UserController {
         UserDto matchedUser = userService.getByUsername(userDto.getUsername());
         if (matchedUser != null) {
             model.addAttribute("userexist", matchedUser);
-            return "register";
+            return "user/register";
         }
         userDto.setRole(Role.CLIENT);
         try {
