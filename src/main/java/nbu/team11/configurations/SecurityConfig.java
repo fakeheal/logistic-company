@@ -43,11 +43,14 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/register", "/home", "/demo").permitAll()
                         .requestMatchers(new AntPathRequestMatcher("/assets/**")).permitAll()
+                        .requestMatchers("/static/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form
                         .loginPage("/login")
                         .loginProcessingUrl("/login")
+                        .usernameParameter("email")
+                        .passwordParameter("password")
                         .defaultSuccessUrl("/employee", true)
                         .permitAll()
                 )
