@@ -60,4 +60,7 @@ public class Employee {
         return "N/A";
     }
 
+    private PositionType getPositionType() {
+        return this.positionType;
+    }
 }

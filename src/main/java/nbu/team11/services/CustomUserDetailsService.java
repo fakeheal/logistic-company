@@ -2,6 +2,9 @@ package nbu.team11.services;
 import java.util.Arrays;
 import java.util.Collection;
 
+import nbu.team11.entities.Employee;
+import nbu.team11.entities.enums.Role;
+import nbu.team11.repositories.EmployeeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -19,12 +22,25 @@ public class CustomUserDetailsService  implements UserDetailsService{
     @Autowired
     private UserRepository userRepository;
 
-    @Override
-    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        User user = userRepository.findByEmail(email);
+    @Autowired
+    private EmployeeRepository employeeRepository;
 
-        if(user == null){
-            throw new UsernameNotFoundException("User not found with email: " + email);
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        User user = userRepository.findByUsername(username);
+
+        if(user == null){throw new UsernameNotFoundException("User not found with email: " + username);
+        }
+
+        if(user.getRole() == Role.EMPLOYEE){
+            Employee employee = employeeRepository.findByUserId(user.getId());
+
+            return new CustomUserDetails(
+                    user.getUsername(),
+                    user.getPassword(),
+                    user.getEmail(),
+                    Arrays.asList(new SimpleGrantedAuthority("EMPLOYEE")),
+                    employee.getPositionTypeFormatted());
         }
 
         //TODO: Check how password is handled
@@ -32,10 +48,7 @@ public class CustomUserDetailsService  implements UserDetailsService{
                 user.getUsername(),
                 user.getPassword(),
                 user.getEmail(),
-                authorities());
-    }
-
-    public Collection<? extends GrantedAuthority> authorities () {
-        return Arrays.asList(new SimpleGrantedAuthority("USER"));
+                Arrays.asList(new SimpleGrantedAuthority("CLIENT")),
+                null);
     }
 }
