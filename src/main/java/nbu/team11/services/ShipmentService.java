@@ -19,42 +19,46 @@ public class ShipmentService {
     @Autowired
     private ShipmentStatusRepository shipmentStatusRepository;
 
-    public Shipment createShipmentWithStatus(Shipment shipment, ShipmentStatus shipmentStatus) {
-        // First save the shipment
-        Shipment savedShipment = shipmentRepository.save(shipment);
-
-        // Then create and save the initial shipment status
-        shipmentStatus.setShipment(savedShipment); // Setting the saved shipment to the status
-        shipmentStatusRepository.save(shipmentStatus);
-
-        return savedShipment;
-    }
-
-
-    // Get all Shipments
     public List<Shipment> getAllShipments() {
         return shipmentRepository.findAll();
     }
 
-    // Get a Shipment by ID
     public Optional<Shipment> getShipmentById(Integer id) {
         return shipmentRepository.findById(id);
     }
 
-    // Update Shipment and its Status
-    public Shipment updateShipment(Integer id, Shipment updatedShipment, ShipmentStatus updatedStatus) {
-        if (shipmentRepository.existsById(id)) {
-            updatedShipment.setId(id);
-            Shipment updatedShipmentEntity = shipmentRepository.save(updatedShipment);
-
-            // Update shipment status
-            updatedStatus.setShipment(updatedShipmentEntity);
-            shipmentStatusRepository.save(updatedStatus);
-
-            return updatedShipmentEntity;
+    public Shipment createShipmentWithStatus(Shipment shipment, ShipmentStatus shipmentStatus) {
+        if (shipment.getWeight() <= 0) {
+            throw new IllegalArgumentException("Weight must be a positive value.");
         }
-        return null;
+
+        if (shipment.getSenderAddress() == null || shipment.getRecipientAddress() == null) {
+            throw new IllegalArgumentException("Sender and receiver addresses must be provided.");
+        }
+
+        // Continue with saving the shipment and status
+        Shipment savedShipment = shipmentRepository.save(shipment);
+        shipmentStatus.setShipment(savedShipment);
+        shipmentStatusRepository.save(shipmentStatus);
+        return savedShipment;
     }
+
+    public Shipment updateShipment(Integer id, Shipment updatedShipment, ShipmentStatus updatedStatus) {
+        if (updatedShipment.getWeight() <= 0) {
+            throw new IllegalArgumentException("Weight must be a positive value.");
+        }
+        if (updatedShipment.getSenderAddress() == null || updatedShipment.getRecipientAddress() == null) {
+            throw new IllegalArgumentException("Sender and receiver addresses must be provided.");
+        }
+        updatedShipment.setId(id);
+        Shipment updatedShipmentEntity = shipmentRepository.save(updatedShipment);
+
+        updatedStatus.setShipment(updatedShipmentEntity);
+        shipmentStatusRepository.save(updatedStatus);
+
+        return updatedShipmentEntity;
+    }
+
 
     // Delete Shipment and its Status
     public void deleteByShipmentId(Integer id) {
@@ -62,8 +66,18 @@ public class ShipmentService {
         shipmentStatusRepository.deleteByShipmentId(id);
     }
 
-}
+    public List<Shipment> getAllShipmentsOrderedByDate() {
+        return shipmentRepository.findAllByOrderByCreatedOnDesc();
+    }
+    public List<Shipment> getShipmentsByEmployeeId(Integer employeeId) {
+        return shipmentRepository.findAllByEmployeeId(employeeId);
+    }
+    public List<Shipment> getUndeliveredShipments() {
+        return shipmentRepository.findUndeliveredShipments(Status.DELIVERED);
+    }
 
+
+}
 
 
 

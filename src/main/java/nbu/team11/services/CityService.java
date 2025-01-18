@@ -13,12 +13,8 @@ public class CityService {
     @Autowired
     private CityRepository cityRepository;
 
-    // create a city
-    public City createCity(City city) {
-        return cityRepository.save(city);
-    }
 
-    // all of the cities
+    // all the cities
     public List<City> getAllCities() {
         return cityRepository.findAll();
     }
@@ -28,8 +24,17 @@ public class CityService {
         return cityRepository.findById(id);
     }
 
-    // modify a city
+    public City createCity(City city) {
+        if (cityRepository.existsByName(city.getName())) {
+            throw new IllegalArgumentException("A city with this name already exists.");
+        }
+        return cityRepository.save(city);
+    }
+
     public City updateCity(Integer id, City updatedCity) {
+        if (cityRepository.existsByName(updatedCity.getName()) && !updatedCity.getId().equals(id)) {
+            throw new IllegalArgumentException("A city with this name already exists.");
+        }
         if (cityRepository.existsById(id)) {
             updatedCity.setId(id);
             return cityRepository.save(updatedCity);

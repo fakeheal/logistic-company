@@ -13,12 +13,7 @@ public class CountryService {
     @Autowired
     private CountryRepository countryRepository;
 
-    // Create new country
-    public Country createCountry(Country country) {
-        return countryRepository.save(country);
-    }
-
-    // get all of the countries
+    // get all the countries
     public List<Country> getAllCountries() {
         return countryRepository.findAll();
     }
@@ -29,13 +24,24 @@ public class CountryService {
     }
 
     // actualizing the existing country
+    public Country createCountry(Country country) {
+        if (countryRepository.existsByName(country.getName())) {
+            throw new IllegalArgumentException("A country with this name already exists.");
+        }
+        return countryRepository.save(country);
+    }
+
     public Country updateCountry(Integer id, Country updatedCountry) {
+        if (countryRepository.existsByName(updatedCountry.getName()) && !updatedCountry.getId().equals(id)) {
+            throw new IllegalArgumentException("A country with this name already exists.");
+        }
         if (countryRepository.existsById(id)) {
             updatedCountry.setId(id);
             return countryRepository.save(updatedCountry);
         }
         return null;
     }
+
 
     // delete a country
     public void deleteCountry(Integer id) {
