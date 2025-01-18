@@ -14,53 +14,47 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/shipments")
-public class ShipmentController{
+public class ShipmentController {
 
     @Autowired
     private ShipmentService shipmentService;
 
-    // Create Shipment with initial Shipment Status
+    // Create a new shipment with status
     @PostMapping
-    public ResponseEntity<Shipment> createShipmentWithStatus(
-            @RequestBody Shipment shipment,
-            @RequestParam("status") String initialStatus) {
-
-        // Create the initial ShipmentStatus
+    public ResponseEntity<Shipment> createShipment(@RequestBody Shipment shipment, @RequestParam("status") String initialStatus) {
         ShipmentStatus shipmentStatus = new ShipmentStatus();
         shipmentStatus.setStatus(Status.valueOf(initialStatus));
         Shipment savedShipment = shipmentService.createShipmentWithStatus(shipment, shipmentStatus);
         return new ResponseEntity<>(savedShipment, HttpStatus.CREATED);
     }
 
-
-    // Get all Shipments
+    // Get all shipments
     @GetMapping
     public List<Shipment> getAllShipments() {
         return shipmentService.getAllShipments();
     }
 
-    // Get Shipment by ID
+    // Get a shipment by ID
     @GetMapping("/{id}")
     public ResponseEntity<Shipment> getShipmentById(@PathVariable Integer id) {
         Optional<Shipment> shipment = shipmentService.getShipmentById(id);
         return shipment.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    // Update Shipment and its Status
+    // Update shipment and its status
     @PutMapping("/{id}")
     public ResponseEntity<Shipment> updateShipment(
             @PathVariable Integer id,
-            @RequestBody Shipment shipment,
+            @RequestBody Shipment updatedShipment,
             @RequestParam("status") String status) {
 
         ShipmentStatus updatedStatus = new ShipmentStatus();
-        updatedStatus.setStatus(Status.valueOf(status)); // Assuming Status is an Enum
-
-        Shipment updatedShipment = shipmentService.updateShipment(id, shipment, updatedStatus);
-        return updatedShipment != null ? ResponseEntity.ok(updatedShipment) : ResponseEntity.notFound().build();
+        updatedStatus.setStatus(Status.valueOf(status));
+        Shipment updatedShipmentEntity = shipmentService.updateShipment(id, updatedShipment, updatedStatus);
+        return updatedShipmentEntity != null ? ResponseEntity.ok(updatedShipmentEntity) : ResponseEntity.notFound().build();
     }
 
-    // Delete Shipment and its Status
+    // Delete a shipment and its status
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteShipment(@PathVariable Integer id) {
         try {
@@ -70,4 +64,20 @@ public class ShipmentController{
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
+
+    @GetMapping("/all")
+    public List<Shipment> getAllShipmentsOrderedByDate() {
+        return shipmentService.getAllShipmentsOrderedByDate();
+    }
+
+    @GetMapping("/by-employee/{employeeId}")
+    public List<Shipment> getShipmentsByEmployee(@PathVariable Integer employeeId) {
+        return shipmentService.getShipmentsByEmployeeId(employeeId);
+    }
+
+    @GetMapping("/undelivered")
+    public List<Shipment> getUndeliveredShipments() {
+        return shipmentService.getUndeliveredShipments();
+    }
+
 }

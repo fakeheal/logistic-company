@@ -20,8 +20,12 @@ public class CityController {
     // Creates a new city
     @PostMapping
     public ResponseEntity<City> createCity(@RequestBody City city) {
-        City savedCity = cityService.createCity(city);
-        return new ResponseEntity<>(savedCity, HttpStatus.CREATED);
+        try {
+            City savedCity = cityService.createCity(city);
+            return new ResponseEntity<>(savedCity, HttpStatus.CREATED);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(null);
+        }
     }
 
     // Returns all cities

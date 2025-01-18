@@ -20,9 +20,14 @@ public class CountryController {
     // Creates a new country
     @PostMapping
     public ResponseEntity<Country> createCountry(@RequestBody Country country) {
-        Country savedCountry = countryService.createCountry(country);
-        return new ResponseEntity<>(savedCountry, HttpStatus.CREATED);
+        try {
+            Country savedCountry = countryService.createCountry(country);
+            return new ResponseEntity<>(savedCountry, HttpStatus.CREATED);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(null);
+        }
     }
+
 
     // Returns all cities
     @GetMapping
