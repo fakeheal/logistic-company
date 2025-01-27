@@ -230,4 +230,17 @@ public class ShipmentService implements IShipmentService {
                 .toList();
     }
 
+
+    /**
+     * Deletes a shipment from the system by its ID.
+     *
+     * @param shipmentId The ID of the shipment to delete.
+     * @throws ShipmentNotFound If the shipment with the specified ID does not exist.
+     */
+    public void deleteShipment(Integer shipmentId) {
+        Shipment shipment = shipmentRepository.findById(shipmentId)
+                .orElseThrow(() -> new ShipmentNotFound("Shipment not found with ID: " + shipmentId));
+        shipmentRepository.delete(shipment);
+    }
+
 }

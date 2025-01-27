@@ -177,6 +177,21 @@ public class ShipmentController {
                 .collect(Collectors.toList());
         return ResponseEntity.ok(shipmentDto);
     }
+    /**
+     * Deletes a shipment by its ID.
+     *
+     * @param shipmentId The ID of the shipment to delete.
+     * @return A response with no content if the deletion is successful, or a 404 status if the shipment is not found.
+     */
+    @DeleteMapping("/{shipmentId}")
+    public ResponseEntity<Void> deleteShipment(@PathVariable Integer shipmentId) {
+        try {
+            shipmentService.deleteShipment(shipmentId);
+            return ResponseEntity.noContent().build();
+        } catch (ShipmentNotFound e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
 
 
 }
