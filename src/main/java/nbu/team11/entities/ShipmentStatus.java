@@ -2,6 +2,7 @@ package nbu.team11.entities;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.Getter;
 import lombok.Setter;
 import nbu.team11.entities.enums.Status;
 import org.hibernate.annotations.CreationTimestamp;
@@ -24,6 +25,7 @@ public class ShipmentStatus {
     private Shipment shipment;
 
     @Setter
+    @Getter
     @Enumerated(EnumType.STRING)
     @Column(name = "Status", nullable = false)
     private Status status;
