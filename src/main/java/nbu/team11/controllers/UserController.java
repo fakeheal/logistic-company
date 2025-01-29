@@ -1,8 +1,11 @@
 package nbu.team11.controllers;
 
 import jakarta.servlet.http.HttpServletRequest;
+import nbu.team11.dtos.UserDto;
+import nbu.team11.entities.enums.PositionType;
 import nbu.team11.entities.enums.Role;
 import nbu.team11.services.CustomPermissionEvaluator;
+import nbu.team11.services.UserService;
 import nbu.team11.services.exceptions.EmailNotAvailable;
 import nbu.team11.services.exceptions.UsernameNotAvailable;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,9 +22,6 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
-
-import nbu.team11.dtos.UserDto;
-import nbu.team11.services.UserService;
 
 @Controller
 public class UserController {
@@ -53,7 +53,7 @@ public class UserController {
 
     @GetMapping("/manage-users")
     public String manageUsers(Model model, Authentication authentication) {
-        if (!this.customPermissionEvaluator.hasRoleAndPosition(authentication, "EMPLOYEE", "Administrator")) {
+        if (!this.customPermissionEvaluator.hasRoleAndPosition(authentication, Role.EMPLOYEE, PositionType.ADMIN)) {
             return "redirect:/home";
         }
 
@@ -109,8 +109,8 @@ public class UserController {
 
     private void authenticateUserAndSetSession(UserDto user, HttpServletRequest request) {
         UserDetails userDetails = userDetailsService.loadUserByUsername(user.getUsername());
-        UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(userDetails,
-                user.getPassword(), userDetails.getAuthorities());
+        UsernamePasswordAuthenticationToken authToken =
+                new UsernamePasswordAuthenticationToken(userDetails, user.getPassword(), userDetails.getAuthorities());
 
         authToken.setDetails(new WebAuthenticationDetails(request));
         Authentication authentication = authenticationManager.authenticate(authToken);

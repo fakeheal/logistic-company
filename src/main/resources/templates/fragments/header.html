@@ -43,26 +43,15 @@
                        class="block py-2 px-3 text-white bg-blue-700 rounded md:bg-transparent md:text-blue-700 md:p-0 dark:text-white md:dark:text-blue-500"
                        aria-current="page">Home</a>
                 </li>
-                <li sec:authorize="@customPermissionEvaluator.hasRoleAndPosition(authentication, 'EMPLOYEE', 'Administrator')">
-                    <a href="/employee/manage"
+                <li sec:authorize="@customPermissionEvaluator.hasRoleAndPosition(authentication, T(nbu.team11.entities.enums.Role).EMPLOYEE, T(nbu.team11.entities.enums.PositionType).ADMIN)">
+                    <a href="/manage-users"
                        class="block py-2 px-3 text-white bg-blue-700 rounded md:bg-transparent md:text-blue-700 md:p-0 dark:text-white md:dark:text-blue-500"
                        aria-current="page">Manage Users</a>
                 </li>
-
-                <li sec:authorize="@customPermissionEvaluator.hasRoleAndPosition(authentication, 'EMPLOYEE', 'Administrator')">
-                    <a href="/shipments/all"
-                       class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent">Shipments
-                    </a>
-                </li>
-                <li sec:authorize="@customPermissionEvaluator.hasRole(authentication, 'CLIENT')">
-                    <a href="/shipments/track"
+                <li>
+                    <a href="/demo/track"
                        class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent">Track
                         package</a>
-                </li>
-                <li sec:authorize="@customPermissionEvaluator.hasRole(authentication, 'CLIENT')">
-                    <a href="/shipments/client"
-                       class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent">My shipments
-                    </a>
                 </li>
                 <li>
                     <button id="dropdownNavbarLink" data-dropdown-toggle="dropdownNavbar"

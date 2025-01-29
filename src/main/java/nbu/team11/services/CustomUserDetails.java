@@ -1,11 +1,11 @@
 package nbu.team11.services;
 
-import java.util.Collection;
-
 import lombok.Getter;
-import lombok.Setter;
+import nbu.team11.entities.enums.PositionType;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+
+import java.util.Collection;
 
 public class CustomUserDetails implements UserDetails {
 
@@ -13,18 +13,17 @@ public class CustomUserDetails implements UserDetails {
     private String password;
     private String email;
     private Collection<? extends GrantedAuthority> authorities;
-    @Setter
     @Getter
-    private String positionType;
+    private PositionType positionType;
 
-    public CustomUserDetails(String username, String password, String email,
-            Collection<? extends GrantedAuthority> authorities, String positionType) {
+    public CustomUserDetails(String username, String password, String email, Collection<? extends GrantedAuthority> authorities, PositionType positionType) {
         this.username = username;
         this.password = password;
         this.email = email;
         this.authorities = authorities;
         this.positionType = positionType;
     }
+
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

@@ -1,10 +1,10 @@
 package nbu.team11.services;
 
-import java.util.Arrays;
-
 import nbu.team11.entities.Employee;
+import nbu.team11.entities.User;
 import nbu.team11.entities.enums.Role;
 import nbu.team11.repositories.EmployeeRepository;
+import nbu.team11.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -12,8 +12,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import nbu.team11.entities.User;
-import nbu.team11.repositories.UserRepository;
+import java.util.List;
 
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
@@ -39,16 +38,18 @@ public class CustomUserDetailsService implements UserDetailsService {
                     user.getUsername(),
                     user.getPassword(),
                     user.getEmail(),
-                    Arrays.asList(new SimpleGrantedAuthority("EMPLOYEE")),
-                    employee.getPositionTypeFormatted());
+                    List.of(new SimpleGrantedAuthority(Role.EMPLOYEE.name())),
+                    employee.getPositionType()
+            );
         }
 
-        // TODO: Check how password is handled
+        //TODO: Check how password is handled
         return new CustomUserDetails(
                 user.getUsername(),
                 user.getPassword(),
                 user.getEmail(),
-                Arrays.asList(new SimpleGrantedAuthority("CLIENT")),
-                null);
+                List.of(new SimpleGrantedAuthority(Role.CLIENT.name())),
+                null
+        );
     }
 }
