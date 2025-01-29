@@ -1,6 +1,9 @@
 package nbu.team11.services;
 
+import nbu.team11.configurations.ModelMapperConfig;
+import nbu.team11.dtos.EmployeeDto;
 import nbu.team11.dtos.UserDto;
+import nbu.team11.entities.Employee;
 import nbu.team11.entities.User;
 import nbu.team11.entities.enums.Role;
 import nbu.team11.repositories.UserRepository;
@@ -10,6 +13,8 @@ import nbu.team11.services.exceptions.ResourceNotFound;
 import nbu.team11.services.exceptions.UsernameNotAvailable;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -35,7 +40,14 @@ public class UserService implements IUserService {
         this.modelMapper = modelMapper;
     }
 
-    // TODO: Return UserDTO with automapper
+
+    public Page<UserDto> paginate(int page, int size, Role role) {
+        Page<User> users = this.userRepository.findAll(PageRequest.of(page, size));
+        return users.map(employee -> (new ModelMapperConfig()).modelMapper().map(employee, UserDto.class));
+    }
+
+
+    //TODO: Return UserDTO with automapper
     @Override
     public UserDto getByUsername(String username) {
         User user = userRepository.findByUsername(username);
@@ -49,13 +61,13 @@ public class UserService implements IUserService {
         return userDto;
     }
 
-    // TODO: Return UserDTO with automapper
+    //TODO: Return UserDTO with automapper
     @Override
     public User getUserById(Integer id) {
         return userRepository.findById(id).orElse(null);
     }
 
-    // TODO: Return UserDTO with automapper
+    //TODO: Return UserDTO with automapper
     @Override
     public List<User> getUsersByRole(Role role) {
         return userRepository.findByRole(role);
@@ -88,12 +100,13 @@ public class UserService implements IUserService {
         return this.modelMapper.map(userRepository.save(userToUpdate), UserDto.class);
     }
 
+
     @Override
     public void delete(Integer id) {
         userRepository.deleteById(id);
     }
 
-    // TODO: Return automap user dto
+    //TODO: Return automap user dto
     @Override
     public User create(UserDto userDto) throws UsernameNotAvailable, EmailNotAvailable {
         if (this.userRepository.findByUsername(userDto.getUsername()) != null) {
@@ -104,8 +117,7 @@ public class UserService implements IUserService {
             throw new EmailNotAvailable();
         }
 
-        User user = new User(userDto.getRole(), userDto.getEmail(), passwordEncoder.encode(userDto.getPassword()),
-                userDto.getUsername(), userDto.getFirstName(), userDto.getLastName());
+        User user = new User(userDto.getRole(), userDto.getEmail(), passwordEncoder.encode(userDto.getPassword()), userDto.getUsername(), userDto.getFirstName(), userDto.getLastName());
         return userRepository.save(user);
     }
 }

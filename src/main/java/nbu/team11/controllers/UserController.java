@@ -2,7 +2,6 @@ package nbu.team11.controllers;
 
 import jakarta.servlet.http.HttpServletRequest;
 import nbu.team11.dtos.UserDto;
-import nbu.team11.entities.enums.PositionType;
 import nbu.team11.entities.enums.Role;
 import nbu.team11.services.CustomPermissionEvaluator;
 import nbu.team11.services.UserService;
@@ -24,22 +23,21 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 
 @Controller
-public class UserController {
-
-    @Autowired
-    private CustomPermissionEvaluator customPermissionEvaluator;
+public class UserController extends AbstractBaseController {
 
     @Autowired
     private UserDetailsService userDetailsService;
+
     @Autowired
     private AuthenticationManager authenticationManager;
 
-    private UserService userService;
+    private final UserService userService;
 
-    public UserController(UserService userService) {
-
+    public UserController(CustomPermissionEvaluator permissionEvaluator, UserService userService) {
+        super(permissionEvaluator);
         this.userService = userService;
     }
+
 
     private String withAppLayout(Model model) {
         return "layouts/app";
@@ -48,16 +46,6 @@ public class UserController {
     @GetMapping("/home")
     public String home(Model model) {
         model.addAttribute("content", "index");
-        return withAppLayout(model);
-    }
-
-    @GetMapping("/manage-users")
-    public String manageUsers(Model model, Authentication authentication) {
-        if (!this.customPermissionEvaluator.hasRoleAndPosition(authentication, Role.EMPLOYEE, PositionType.ADMIN)) {
-            return "redirect:/home";
-        }
-
-        model.addAttribute("content", "user/admin/manage-users");
         return withAppLayout(model);
     }
 

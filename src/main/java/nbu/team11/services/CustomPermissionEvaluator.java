@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class CustomPermissionEvaluator {
 
-    public boolean hasRoleAndPosition(Authentication authentication, Role role, PositionType positionType) {
+    private boolean hasRoleAndPosition(Authentication authentication, Role role, PositionType positionType) {
         if (authentication == null || authentication.getPrincipal() == "anonymousUser") {
             return false;
         }
@@ -21,12 +21,7 @@ public class CustomPermissionEvaluator {
                 && userDetails.getPositionType() == positionType;
     }
 
-    public boolean hasRole(Authentication authentication, String role) {
-        if (authentication == null || authentication.getPrincipal() == "anonymousUser") {
-            return false;
-        }
-
-        return authentication.getAuthorities().stream()
-                .anyMatch(auth -> auth.getAuthority().equals(role));
+    public boolean isAdmin(Authentication authentication) {
+        return this.hasRoleAndPosition(authentication, Role.EMPLOYEE, PositionType.ADMIN);
     }
 }

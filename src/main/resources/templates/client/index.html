@@ -1,0 +1,88 @@
+<!--/*@thymesVar id="clients" type="org.springframework.data.domain.Page<nbu.team11.dtos.UserDto>"*/-->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:fragment="manageUsersPage">
+    <div class="container mx-auto my-12 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
+        <div class="border-b-2 border-neutral-100 p-4 dark:border-white/10">
+            <div class="flex justify-between items-center">
+                <h2 class="font-semibold text-lg">Users</h2>
+            </div>
+        </div>
+        <div class="relative overflow-x-auto">
+            <div th:if="${clients.getNumberOfElements() == 0}"
+                 class="p-4 text-center text-gray-500 dark:text-gray-400">
+                No employees found.
+            </div>
+            <table th:if="${clients.getNumberOfElements() > 0}"
+                   class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+                <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                <tr>
+                    <th scope="col" class="px-6 py-3">
+                        Name
+                    </th>
+                    <th scope="col" class="px-6 py-3">
+                        Email
+                    </th>
+                    <th scope="col" class="px-6 py-3">
+                        <span class="sr-only">Edit</span>
+                    </th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="client : ${clients}"
+                    class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
+                    <th th:text="${client.getFullName()}" scope="row"
+                        class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                        Jane Doe
+                    </th>
+                    <td th:text="${client.getEmail()}" class="px-6 py-4">
+                        jane@doe.com
+                    </td>
+                    <td class="px-6 py-4 text-right">
+                        <a th:href="@{'/client/' + ${client.getId()}}"
+                           class="font-medium text-blue-600 dark:text-blue-500 hover:underline">View</a>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="border-t-2 border-neutral-100 p-4 dark:border-white/10" th:if="${clients.getTotalPages() > 1}">
+            <div class="flex items-center justify-center mt-4">
+                <nav aria-label="Page navigation example">
+                    <ul class="inline-flex -space-x-px text-sm">
+
+                        <!-- Previous Button -->
+                        <li>
+                            <a th:href="@{${clients.number > 0} ? ('/client?page=' + ${clients.number - 1}) : ''}"
+                               th:classappend="${clients.first} ? 'pointer-events-none text-gray-400' : ''"
+                               class="flex items-center justify-center px-3 h-8 ml-0 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">
+                                Previous
+                            </a>
+                        </li>
+
+                        <!-- Page Numbers -->
+                        <li th:each="i : ${#numbers.sequence(0, clients.totalPages - 1)}">
+                            <a th:href="@{'/client?page=' + ${i}}"
+                               th:classappend="${i == clients.number} ? 'text-blue-600 border-blue-300 bg-blue-50 dark:border-gray-700 dark:bg-gray-700 dark:text-white' : ''"
+                               class="flex items-center justify-center px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
+                               th:text="${i + 1}">
+                            </a>
+                        </li>
+
+                        <!-- Next Button -->
+                        <li>
+                            <a th:href="@{${clients.number < clients.totalPages - 1} ? ('/client?page=' + ${clients.number + 1}) : ''}"
+                               th:classappend="${clients.last} ? 'pointer-events-none text-gray-400' : ''"
+                               class="flex items-center justify-center px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">
+                                Next
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
