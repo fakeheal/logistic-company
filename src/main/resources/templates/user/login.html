@@ -2,19 +2,16 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <body>
 <div th:fragment="loginPage">
-    <div th:if="${param.error}">
-        <div class="error-message">
-            <p>Invalid username or password</p>
-        </div>
-    </div>
-
-    <div th:if="${param.logout}">
-        <div class="logout-message">
-            <p>Logout Successful!</p>
-        </div>
-    </div>
     <form method="post" role="form" th:action="@{/login}" th:object="${user}"class="max-w-sm mx-auto my-24 p-6 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
         <h2 class="font-bold text-xl mb-4">Login</h2>
+
+        <div th:if="${param.error}">
+            <div class="p-4 mb-4 text-sm text-red-800 rounded-lg bg-red-50 dark:bg-red-700 dark:text-red-200" role="alert">
+                <span class="font-medium">Ooops!</span>
+                Invalid username and/or password
+            </div>
+        </div>
+
         <div class="mb-5">
             <label for="username" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Your username</label>
             <input th:field="*{username}" type="text" id="username"
@@ -31,7 +28,7 @@
             <div class="flex items-center h-5">
                 <input id="remember" type="checkbox" value=""
                        class="w-4 h-4 border border-gray-300 rounded bg-gray-50 focus:ring-3 focus:ring-blue-300 dark:bg-gray-700 dark:border-gray-600 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800"
-                       required/>
+                />
             </div>
             <label for="remember" class="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300">Remember me</label>
         </div>
