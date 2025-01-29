@@ -45,7 +45,7 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/register", "/home", "/demo").permitAll()
+                        .requestMatchers("/", "/register", "/home", "/demo").permitAll()
                         .requestMatchers(new AntPathRequestMatcher("/assets/**")).permitAll()
                         .requestMatchers("/static/**").permitAll()
                         .requestMatchers("/shipments/all").hasAuthority("EMPLOYEE")
