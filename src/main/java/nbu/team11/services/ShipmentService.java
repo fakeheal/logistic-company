@@ -184,11 +184,8 @@ public class ShipmentService implements IShipmentService {
      * @throws ShipmentNotFound If the shipment is not found.
      */
     public List<ShipmentStatus> getShipmentHistory(Integer shipmentId) {
-        // Проверяваме дали пратката съществува
         shipmentRepository.findById(shipmentId)
                 .orElseThrow(() -> new ShipmentNotFound("Shipment not found with ID: " + shipmentId));
-
-        // Намираме историята на статусите
         return shipmentStatusRepository.findByShipmentId(shipmentId);
     }
     /**
