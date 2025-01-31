@@ -3,6 +3,7 @@ package nbu.team11.entities;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.Data;
+import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -11,6 +12,7 @@ import java.time.Instant;
 @Entity
 @Data
 public class Country {
+    @Setter
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
@@ -27,8 +29,7 @@ public class Country {
     @Column(name = "updated_on", nullable = false)
     private Instant updatedOn;
 
-    public void setId(Integer id) {
-        this.id = id;
+    public Country() {
     }
 
     public Country(String name) {

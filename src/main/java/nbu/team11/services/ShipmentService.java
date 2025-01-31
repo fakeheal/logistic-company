@@ -2,15 +2,31 @@ package nbu.team11.services;
 
 import nbu.team11.entities.Shipment;
 import nbu.team11.entities.ShipmentStatus;
+import nbu.team11.entities.User;
+import nbu.team11.entities.enums.Role;
+import nbu.team11.entities.enums.Status;
 import nbu.team11.repositories.ShipmentRepository;
 import nbu.team11.repositories.ShipmentStatusRepository;
+import nbu.team11.repositories.UserRepository;
+import nbu.team11.services.contracts.IShipmentService;
+import nbu.team11.services.exceptions.ShipmentNotFound;
+import nbu.team11.services.exceptions.UnauthorizedAccess;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
 
+import java.math.BigDecimal;
+import java.util.HashMap;
+import java.util.Map;
+
+/**
+ * Service implementation for managing shipments.
+ * Provides business logic for shipment registration, updates, and retrieval.
+ */
 @Service
-public class ShipmentService {
+public class ShipmentService implements IShipmentService {
 
     @Autowired
     private ShipmentRepository shipmentRepository;
@@ -18,15 +34,211 @@ public class ShipmentService {
     @Autowired
     private ShipmentStatusRepository shipmentStatusRepository;
 
-    public Shipment createShipmentWithStatus(Shipment shipment, ShipmentStatus shipmentStatus) {
-        // First save the shipment
-        Shipment savedShipment = shipmentRepository.save(shipment);
+    private UserRepository userRepository;
 
-        // Then create and save the initial shipment status
-        shipmentStatus.setShipment(savedShipment); // Setting the saved shipment to the status
+    private static final double BASE_PRICE_TO_OFFICE = 5.0;
+    private static final double BASE_PRICE_TO_ADDRESS = 10.0;
+    private static final double PRICE_PER_KILO = 2.0;
+
+    /**
+     * Retrieves all shipments accessible to employees.
+     *
+     * @param authentication The authentication object containing user details.
+     * @return List of all shipments.
+     * @throws UnauthorizedAccess If the user is not an employee.
+     */
+    public List<Shipment> getAllShipmentsForEmployee(Authentication authentication) {
+        if (isEmployee(authentication)) {
+            return shipmentRepository.findAll();
+        }
+        throw new UnauthorizedAccess("Access denied. Only employees can view all shipments.");
+    }
+
+    /**
+     * Retrieves all shipments registered by a specific employee.
+     *
+     * @param employeeId The ID of the employee.
+     * @return List of shipments registered by the employee.
+     */
+    public List<Shipment> getShipmentsByEmployeeId(Integer employeeId) {
+        return shipmentRepository.findAllByEmployeeId(employeeId);
+    }
+
+    /**
+     * Retrieves all shipments that have not been delivered.
+     *
+     * @return List of undelivered shipments.
+     */
+    public List<Shipment> getUndeliveredShipments() {
+        return shipmentRepository.findUndeliveredShipments(Status.DELIVERED);
+    }
+
+    /**
+     * Registers a new shipment in the system.
+     *
+     * @param shipment       The shipment entity to register.
+     * @param authentication The authentication object containing user details.
+     * @return The registered shipment.
+     * @throws UnauthorizedAccess If the user is not an employee.
+     */
+    public Shipment registerShipment(Shipment shipment, Authentication authentication) {
+        if (!isEmployee(authentication)) {
+            throw new UnauthorizedAccess("Only employees can register shipments.");
+        }
+        validateShipment(shipment);
+        return shipmentRepository.save(shipment);
+    }
+
+    /**
+     * Retrieves shipments sent or received by a client.
+     *
+     * @param authentication The authentication object containing user details.
+     * @return List of shipments related to the client.
+     * @throws UnauthorizedAccess If the user is not a client.
+     */
+    public List<Shipment> getShipmentsForClient(Authentication authentication) {
+        if (isClient(authentication)) {
+            Integer userId = getUserIdFromAuthentication(authentication);
+            return shipmentRepository.findAll().stream()
+                    .filter(s -> s.getSender().getUser().getId().equals(userId)
+                            || s.getRecipient().getUser().getId().equals(userId))
+                    .toList();
+        }
+        throw new UnauthorizedAccess("Access denied. Only clients can view their shipments.");
+    }
+
+    /**
+     * Validates the shipment details.
+     *
+     * @param shipment The shipment entity to validate.
+     * @throws IllegalArgumentException If the shipment details are invalid.
+     */
+    private void validateShipment(Shipment shipment) {
+        if (shipment.getWeight() <= 0) {
+            throw new IllegalArgumentException("Weight must be a positive value.");
+        }
+        if (shipment.getSenderAddress() == null || shipment.getRecipientAddress() == null) {
+            throw new IllegalArgumentException("Sender and recipient addresses must be provided.");
+        }
+    }
+
+    /**
+     * Checks if the user is an employee.
+     *
+     * @param authentication The authentication object containing user details.
+     * @return True if the user is an employee, false otherwise.
+     */
+    private boolean isEmployee(Authentication authentication) {
+        return authentication.getAuthorities().stream()
+                .anyMatch(authority -> authority.getAuthority().equals(Role.EMPLOYEE.name()));
+    }
+
+    /**
+     * Checks if the user is a client.
+     *
+     * @param authentication The authentication object containing user details.
+     * @return True if the user is a client, false otherwise.
+     */
+    private boolean isClient(Authentication authentication) {
+        return authentication.getAuthorities().stream()
+                .anyMatch(authority -> authority.getAuthority().equals(Role.CLIENT.name()));
+    }
+
+    /**
+     * Extracts the user ID from the authentication object.
+     *
+     * @param authentication The authentication object containing user details.
+     * @return The user ID.
+     */
+    private Integer getUserIdFromAuthentication(Authentication authentication) {
+        User user = userRepository.findByUsername(authentication.getName());
+        return user.getId();
+    }
+
+    /**
+     * Calculates the price of the shipment.
+     *
+     * @param shipment The shipment entity.
+     * @return The calculated price.
+     */
+    private double calculatePrice(Shipment shipment) {
+        double basePrice = shipment.getRecipientAddress() == null ? BASE_PRICE_TO_OFFICE : BASE_PRICE_TO_ADDRESS;
+        return basePrice + (shipment.getWeight() * PRICE_PER_KILO);
+    }
+
+    /**
+     * Updates the status of a shipment.
+     *
+     * @param shipmentId The ID of the shipment.
+     * @param newStatus  The new status to set.
+     * @return The updated shipment.
+     * @throws ShipmentNotFound If the shipment is not found.
+     */
+    public Shipment updateShipmentStatus(Integer shipmentId, Status newStatus) {
+
+        Shipment shipment = shipmentRepository.findById(shipmentId)
+                .orElseThrow(() -> new ShipmentNotFound("Shipment not found with ID: " + shipmentId));
+
+        ShipmentStatus shipmentStatus = new ShipmentStatus();
+        shipmentStatus.setShipment(shipment);
+        shipmentStatus.setStatus(newStatus);
         shipmentStatusRepository.save(shipmentStatus);
 
-        return savedShipment;
+        return shipment;
+    }
+
+    /**
+     * Retrieves the history of a shipment's statuses.
+     *
+     * @param shipmentId The ID of the shipment.
+     * @return List of shipment statuses.
+     * @throws ShipmentNotFound If the shipment is not found.
+     */
+    public List<ShipmentStatus> getShipmentHistory(Integer shipmentId) {
+        shipmentRepository.findById(shipmentId)
+                .orElseThrow(() -> new ShipmentNotFound("Shipment not found with ID: " + shipmentId));
+        return shipmentStatusRepository.findByShipmentId(shipmentId);
+    }
+
+    /**
+     * Retrieves shipment statistics.
+     *
+     * @return A map containing total shipments, delivered shipments, total weight,
+     *         and total revenue.
+     */
+    public Map<String, Object> getShipmentStatistics() {
+        long totalShipments = shipmentRepository.count();
+        long deliveredShipments = shipmentStatusRepository.findAll().stream()
+                .filter(shipmentStatus -> shipmentStatus.getStatus() == Status.DELIVERED)
+                .count();
+        double totalWeight = shipmentRepository.findAll().stream()
+                .mapToDouble(Shipment::getWeight)
+                .sum();
+
+        BigDecimal totalRevenue = shipmentRepository.findAll().stream()
+                .map(Shipment::getPrice)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        Map<String, Object> stats = new HashMap<>();
+        stats.put("totalShipments", totalShipments);
+        stats.put("deliveredShipments", deliveredShipments);
+        stats.put("totalWeight", totalWeight);
+        stats.put("totalRevenue", totalRevenue);
+
+        return stats;
+    }
+
+    /**
+     * Retrieves shipments filtered by country and city.
+     *
+     * @param countryName The name of the country.
+     * @param cityName    The name of the city.
+     * @return List of shipments filtered by the specified location.
+     */
+    public List<Shipment> getShipmentsByCountryAndCity(String countryName, String cityName) {
+        return shipmentRepository.findAll().stream()
+                .filter(shipment -> shipment.getSenderAddress().getCity().getName().equals(cityName) &&
+                        shipment.getSenderAddress().getCity().getCountry().getName().equals(countryName))
+                .toList();
     }
 
     // Get all Shipments
@@ -54,10 +266,17 @@ public class ShipmentService {
         return null;
     }
 
-    // Delete Shipment and its Status
-    public void deleteByShipmentId(Integer id) {
-        shipmentRepository.deleteById(id);
-        shipmentStatusRepository.deleteByShipmentId(id);
+    /**
+     * Deletes a shipment from the system by its ID.
+     *
+     * @param shipmentId The ID of the shipment to delete.
+     * @throws ShipmentNotFound If the shipment with the specified ID does not
+     *                          exist.
+     */
+    public void deleteShipment(Integer shipmentId) {
+        Shipment shipment = shipmentRepository.findById(shipmentId)
+                .orElseThrow(() -> new ShipmentNotFound("Shipment not found with ID: " + shipmentId));
+        shipmentRepository.delete(shipment);
     }
 
 }

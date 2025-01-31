@@ -3,6 +3,9 @@ package nbu.team11.entities;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
+
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -11,18 +14,26 @@ import java.time.Instant;
 @Entity
 @Data
 public class Address {
+    @Getter
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
+
+    @Getter
+    @Setter
     @ManyToOne
     @JoinColumn(name = "CityId", nullable = false)
     private City city;
 
+    @Getter
+    @Setter
     @NotBlank(message = "Street cannot be blank!")
     @Size(min = 5, max = 20, message = "Street name has to be between 5 and 20 characters!")
     @Column(name = "Street", nullable = false)
     private String street;
 
+    @Getter
+    @Setter
     @NotBlank(message = "Postal code cannot be blank!")
     @Column(name = "PostalCode", nullable = false)
     private String postalCode;
@@ -36,34 +47,6 @@ public class Address {
 
     public Address(String street, String postalCode) {
         this.street = street;
-        this.postalCode = postalCode;
-    }
-
-    public Integer getId() {
-        return id;
-    }
-
-    public City getCity() {
-        return city;
-    }
-
-    public void setCity(City city) {
-        this.city = city;
-    }
-
-    public String getStreet() {
-        return street;
-    }
-
-    public void setStreet(String street) {
-        this.street = street;
-    }
-
-    public String getPostalCode() {
-        return postalCode;
-    }
-
-    public void setPostalCode(String postalCode) {
         this.postalCode = postalCode;
     }
 

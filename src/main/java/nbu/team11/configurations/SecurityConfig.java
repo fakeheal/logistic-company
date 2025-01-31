@@ -48,6 +48,7 @@ public class SecurityConfig {
                         .requestMatchers("/register", "/home", "/demo").permitAll()
                         .requestMatchers(new AntPathRequestMatcher("/assets/**")).permitAll()
                         .requestMatchers("/static/**").permitAll()
+                        .requestMatchers("/shipments/all").hasAuthority("EMPLOYEE")
                         .anyRequest().authenticated())
                 .formLogin(form -> form
                         .loginPage("/login")
