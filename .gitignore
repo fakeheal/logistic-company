@@ -12,6 +12,7 @@
 *~
 bin
 build
+node_modules/
 target
 *.sublime-*
 /scratch
@@ -23,4 +24,3 @@ README.html
 out/
 .micronaut/
 src/main/resources/static/
-node_modules
