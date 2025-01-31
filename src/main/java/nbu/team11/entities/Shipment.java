@@ -1,8 +1,10 @@
 package nbu.team11.entities;
+
 import jakarta.persistence.*;
 import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import jakarta.validation.constraints.*;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -38,9 +40,11 @@ public class Shipment {
     @JoinColumn(name = "OfficeId", nullable = false)
     private Office office;
 
+    @Positive(message = "The weight must be greater than 0")
     @Column(name = "Weight", nullable = false)
     private double weight;
 
+    @Positive(message = "The price must be greater than 0")
     @Column(name = "Price", nullable = false)
     private BigDecimal price;
 
@@ -51,9 +55,20 @@ public class Shipment {
     @Column(name = "updated_on", nullable = false)
     private Instant updatedOn;
 
+    public Shipment(Employee employee, Client recipient, Address recipientAddress, Client sender, Address senderAddress,
+            Office office, double weight, BigDecimal price) {
+        this.employee = employee;
+        this.recipient = recipient;
+        this.recipientAddress = recipientAddress;
+        this.sender = sender;
+        this.senderAddress = senderAddress;
+        this.office = office;
+        this.weight = weight;
+        this.price = price;
+    }
+
     public void setId(Integer id) {
         this.id = id;
     }
-
 
 }

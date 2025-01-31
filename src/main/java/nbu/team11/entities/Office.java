@@ -1,6 +1,7 @@
 package nbu.team11.entities;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.*;
 import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -13,11 +14,14 @@ public class Office {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
+
+    @NotBlank(message = "Title cannot be blank!")
+    @Size(min = 5, max = 20, message = "Title has to be between 5 and 20 characters!")
     @Column(name = "Title", nullable = false)
     private String title;
 
     @OneToOne
-    @JoinColumn(name = "address_id",nullable = false)
+    @JoinColumn(name = "address_id", nullable = false)
     private Address address;
 
     @CreationTimestamp
@@ -26,6 +30,10 @@ public class Office {
     @UpdateTimestamp
     @Column(name = "updated_on", nullable = false)
     private Instant updatedOn;
+
+    public Office(String title) {
+        this.title = title;
+    }
 
     public Integer getId() {
         return id;

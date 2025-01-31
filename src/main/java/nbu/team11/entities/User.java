@@ -1,6 +1,7 @@
 package nbu.team11.entities;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.*;
 import lombok.Data;
 import nbu.team11.entities.enums.Role;
 import org.hibernate.annotations.CreationTimestamp;
@@ -15,15 +16,27 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
+    @NotBlank(message = "First Name cannot be blank!")
+    @Size(max = 20, message = "First name has to be up to 20 characters!")
     @Column(name = "FirstName", nullable = false)
     private String firstName;
+
+    @NotBlank(message = "Last Name cannot be blank!")
+    @Size(max = 20, message = "Last name has to be up to 20 characters!")
     @Column(name = "LastName", nullable = false)
     private String lastName;
 
+    @NotBlank(message = "Username cannot be blank!")
+    @Size(min = 5, max = 20, message = "Username has to be between 5 and 20 characters!")
     @Column(name = "username", nullable = false, unique = true)
     private String username;
+
+    @NotBlank(message = "Password cannot be blank!")
     @Column(name = "password", nullable = false)
     private String password;
+
+    @NotBlank(message = "Email cannot be blank!")
+    @Email(message = "Invalid email address. Please enter a proper email!")
     @Column(name = "email", nullable = false, unique = true)
     private String email;
 

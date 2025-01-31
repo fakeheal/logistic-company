@@ -1,12 +1,12 @@
 package nbu.team11.entities;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.*;
 import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.Instant;
-
 
 @Entity
 @Data
@@ -18,9 +18,12 @@ public class Address {
     @JoinColumn(name = "CityId", nullable = false)
     private City city;
 
+    @NotBlank(message = "Street cannot be blank!")
+    @Size(min = 5, max = 20, message = "Street name has to be between 5 and 20 characters!")
     @Column(name = "Street", nullable = false)
     private String street;
 
+    @NotBlank(message = "Postal code cannot be blank!")
     @Column(name = "PostalCode", nullable = false)
     private String postalCode;
 
@@ -30,6 +33,11 @@ public class Address {
     @UpdateTimestamp
     @Column(name = "updated_on", nullable = false)
     private Instant updatedOn;
+
+    public Address(String street, String postalCode) {
+        this.street = street;
+        this.postalCode = postalCode;
+    }
 
     public Integer getId() {
         return id;

@@ -1,14 +1,13 @@
 package nbu.team11.services;
+
 import nbu.team11.entities.Shipment;
 import nbu.team11.entities.ShipmentStatus;
-import nbu.team11.entities.enums.Status;
 import nbu.team11.repositories.ShipmentRepository;
 import nbu.team11.repositories.ShipmentStatusRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
-import nbu.team11.controllers.ShipmentController;
 
 @Service
 public class ShipmentService {
@@ -29,7 +28,6 @@ public class ShipmentService {
 
         return savedShipment;
     }
-
 
     // Get all Shipments
     public List<Shipment> getAllShipments() {
@@ -63,11 +61,3 @@ public class ShipmentService {
     }
 
 }
-
-
-
-
-
-
-
-

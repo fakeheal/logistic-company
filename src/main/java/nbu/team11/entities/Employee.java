@@ -10,7 +10,6 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.Instant;
 
-
 @Entity
 @Data
 public class Employee {
@@ -32,7 +31,6 @@ public class Employee {
     private Office office;
 
     @Setter
-    @Getter
     @Enumerated(EnumType.STRING)
     private PositionType positionType;
 
@@ -43,6 +41,11 @@ public class Employee {
     @Column(name = "updated_on", nullable = false)
     private Instant updatedOn;
 
+    public Employee(User user, Office office, PositionType positionType) {
+        this.user = user;
+        this.office = office;
+        this.positionType = positionType;
+    }
 
     public String getPositionTypeFormatted() {
         switch (this.getPositionType()) {

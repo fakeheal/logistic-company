@@ -1,8 +1,8 @@
 package nbu.team11.controllers;
+
 import nbu.team11.entities.Shipment;
 import nbu.team11.entities.ShipmentStatus;
 import nbu.team11.entities.enums.Status;
-import nbu.team11.repositories.ShipmentStatusRepository;
 import nbu.team11.services.ShipmentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -14,7 +14,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/shipments")
-public class ShipmentController{
+public class ShipmentController {
 
     @Autowired
     private ShipmentService shipmentService;
@@ -31,7 +31,6 @@ public class ShipmentController{
         Shipment savedShipment = shipmentService.createShipmentWithStatus(shipment, shipmentStatus);
         return new ResponseEntity<>(savedShipment, HttpStatus.CREATED);
     }
-
 
     // Get all Shipments
     @GetMapping
