@@ -6,7 +6,6 @@ import nbu.team11.entities.enums.PositionType;
 
 import java.time.Instant;
 
-
 @Setter
 @Getter
 public class EmployeeDto {

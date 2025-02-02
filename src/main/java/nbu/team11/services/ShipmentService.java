@@ -195,10 +195,9 @@ public class ShipmentService implements IShipmentService {
      * @return List of shipment statuses.
      * @throws ShipmentNotFound If the shipment is not found.
      */
-    public List<ShipmentStatus> getShipmentHistory(Integer shipmentId) {
-        shipmentRepository.findById(shipmentId)
-                .orElseThrow(() -> new ShipmentNotFound("Shipment not found with ID: " + shipmentId));
-        return shipmentStatusRepository.findByShipmentId(shipmentId);
+    public List<ShipmentStatus> getShipmentHistory(String uniqueId) {
+        Shipment shipment = shipmentRepository.findByUniqueId(uniqueId);
+        return shipmentStatusRepository.findByShipmentId(shipment.getId());
     }
 
     /**

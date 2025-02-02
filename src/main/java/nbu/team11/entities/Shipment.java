@@ -52,6 +52,11 @@ public class Shipment {
     @Column(name = "Price", nullable = false)
     private BigDecimal price;
 
+    @NotBlank(message = "Unique ID cannot be blank!")
+    @Size(min = 10, max = 20, message = "Unique id has to be between 5 and 30 characters!")
+    @Column(name = "uniqueId", nullable = false, unique = true)
+    private String uniqueId;
+
     @CreationTimestamp
     @Column(name = "created_on", nullable = false, updatable = false)
     private Instant createdOn;

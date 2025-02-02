@@ -9,11 +9,18 @@ import nbu.team11.dtos.UserDto;
 import nbu.team11.entities.Employee;
 import nbu.team11.entities.Office;
 import nbu.team11.entities.User;
+import nbu.team11.entities.enums.PositionType;
+import nbu.team11.entities.enums.Role;
 import nbu.team11.repositories.EmployeeRepository;
 import nbu.team11.services.contracts.IEmployeeService;
 import nbu.team11.services.exceptions.EmailNotAvailable;
 import nbu.team11.services.exceptions.ResourceNotFound;
 import nbu.team11.services.exceptions.UsernameNotAvailable;
+
+import java.util.List;
+import java.util.Arrays;
+import java.util.stream.Collectors;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -39,12 +46,26 @@ public class EmployeeService implements IEmployeeService {
         this.employeeRepository.save(
                 (new ModelMapperConfig())
                         .modelMapper()
-                        .map(employeeDto, Employee.class)
-        );
+                        .map(employeeDto, Employee.class));
+    }
+
+    public List<Employee> getAllEmployees() {
+        List<PositionType> positions = Arrays.stream(PositionType.values())
+                .filter(position -> position != PositionType.ADMIN)
+                .collect(Collectors.toList());
+
+        List<Employee> employees = employeeRepository.findAllByPositionTypeIn(positions);
+
+        if (employees == null) {
+            return null;
+        }
+
+        return employees;
     }
 
     @Override
-    public void update(EmployeeDto employeeDto, UserDto userDto) throws UsernameNotAvailable, EmailNotAvailable, ResourceNotFound {
+    public void update(EmployeeDto employeeDto, UserDto userDto)
+            throws UsernameNotAvailable, EmailNotAvailable, ResourceNotFound {
         this.userService.update(userDto);
         Employee employee = this.employeeRepository.findById(employeeDto.getId()).orElseThrow(ResourceNotFound::new);
 
@@ -56,6 +77,7 @@ public class EmployeeService implements IEmployeeService {
 
     @Override
     public EmployeeDto getById(Integer id) throws ResourceNotFound {
-        return (new ModelMapperConfig()).modelMapper().map(employeeRepository.findById(id).orElseThrow(ResourceNotFound::new), EmployeeDto.class);
+        return (new ModelMapperConfig()).modelMapper()
+                .map(employeeRepository.findById(id).orElseThrow(ResourceNotFound::new), EmployeeDto.class);
     }
 }

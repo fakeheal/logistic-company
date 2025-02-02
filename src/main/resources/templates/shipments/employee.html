@@ -5,6 +5,7 @@
       <table class="w-full">
         <thead>
           <tr class="text-md font-semibold tracking-wide text-left text-gray-900 bg-gray-100 uppercase border-b border-gray-600">
+            <th class="px-4 py-3">Employee</th>
             <th class="px-4 py-3">Recipient</th>
             <th class="px-4 py-3">Recipient Address</th>
             <th class="px-4 py-3">Sender</th>
@@ -18,6 +19,7 @@
         </thead>
         <tbody class="bg-white">
           <tr class="text-gray-700" th:each="shipment, iterStat : ${shipments}">
+            <td class="px-4 py-3 text-sm border" th:text = "${shipment.employee.user.getFullName}"></td>
             <td class="px-4 py-3 text-sm border" th:text = "${shipment.recipient.user.getFullName}"></td>
             <td class="px-4 py-3 text-sm border" th:text = "${shipment.recipientAddress.getFullAddress}"></td>
             <td class="px-4 py-3 text-sm border" th:text = "${shipment.sender.user.getFullName}"></td>

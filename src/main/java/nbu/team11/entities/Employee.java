@@ -31,6 +31,7 @@ public class Employee {
     private Office office;
 
     @Setter
+    @Getter
     @Enumerated(EnumType.STRING)
     private PositionType positionType;
 
@@ -64,9 +65,5 @@ public class Employee {
         }
 
         return "N/A";
-    }
-
-    private PositionType getPositionType() {
-        return this.positionType;
     }
 }

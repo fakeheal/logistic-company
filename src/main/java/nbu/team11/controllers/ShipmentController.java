@@ -2,21 +2,17 @@
 package nbu.team11.controllers;
 
 import nbu.team11.dtos.ShipmentDto;
-import nbu.team11.dtos.UserDto;
 import nbu.team11.entities.Shipment;
 import nbu.team11.entities.ShipmentStatus;
 import nbu.team11.entities.enums.Status;
 import nbu.team11.services.ShipmentService;
-import nbu.team11.services.exceptions.ResourceNotFound;
 import nbu.team11.services.exceptions.ShipmentNotFound;
 import nbu.team11.services.exceptions.UnauthorizedAccess;
 import org.modelmapper.*;
 import org.springframework.ui.Model;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.stereotype.Controller;
 
@@ -49,12 +45,21 @@ public class ShipmentController {
      * @return List of all shipments as DTOs.
      */
     @GetMapping("/all")
-    public ResponseEntity<List<ShipmentDto>> getAllShipments(Authentication authentication) {
+    public String getAllShipments(Authentication authentication, Model model) {
         List<Shipment> shipments = shipmentService.getAllShipmentsForEmployee(authentication);
         List<ShipmentDto> shipmentDto = shipments.stream()
                 .map(shipment -> modelMapper.map(shipment, ShipmentDto.class))
                 .collect(Collectors.toList());
-        return ResponseEntity.ok(shipmentDto);
+        for (int i = 0; i < shipmentDto.size(); i++) {
+            ShipmentDto shipment = (ShipmentDto) shipmentDto.get(i);
+            String status = shipmentService.getShipmentHistory(shipment.getUniqueID()).getFirst().getStatus()
+                    .toString();
+            shipment.setStatus(status);
+        }
+        model.addAttribute("shipments", shipmentDto);
+        model.addAttribute("title", "employee");
+        model.addAttribute("content", "shipments/employee");
+        return withAppLayout(model);
     }
 
     /**
@@ -125,7 +130,8 @@ public class ShipmentController {
 
         for (int i = 0; i < shipmentDto.size(); i++) {
             ShipmentDto shipment = (ShipmentDto) shipmentDto.get(i);
-            String status = shipmentService.getShipmentHistory(shipment.getId()).getFirst().getStatus().toString();
+            String status = shipmentService.getShipmentHistory(shipment.getUniqueID()).getFirst().getStatus()
+                    .toString();
             shipment.setStatus(status);
         }
         model.addAttribute("shipments", shipmentDto);
@@ -155,21 +161,33 @@ public class ShipmentController {
         }
     }
 
+    @GetMapping("/track")
+    public String track(Model model) {
+        model.addAttribute("title", "Track package");
+        model.addAttribute("content", "shipments/track");
+        return withAppLayout(model);
+    }
+
     /**
      * Retrieves the history of statuses for a specific shipment.
      *
      * @param shipmentId The ID of the shipment.
      * @return List of shipment statuses.
      */
-    @GetMapping("/history/{shipmentId}")
-    public ResponseEntity<List<ShipmentStatus>> getShipmentHistory(@PathVariable Integer shipmentId) {
+    @GetMapping("/history")
+    public String getShipmentHistory(@RequestParam String shipmentId, Model model) {
         try {
             List<ShipmentStatus> history = shipmentService.getShipmentHistory(shipmentId);
-            return ResponseEntity.ok(history);
+            model.addAttribute("shipmentStatuses", history);
+            model.addAttribute("title", "client");
+            model.addAttribute("content", "shipments/track");
+            return withAppLayout(model);
         } catch (ShipmentNotFound e) {
-            return ResponseEntity.notFound().build();
+            model.addAttribute("content", "shipments/track");
+            return withAppLayout(model);
         } catch (Exception e) {
-            return ResponseEntity.badRequest().build();
+            model.addAttribute("content", "shipments/track");
+            return withAppLayout(model);
         }
     }
 

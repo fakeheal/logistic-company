@@ -26,6 +26,8 @@ public class ShipmentDto {
     private BigDecimal price;
     private Instant createdOn;
     private Instant updatedOn;
+    @Getter
+    private String uniqueID;
     @Setter
     private String status;
 }

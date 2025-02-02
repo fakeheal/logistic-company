@@ -46,13 +46,6 @@ public class DemoPages {
         return withAppLayout(model);
     }
 
-    @GetMapping("/demo/track")
-    public String track(Model model) {
-        model.addAttribute("title", "Track package");
-        model.addAttribute("content", "demo/pages/track");
-        return withAppLayout(model);
-    }
-
     @GetMapping("/demo/contact")
     public String privacyPolicy(Model model) {
         model.addAttribute("title", "Contact");

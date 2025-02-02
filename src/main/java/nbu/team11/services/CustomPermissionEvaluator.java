@@ -17,4 +17,13 @@ public class CustomPermissionEvaluator {
                 .anyMatch(auth -> auth.getAuthority().equals(role)) &&
                 userDetails.getPositionType().equals(positionType);
     }
+
+    public boolean hasRole(Authentication authentication, String role) {
+        if (authentication == null || authentication.getPrincipal() == "anonymousUser") {
+            return false;
+        }
+
+        return authentication.getAuthorities().stream()
+                .anyMatch(auth -> auth.getAuthority().equals(role));
+    }
 }

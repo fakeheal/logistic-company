@@ -29,6 +29,11 @@ public class ShipmentStatus {
     @Column(name = "Status", nullable = false)
     private Status status;
 
+    @Setter
+    @Getter
+    @Column(name = "comment")
+    private String comment;
+
     @CreationTimestamp
     @Column(name = "created_on", nullable = false, updatable = false)
     private Instant createdOn;

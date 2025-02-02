@@ -35,7 +35,7 @@ public class UserService implements IUserService {
         this.modelMapper = modelMapper;
     }
 
-    //TODO: Return UserDTO with automapper
+    // TODO: Return UserDTO with automapper
     @Override
     public UserDto getByUsername(String username) {
         User user = userRepository.findByUsername(username);
@@ -49,13 +49,13 @@ public class UserService implements IUserService {
         return userDto;
     }
 
-    //TODO: Return UserDTO with automapper
+    // TODO: Return UserDTO with automapper
     @Override
     public User getUserById(Integer id) {
         return userRepository.findById(id).orElse(null);
     }
 
-    //TODO: Return UserDTO with automapper
+    // TODO: Return UserDTO with automapper
     @Override
     public List<User> getUsersByRole(Role role) {
         return userRepository.findByRole(role);
@@ -88,13 +88,12 @@ public class UserService implements IUserService {
         return this.modelMapper.map(userRepository.save(userToUpdate), UserDto.class);
     }
 
-
     @Override
     public void delete(Integer id) {
         userRepository.deleteById(id);
     }
 
-    //TODO: Return automap user dto
+    // TODO: Return automap user dto
     @Override
     public User create(UserDto userDto) throws UsernameNotAvailable, EmailNotAvailable {
         if (this.userRepository.findByUsername(userDto.getUsername()) != null) {
@@ -105,7 +104,8 @@ public class UserService implements IUserService {
             throw new EmailNotAvailable();
         }
 
-        User user = new User(userDto.getRole(), userDto.getEmail(), passwordEncoder.encode(userDto.getPassword()), userDto.getUsername(), userDto.getFirstName(), userDto.getLastName());
+        User user = new User(userDto.getRole(), userDto.getEmail(), passwordEncoder.encode(userDto.getPassword()),
+                userDto.getUsername(), userDto.getFirstName(), userDto.getLastName());
         return userRepository.save(user);
     }
 }
