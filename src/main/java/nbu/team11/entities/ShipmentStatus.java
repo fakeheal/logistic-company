@@ -2,6 +2,8 @@ package nbu.team11.entities;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import nbu.team11.entities.enums.Status;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -17,10 +19,13 @@ public class ShipmentStatus {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
+    @Setter
     @OneToOne
     @JoinColumn(name = "ShipmentId", nullable = false)
     private Shipment shipment;
 
+    @Setter
+    @Getter
     @Enumerated(EnumType.STRING)
     @Column(name = "Status", nullable = false)
     private Status status;
@@ -32,11 +37,4 @@ public class ShipmentStatus {
     @Column(name = "updated_on", nullable = false)
     private Instant updatedOn;
 
-    public void setStatus(Status status) {
-        this.status = status;
-    }
-
-    public void setShipment(Shipment savedShipment) {
-        this.shipment = savedShipment;
-    }
 }

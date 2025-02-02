@@ -2,6 +2,7 @@ package nbu.team11.entities;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -10,6 +11,7 @@ import java.time.Instant;
 @Entity
 @Data
 public class City {
+    @Setter
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
@@ -27,7 +29,4 @@ public class City {
     @Column(name = "updated_on", nullable = false)
     private Instant updatedOn;
 
-    public void setId(Integer id) {
-        this.id = id;
-    }
 }

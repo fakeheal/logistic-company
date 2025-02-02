@@ -2,6 +2,7 @@ package nbu.team11.entities;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.Getter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -11,6 +12,7 @@ import java.time.Instant;
 @Entity
 @Data
 public class Address {
+    @Getter
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
@@ -21,6 +23,7 @@ public class Address {
     @Column(name = "Street", nullable = false)
     private String street;
 
+    @Getter
     @Column(name = "PostalCode", nullable = false)
     private String postalCode;
 
@@ -30,10 +33,6 @@ public class Address {
     @UpdateTimestamp
     @Column(name = "updated_on", nullable = false)
     private Instant updatedOn;
-
-    public Integer getId() {
-        return id;
-    }
 
     public City getCity() {
         return city;
@@ -49,10 +48,6 @@ public class Address {
 
     public void setStreet(String street) {
         this.street = street;
-    }
-
-    public String getPostalCode() {
-        return postalCode;
     }
 
     public void setPostalCode(String postalCode) {

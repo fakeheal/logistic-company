@@ -1,15 +1,19 @@
-
 package nbu.team11.controllers;
-import nbu.team11.entities.City;
+
+import nbu.team11.dtos.CityDto;
 import nbu.team11.services.CityService;
+import nbu.team11.services.exceptions.CityNotFound;
+import nbu.team11.services.exceptions.CountryNotFound;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
+/**
+ * Controller for managing cities in the system.
+ * Provides CRUD operations and error handling for cities.
+ */
 @RestController
 @RequestMapping("/cities")
 public class CityController {
@@ -17,36 +21,83 @@ public class CityController {
     @Autowired
     private CityService cityService;
 
-    // Creates a new city
-    @PostMapping
-    public ResponseEntity<City> createCity(@RequestBody City city) {
-        City savedCity = cityService.createCity(city);
-        return new ResponseEntity<>(savedCity, HttpStatus.CREATED);
-    }
-
-    // Returns all cities
+    /**
+     * Retrieves a list of all cities.
+     *
+     * @return A list of {@link CityDto} objects representing all cities.
+     */
     @GetMapping
-    public List<City> getAllCities() {
+    public List<CityDto> getAllCities() {
         return cityService.getAllCities();
     }
 
-    // Returns a city by id
+    /**
+     * Retrieves a city by its ID.
+     *
+     * @param id The ID of the city to retrieve.
+     * @return A {@link CityDto} representing the requested city.
+     */
     @GetMapping("/{id}")
-    public ResponseEntity<City> getCityById(@PathVariable Integer id) {
-        Optional<City> city = cityService.getCityById(id);
-        return city.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+    public CityDto getCityById(@PathVariable Integer id) {
+        return cityService.getCityById(id);
     }
 
+    /**
+     * Creates a new city.
+     *
+     * @param cityDto The details of the city to create.
+     * @return The created {@link CityDto}.
+     */
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    public CityDto createCity(@RequestBody CityDto cityDto) {
+        return cityService.createCity(cityDto);
+    }
+
+    /**
+     * Updates an existing city by its ID.
+     *
+     * @param id      The ID of the city to update.
+     * @param cityDto The updated details of the city.
+     * @return The updated {@link CityDto}.
+     */
     @PutMapping("/{id}")
-    public ResponseEntity<City> updateCity(@PathVariable Integer id, @RequestBody City city) {
-        City updatedCity = cityService.updateCity(id, city);
-        return updatedCity != null ? ResponseEntity.ok(updatedCity) : ResponseEntity.notFound().build();
+    public CityDto updateCity(@PathVariable Integer id, @RequestBody CityDto cityDto) {
+        return cityService.updateCity(id, cityDto);
     }
 
-    // Deleting a city
+    /**
+     * Deletes a city by its ID.
+     *
+     * @param id The ID of the city to delete.
+     */
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteCity(@PathVariable Integer id) {
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteCity(@PathVariable Integer id) {
         cityService.deleteCity(id);
-        return ResponseEntity.noContent().build();
+    }
+
+    /**
+     * Handles {@link CityNotFound} exceptions.
+     *
+     * @param exception The exception that was thrown.
+     * @return The error message from the exception.
+     */
+    @ExceptionHandler(CityNotFound.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public String handleCityNotFound(CityNotFound exception) {
+        return exception.getMessage();
+    }
+
+    /**
+     * Handles {@link CountryNotFound} exceptions.
+     *
+     * @param exception The exception that was thrown.
+     * @return The error message from the exception.
+     */
+    @ExceptionHandler(CountryNotFound.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public String handleCountryNotFound(CountryNotFound exception) {
+        return exception.getMessage();
     }
 }
