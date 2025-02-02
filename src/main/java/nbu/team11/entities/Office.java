@@ -38,6 +38,9 @@ public class Office {
     @Column(name = "updated_on", nullable = false)
     private Instant updatedOn;
 
+    public Office() {
+    }
+
     public Office(String title) {
         this.title = title;
     }

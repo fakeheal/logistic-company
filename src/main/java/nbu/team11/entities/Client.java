@@ -37,6 +37,9 @@ public class Client {
     @Column(name = "updated_on", nullable = false)
     private Instant updatedOn;
 
+    public Client() {
+    }
+
     public Client(User user, String phoneNumber) {
         this.user = user;
         this.phoneNumber = phoneNumber;

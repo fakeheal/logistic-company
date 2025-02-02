@@ -19,7 +19,7 @@ public class ShipmentStatus {
     private Integer id;
 
     @Setter
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "ShipmentId", nullable = false)
     private Shipment shipment;
 

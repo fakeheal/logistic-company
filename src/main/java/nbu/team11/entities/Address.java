@@ -45,9 +45,17 @@ public class Address {
     @Column(name = "updated_on", nullable = false)
     private Instant updatedOn;
 
+    public Address() {
+
+    }
+
     public Address(String street, String postalCode) {
         this.street = street;
         this.postalCode = postalCode;
     }
 
+    public String getFullAddress() {
+        return this.city.getCountry().getName() + ", " + this.city.getName() + ", " + this.street + ", "
+                + this.postalCode;
+    }
 }

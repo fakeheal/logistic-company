@@ -34,6 +34,7 @@ public class ShipmentService implements IShipmentService {
     @Autowired
     private ShipmentStatusRepository shipmentStatusRepository;
 
+    @Autowired
     private UserRepository userRepository;
 
     private static final double BASE_PRICE_TO_OFFICE = 5.0;

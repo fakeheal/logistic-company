@@ -1,0 +1,34 @@
+<!-- component -->
+<section class="container mx-auto p-6 font-mono">
+  <div class="w-full mb-8 overflow-hidden rounded-lg shadow-lg">
+    <div class="w-full overflow-x-auto">
+      <table class="w-full">
+        <thead>
+          <tr class="text-md font-semibold tracking-wide text-left text-gray-900 bg-gray-100 uppercase border-b border-gray-600">
+            <th class="px-4 py-3">Recipient</th>
+            <th class="px-4 py-3">Recipient Address</th>
+            <th class="px-4 py-3">Sender</th>
+            <th class="px-4 py-3">Sender Address</th>
+            <th class="px-4 py-3">Price</th>
+            <th class="px-4 py-3">Weight</th>
+            <th class="px-4 py-3">Office</th>
+            <th class="px-4 py-3">Status</th>
+          </tr>
+        </thead>
+        <tbody class="bg-white">
+          <tr class="text-gray-700" th:each="shipment, iterStat : ${shipments}">
+            <td class="px-4 py-3 text-sm border" th:text = "${shipment.recipient.user.getFullName}"></td>
+            <td class="px-4 py-3 text-sm border" th:text = "${shipment.recipientAddress.getFullAddress}"></td>
+            <td class="px-4 py-3 text-sm border" th:text = "${shipment.sender.user.getFullName}"></td>
+            <td class="px-4 py-3 text-sm border" th:text = "${shipment.senderAddress.getFullAddress}"></td>
+            <td class="px-4 py-3 text-sm border" th:text = "${shipment.price}"></td>
+            <td class="px-4 py-3 text-sm border" th:text = "${shipment.weight}"></td>
+            <td class="px-4 py-3 text-sm border" th:text = "${shipment.office.getTitle()}"></td>
+            <td class="px-4 py-3 text-sm border" th:text = "${shipment.status}"></td>
+
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>

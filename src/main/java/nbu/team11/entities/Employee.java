@@ -41,6 +41,9 @@ public class Employee {
     @Column(name = "updated_on", nullable = false)
     private Instant updatedOn;
 
+    public Employee() {
+    }
+
     public Employee(User user, Office office, PositionType positionType) {
         this.user = user;
         this.office = office;

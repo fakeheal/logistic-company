@@ -2,6 +2,7 @@
 package nbu.team11.controllers;
 
 import nbu.team11.dtos.ShipmentDto;
+import nbu.team11.dtos.UserDto;
 import nbu.team11.entities.Shipment;
 import nbu.team11.entities.ShipmentStatus;
 import nbu.team11.entities.enums.Status;
@@ -9,11 +10,15 @@ import nbu.team11.services.ShipmentService;
 import nbu.team11.services.exceptions.ResourceNotFound;
 import nbu.team11.services.exceptions.ShipmentNotFound;
 import nbu.team11.services.exceptions.UnauthorizedAccess;
-import org.modelmapper.ModelMapper;
+import org.modelmapper.*;
+import org.springframework.ui.Model;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.stereotype.Controller;
 
 import java.util.List;
 import java.util.Map;
@@ -23,7 +28,7 @@ import java.util.stream.Collectors;
  * Controller for managing shipments in the system.
  * Provides endpoints for employees and clients to interact with shipment data.
  */
-@RestController
+@Controller
 @RequestMapping("/shipments")
 public class ShipmentController {
 
@@ -32,6 +37,10 @@ public class ShipmentController {
 
     @Autowired
     private ModelMapper modelMapper;
+
+    private String withAppLayout(Model model) {
+        return "layouts/app";
+    }
 
     /**
      * Retrieves all shipments accessible to employees.
@@ -108,12 +117,21 @@ public class ShipmentController {
      * @return List of shipments as DTOs.
      */
     @GetMapping("/client")
-    public ResponseEntity<List<ShipmentDto>> getShipmentsByClient(Authentication authentication) {
+    public String getShipmentsByClient(Model model, Authentication authentication) {
         List<Shipment> shipments = shipmentService.getShipmentsForClient(authentication);
         List<ShipmentDto> shipmentDto = shipments.stream()
                 .map(shipment -> modelMapper.map(shipment, ShipmentDto.class))
                 .collect(Collectors.toList());
-        return ResponseEntity.ok(shipmentDto);
+
+        for (int i = 0; i < shipmentDto.size(); i++) {
+            ShipmentDto shipment = (ShipmentDto) shipmentDto.get(i);
+            String status = shipmentService.getShipmentHistory(shipment.getId()).getFirst().getStatus().toString();
+            shipment.setStatus(status);
+        }
+        model.addAttribute("shipments", shipmentDto);
+        model.addAttribute("title", "client");
+        model.addAttribute("content", "shipments/client");
+        return withAppLayout(model);
     }
 
     /**

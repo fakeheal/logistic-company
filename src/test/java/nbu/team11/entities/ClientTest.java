@@ -30,7 +30,6 @@ public class ClientTest {
   @BeforeEach
   void init() {
     user = new User(Role.CLIENT, "test@mail.com", "password", "username", "firstName", "lastName");
-
   }
 
   @Test

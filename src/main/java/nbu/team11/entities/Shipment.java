@@ -3,8 +3,10 @@ package nbu.team11.entities;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.Setter;
+
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+
 import jakarta.validation.constraints.*;
 
 import java.math.BigDecimal;
@@ -56,6 +58,9 @@ public class Shipment {
     @UpdateTimestamp
     @Column(name = "updated_on", nullable = false)
     private Instant updatedOn;
+
+    public Shipment() {
+    }
 
     public Shipment(Employee employee, Client recipient, Address recipientAddress, Client sender, Address senderAddress,
             Office office, double weight, BigDecimal price) {
