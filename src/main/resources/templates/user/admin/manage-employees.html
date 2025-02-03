@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:fragment="manageUsersPage">
+    <div class="container mx-auto my-12 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
+        <div class="border-b-2 border-neutral-100 p-4 dark:border-white/10">
+            <div class="flex justify-between items-center">
+                <h2 class="font-semibold text-lg">Employees</h2>
+                <a href="/employee/create"
+                   class="flex items-center text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                         stroke="currentColor" class="size-4 mr-2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
+                    </svg>
+                </a>
+            </div>
+        </div>
+        <div class="relative overflow-x-auto">
+
+            <table
+                   class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+                <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                <tr>
+                    <th scope="col" class="px-6 py-3">
+                        Name
+                    </th>
+                    <th scope="col" class="px-6 py-3">
+                        Position
+                    </th>
+                    <th scope="col" class="px-6 py-3">
+                        Email
+                    </th>
+                    <th scope="col" class="px-6 py-3">
+                        Office
+                    </th>
+                    <th scope="col" class="px-6 py-3">
+                        <span class="sr-only">Edit</span>
+                    </th>
+                </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="employee : ${employees}"
+                        class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
+                        <th th:text="${employee.user.getFullName()}" scope="row"
+                            class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"></th>
+                        <td th:text="${employee.getPositionType()}" class="px-6 py-4"></td>
+                        <td th:text="${employee.user.getEmail()}" class="px-6 py-4"></td>
+                        <td th:text="${employee.office.getTitle()}" class="px-6 py-4"></td>
+                        <td class="px-6 py-4 text-right">
+                            <a th:href="@{'/employee/' + ${employee.getId()}}"
+                               class="font-medium text-blue-600 dark:text-blue-500 hover:underline">View</a>
+                        </td>
+                    </tr>
+                    </tbody>
+            </table>
+        </div>
+
+    </div>
+</div>
+</body>
+</html>

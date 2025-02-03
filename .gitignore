@@ -12,6 +12,7 @@
 *~
 bin
 build
+node_modules/
 target
 *.sublime-*
 /scratch

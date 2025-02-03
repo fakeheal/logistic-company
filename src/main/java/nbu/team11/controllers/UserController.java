@@ -1,25 +1,19 @@
 package nbu.team11.controllers;
-import java.security.Principal;
 
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpSession;
 import nbu.team11.entities.enums.Role;
 import nbu.team11.services.CustomPermissionEvaluator;
-import nbu.team11.services.CustomUserDetails;
 import nbu.team11.services.exceptions.EmailNotAvailable;
 import nbu.team11.services.exceptions.UsernameNotAvailable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.config.annotation.web.oauth2.resourceserver.OAuth2ResourceServerSecurityMarker;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetails;
-import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -28,7 +22,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 
 import nbu.team11.dtos.UserDto;
 import nbu.team11.services.UserService;
-import nbu.team11.entities.*;
+
 @Controller
 public class UserController {
 
@@ -59,7 +53,7 @@ public class UserController {
 
     @GetMapping("/manage-users")
     public String manageUsers(Model model, Authentication authentication) {
-        if (!this.customPermissionEvaluator.hasRoleAndPosition(authentication,"EMPLOYEE", "Administrator")) {
+        if (!this.customPermissionEvaluator.hasRoleAndPosition(authentication, "EMPLOYEE", "Administrator")) {
             return "redirect:/home";
         }
 
@@ -115,8 +109,8 @@ public class UserController {
 
     private void authenticateUserAndSetSession(UserDto user, HttpServletRequest request) {
         UserDetails userDetails = userDetailsService.loadUserByUsername(user.getUsername());
-        UsernamePasswordAuthenticationToken authToken =
-                new UsernamePasswordAuthenticationToken(userDetails, user.getPassword(), userDetails.getAuthorities());
+        UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(userDetails,
+                user.getPassword(), userDetails.getAuthorities());
 
         authToken.setDetails(new WebAuthenticationDetails(request));
         Authentication authentication = authenticationManager.authenticate(authToken);

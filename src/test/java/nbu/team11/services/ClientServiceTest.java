@@ -1,3 +1,5 @@
+package nbu.team11.services;
+
 import nbu.team11.dtos.ClientDto;
 import nbu.team11.entities.Client;
 import nbu.team11.repositories.ClientRepository;

@@ -1,12 +1,11 @@
 package nbu.team11.services;
+
 import java.util.Arrays;
-import java.util.Collection;
 
 import nbu.team11.entities.Employee;
 import nbu.team11.entities.enums.Role;
 import nbu.team11.repositories.EmployeeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -17,7 +16,7 @@ import nbu.team11.entities.User;
 import nbu.team11.repositories.UserRepository;
 
 @Service
-public class CustomUserDetailsService  implements UserDetailsService{
+public class CustomUserDetailsService implements UserDetailsService {
 
     @Autowired
     private UserRepository userRepository;
@@ -29,10 +28,11 @@ public class CustomUserDetailsService  implements UserDetailsService{
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         User user = userRepository.findByUsername(username);
 
-        if(user == null){throw new UsernameNotFoundException("User not found with email: " + username);
+        if (user == null) {
+            throw new UsernameNotFoundException("User not found with email: " + username);
         }
 
-        if(user.getRole() == Role.EMPLOYEE){
+        if (user.getRole() == Role.EMPLOYEE) {
             Employee employee = employeeRepository.findByUserId(user.getId());
 
             return new CustomUserDetails(
@@ -43,7 +43,7 @@ public class CustomUserDetailsService  implements UserDetailsService{
                     employee.getPositionTypeFormatted());
         }
 
-        //TODO: Check how password is handled
+        // TODO: Check how password is handled
         return new CustomUserDetails(
                 user.getUsername(),
                 user.getPassword(),

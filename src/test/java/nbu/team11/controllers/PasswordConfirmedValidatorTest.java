@@ -1,3 +1,4 @@
+package nbu.team11.controllers;
 
 import jakarta.validation.ConstraintValidatorContext;
 import nbu.team11.controllers.forms.constraints.PasswordConfirmed;
@@ -20,7 +21,6 @@ class PasswordConfirmedValidatorTest {
     @Mock
     private ConstraintValidatorContext.ConstraintViolationBuilder violationBuilder;
 
-
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
@@ -32,7 +32,6 @@ class PasswordConfirmedValidatorTest {
         validator.initialize(annotation);
         doNothing().when(context).disableDefaultConstraintViolation();
     }
-
 
     @Test
     void testValidPasswords() {

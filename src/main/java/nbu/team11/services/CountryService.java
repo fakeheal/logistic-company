@@ -52,7 +52,8 @@ public class CountryService {
      *
      * @param countryDto The details of the country to create.
      * @return The created {@link CountryDto}.
-     * @throws IllegalArgumentException if a country with the same name already exists.
+     * @throws IllegalArgumentException if a country with the same name already
+     *                                  exists.
      */
     public CountryDto createCountry(CountryDto countryDto) {
         if (countryRepository.existsByName(countryDto.getName())) {
@@ -70,8 +71,9 @@ public class CountryService {
      * @param id         The ID of the country to update.
      * @param countryDto The updated details of the country.
      * @return The updated {@link CountryDto}.
-     * @throws CountryNotFound if no country is found with the given ID.
-     * @throws IllegalArgumentException if a country with the same name already exists.
+     * @throws CountryNotFound          if no country is found with the given ID.
+     * @throws IllegalArgumentException if a country with the same name already
+     *                                  exists.
      */
     public CountryDto updateCountry(Integer id, CountryDto countryDto) {
         Country country = countryRepository.findById(id)

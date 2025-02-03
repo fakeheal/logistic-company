@@ -1,8 +1,8 @@
+package nbu.team11.controllers;
+
 import jakarta.servlet.http.HttpServletRequest;
-import nbu.team11.controllers.UserController;
 import nbu.team11.dtos.UserDto;
 import nbu.team11.entities.User;
-import nbu.team11.entities.enums.Role;
 import nbu.team11.services.CustomPermissionEvaluator;
 import nbu.team11.services.UserService;
 import nbu.team11.services.exceptions.EmailNotAvailable;
@@ -14,7 +14,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;

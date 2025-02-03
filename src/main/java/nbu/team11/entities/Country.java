@@ -1,8 +1,10 @@
 package nbu.team11.entities;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.*;
 import lombok.Data;
 import lombok.Setter;
+import lombok.Getter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -11,10 +13,14 @@ import java.time.Instant;
 @Entity
 @Data
 public class Country {
-    @Setter
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
+
+    @Setter
+    @Getter
+    @NotBlank(message = "Country name cannot be blank!")
+    @Size(min = 5, max = 10, message = "Country name has to be between 5 and 10 characters!")
     @Column(name = "name", nullable = false, unique = true)
     private String name;
 
@@ -25,4 +31,10 @@ public class Country {
     @Column(name = "updated_on", nullable = false)
     private Instant updatedOn;
 
+    public Country() {
+    }
+
+    public Country(String name) {
+        this.name = name;
+    }
 }

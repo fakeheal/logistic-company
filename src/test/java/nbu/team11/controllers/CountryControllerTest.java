@@ -1,4 +1,5 @@
-import nbu.team11.controllers.CountryController;
+package nbu.team11.controllers;
+
 import nbu.team11.dtos.CountryDto;
 import nbu.team11.services.CountryService;
 import nbu.team11.services.exceptions.CountryNotFound;
@@ -85,8 +86,8 @@ class CountryControllerTest {
         when(countryService.createCountry(any(CountryDto.class))).thenReturn(countryDto);
 
         mockMvc.perform(post("/countries")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"name\": \"Bulgaria\"}"))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"name\": \"Bulgaria\"}"))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").value(1))
                 .andExpect(jsonPath("$.name").value("Bulgaria"));
@@ -94,13 +95,13 @@ class CountryControllerTest {
         verify(countryService, times(1)).createCountry(any(CountryDto.class));
     }
 
-   @Test
+    @Test
     void testUpdateCountry_WhenExists_ShouldUpdateAndReturnCountry() throws Exception {
         when(countryService.updateCountry(eq(1), any(CountryDto.class))).thenReturn(countryDto);
 
         mockMvc.perform(put("/countries/1")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"name\": \"Bulgaria\"}"))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"name\": \"Bulgaria\"}"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(1))
                 .andExpect(jsonPath("$.name").value("Bulgaria"));
@@ -110,11 +111,12 @@ class CountryControllerTest {
 
     @Test
     void testUpdateCountry_WhenNotExists_ShouldReturn404() throws Exception {
-        when(countryService.updateCountry(eq(99), any(CountryDto.class))).thenThrow(new CountryNotFound("Country not found"));
+        when(countryService.updateCountry(eq(99), any(CountryDto.class)))
+                .thenThrow(new CountryNotFound("Country not found"));
 
         mockMvc.perform(put("/countries/99")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"name\": \"Unknown\"}"))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"name\": \"Unknown\"}"))
                 .andExpect(status().isNotFound())
                 .andExpect(content().string("Country not found"));
 

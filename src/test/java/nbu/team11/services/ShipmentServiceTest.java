@@ -1,3 +1,5 @@
+package nbu.team11.services;
+
 import nbu.team11.entities.*;
 import nbu.team11.entities.enums.Role;
 import nbu.team11.entities.enums.Status;
@@ -121,7 +123,6 @@ class ShipmentServiceTest {
         verify(shipmentStatusRepository, times(1)).findByShipmentId(1);
     }
 
-
     @Test
     void testGetShipmentHistory_WhenShipmentDoesNotExist() {
         when(shipmentRepository.findById(1)).thenReturn(Optional.empty());
@@ -137,6 +138,7 @@ class ShipmentServiceTest {
 
         verify(shipmentRepository, times(1)).delete(shipment);
     }
+
     @Test
     void testGetShipmentsByEmployeeId_ShouldReturnShipments() {
         when(shipmentRepository.findAllByEmployeeId(1)).thenReturn(List.of(shipment));
@@ -163,6 +165,7 @@ class ShipmentServiceTest {
 
         assertThrows(ShipmentNotFound.class, () -> shipmentService.deleteShipment(1));
     }
+
     @Test
     void testGetShipmentStatistics_ShouldReturnCorrectStatistics() {
         when(shipmentRepository.count()).thenReturn(5L);
@@ -180,6 +183,7 @@ class ShipmentServiceTest {
         assertEquals(5.0, stats.get("totalWeight"));
         assertEquals(BigDecimal.valueOf(20.0), stats.get("totalRevenue"));
     }
+
     @Test
     void testGetShipmentsForClient_WhenUserIsClient_ShouldReturnShipments() {
         User user = new User();
@@ -200,8 +204,6 @@ class ShipmentServiceTest {
         assertFalse(result.isEmpty());
     }
 
-
-
     @Test
     void testGetShipmentsByCountryAndCity_ShouldReturnFilteredShipments() {
         City city = new City();
@@ -221,6 +223,7 @@ class ShipmentServiceTest {
         assertNotNull(result);
         assertEquals(1, result.size());
     }
+
     @Test
     void testRegisterShipment_WhenUserIsEmployee_ShouldSucceed() {
         when(authentication.getAuthorities()).thenAnswer(invocation -> List.of(new SimpleGrantedAuthority("EMPLOYEE")));
@@ -239,7 +242,6 @@ class ShipmentServiceTest {
         assertNotNull(result);
         verify(shipmentRepository, times(1)).save(shipment);
     }
-
 
     @Test
     void testGetShipmentsForClient_WhenUserIsNotClient_ShouldThrowUnauthorizedAccess() {
@@ -264,4 +266,3 @@ class ShipmentServiceTest {
     }
 
 }
-

@@ -1,4 +1,5 @@
-import nbu.team11.controllers.CityController;
+package nbu.team11.controllers;
+
 import nbu.team11.dtos.CityDto;
 import nbu.team11.services.CityService;
 import nbu.team11.services.exceptions.CityNotFound;
@@ -86,8 +87,8 @@ class CityControllerTest {
         when(cityService.createCity(any(CityDto.class))).thenReturn(cityDto);
 
         mockMvc.perform(post("/cities")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"name\": \"Sofia\"}"))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"name\": \"Sofia\"}"))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").value(1))
                 .andExpect(jsonPath("$.name").value("Sofia"));
@@ -100,8 +101,8 @@ class CityControllerTest {
         when(cityService.updateCity(eq(1), any(CityDto.class))).thenReturn(cityDto);
 
         mockMvc.perform(put("/cities/1")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"name\": \"Sofia\"}"))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"name\": \"Sofia\"}"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(1))
                 .andExpect(jsonPath("$.name").value("Sofia"));
@@ -114,8 +115,8 @@ class CityControllerTest {
         when(cityService.updateCity(eq(99), any(CityDto.class))).thenThrow(new CityNotFound("City not found"));
 
         mockMvc.perform(put("/cities/99")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"name\": \"Unknown\"}"))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"name\": \"Unknown\"}"))
                 .andExpect(status().isNotFound())
                 .andExpect(content().string("City not found"));
 
@@ -148,8 +149,8 @@ class CityControllerTest {
         when(cityService.createCity(any(CityDto.class))).thenThrow(new CountryNotFound("Country not found"));
 
         mockMvc.perform(post("/cities")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"name\": \"Unknown\", \"countryId\": 1}"))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"name\": \"Unknown\", \"countryId\": 1}"))
                 .andExpect(status().isNotFound())
                 .andExpect(content().string("Country not found"));
 

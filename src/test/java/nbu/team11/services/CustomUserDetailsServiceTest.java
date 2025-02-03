@@ -1,3 +1,5 @@
+package nbu.team11.services;
+
 import nbu.team11.entities.Employee;
 import nbu.team11.entities.User;
 import nbu.team11.entities.enums.PositionType;
@@ -87,8 +89,8 @@ class CustomUserDetailsServiceTest {
     void testLoadUserByUsername_WhenUserNotFound() {
         when(userRepository.findByUsername("nonExistentUser")).thenReturn(null);
 
-        Exception exception = assertThrows(UsernameNotFoundException.class, () ->
-                customUserDetailsService.loadUserByUsername("nonExistentUser"));
+        Exception exception = assertThrows(UsernameNotFoundException.class,
+                () -> customUserDetailsService.loadUserByUsername("nonExistentUser"));
 
         assertEquals("User not found with email: nonExistentUser", exception.getMessage());
     }

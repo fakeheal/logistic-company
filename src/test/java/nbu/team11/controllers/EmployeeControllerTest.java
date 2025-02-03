@@ -1,11 +1,9 @@
-import nbu.team11.controllers.EmployeeController;
+package nbu.team11.controllers;
+
 import nbu.team11.dtos.EmployeeDto;
-import nbu.team11.dtos.OfficeDto;
 import nbu.team11.dtos.UserDto;
-import nbu.team11.entities.enums.PositionType;
 import nbu.team11.services.EmployeeService;
 import nbu.team11.services.OfficeService;
-import nbu.team11.services.exceptions.EmailNotAvailable;
 import nbu.team11.services.exceptions.ResourceNotFound;
 import nbu.team11.services.exceptions.UsernameNotAvailable;
 import org.junit.jupiter.api.BeforeEach;
@@ -16,8 +14,6 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-
-import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -70,13 +66,13 @@ class EmployeeControllerTest {
         doNothing().when(employeeService).create(any(EmployeeDto.class), any(UserDto.class));
 
         mockMvc.perform(post("/employee/store")
-                        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-                        .param("firstName", "John")
-                        .param("lastName", "Doe")
-                        .param("username", "johndoe")
-                        .param("email", "johndoe@example.com")
-                        .param("password", "password123")
-                        .param("confirmPassword", "password123"))
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                .param("firstName", "John")
+                .param("lastName", "Doe")
+                .param("username", "johndoe")
+                .param("email", "johndoe@example.com")
+                .param("password", "password123")
+                .param("confirmPassword", "password123"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/employee/create"));
     }
@@ -86,8 +82,8 @@ class EmployeeControllerTest {
         doThrow(new UsernameNotAvailable()).when(employeeService).create(any(EmployeeDto.class), any(UserDto.class));
 
         mockMvc.perform(post("/employee/store")
-                        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-                        .param("username", "existinguser"))
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                .param("username", "existinguser"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/employee/create"));
     }
@@ -100,8 +96,8 @@ class EmployeeControllerTest {
         doNothing().when(employeeService).update(any(EmployeeDto.class), any(UserDto.class));
 
         mockMvc.perform(post("/employee/1/update")
-                        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-                        .param("firstName", "Updated Name"))
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                .param("firstName", "Updated Name"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/employee/1/edit"));
     }
@@ -111,8 +107,8 @@ class EmployeeControllerTest {
         when(employeeService.getById(anyInt())).thenThrow(new ResourceNotFound());
 
         mockMvc.perform(post("/employee/1/update")
-                        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-                        .param("firstName", "Updated Name"))
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                .param("firstName", "Updated Name"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrlPattern("/employee/1/edit*"));
     }

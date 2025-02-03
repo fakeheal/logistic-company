@@ -1,6 +1,5 @@
 package nbu.team11.services;
 
-import nbu.team11.dtos.ShipmentDto;
 import nbu.team11.entities.Shipment;
 import nbu.team11.entities.ShipmentStatus;
 import nbu.team11.entities.User;
@@ -10,17 +9,18 @@ import nbu.team11.repositories.ShipmentRepository;
 import nbu.team11.repositories.ShipmentStatusRepository;
 import nbu.team11.repositories.UserRepository;
 import nbu.team11.services.contracts.IShipmentService;
-import nbu.team11.services.exceptions.ResourceNotFound;
 import nbu.team11.services.exceptions.ShipmentNotFound;
 import nbu.team11.services.exceptions.UnauthorizedAccess;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
+import java.util.List;
+import java.util.Optional;
 
 import java.math.BigDecimal;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+
 /**
  * Service implementation for managing shipments.
  * Provides business logic for shipment registration, updates, and retrieval.
@@ -34,6 +34,7 @@ public class ShipmentService implements IShipmentService {
     @Autowired
     private ShipmentStatusRepository shipmentStatusRepository;
 
+    @Autowired
     private UserRepository userRepository;
 
     private static final double BASE_PRICE_TO_OFFICE = 5.0;
@@ -53,6 +54,7 @@ public class ShipmentService implements IShipmentService {
         }
         throw new UnauthorizedAccess("Access denied. Only employees can view all shipments.");
     }
+
     /**
      * Retrieves all shipments registered by a specific employee.
      *
@@ -62,6 +64,7 @@ public class ShipmentService implements IShipmentService {
     public List<Shipment> getShipmentsByEmployeeId(Integer employeeId) {
         return shipmentRepository.findAllByEmployeeId(employeeId);
     }
+
     /**
      * Retrieves all shipments that have not been delivered.
      *
@@ -70,10 +73,11 @@ public class ShipmentService implements IShipmentService {
     public List<Shipment> getUndeliveredShipments() {
         return shipmentRepository.findUndeliveredShipments(Status.DELIVERED);
     }
+
     /**
      * Registers a new shipment in the system.
      *
-     * @param shipment The shipment entity to register.
+     * @param shipment       The shipment entity to register.
      * @param authentication The authentication object containing user details.
      * @return The registered shipment.
      * @throws UnauthorizedAccess If the user is not an employee.
@@ -85,6 +89,7 @@ public class ShipmentService implements IShipmentService {
         validateShipment(shipment);
         return shipmentRepository.save(shipment);
     }
+
     /**
      * Retrieves shipments sent or received by a client.
      *
@@ -102,6 +107,7 @@ public class ShipmentService implements IShipmentService {
         }
         throw new UnauthorizedAccess("Access denied. Only clients can view their shipments.");
     }
+
     /**
      * Validates the shipment details.
      *
@@ -116,6 +122,7 @@ public class ShipmentService implements IShipmentService {
             throw new IllegalArgumentException("Sender and recipient addresses must be provided.");
         }
     }
+
     /**
      * Checks if the user is an employee.
      *
@@ -126,6 +133,7 @@ public class ShipmentService implements IShipmentService {
         return authentication.getAuthorities().stream()
                 .anyMatch(authority -> authority.getAuthority().equals(Role.EMPLOYEE.name()));
     }
+
     /**
      * Checks if the user is a client.
      *
@@ -136,6 +144,7 @@ public class ShipmentService implements IShipmentService {
         return authentication.getAuthorities().stream()
                 .anyMatch(authority -> authority.getAuthority().equals(Role.CLIENT.name()));
     }
+
     /**
      * Extracts the user ID from the authentication object.
      *
@@ -146,6 +155,7 @@ public class ShipmentService implements IShipmentService {
         User user = userRepository.findByUsername(authentication.getName());
         return user.getId();
     }
+
     /**
      * Calculates the price of the shipment.
      *
@@ -156,11 +166,12 @@ public class ShipmentService implements IShipmentService {
         double basePrice = shipment.getRecipientAddress() == null ? BASE_PRICE_TO_OFFICE : BASE_PRICE_TO_ADDRESS;
         return basePrice + (shipment.getWeight() * PRICE_PER_KILO);
     }
+
     /**
      * Updates the status of a shipment.
      *
      * @param shipmentId The ID of the shipment.
-     * @param newStatus The new status to set.
+     * @param newStatus  The new status to set.
      * @return The updated shipment.
      * @throws ShipmentNotFound If the shipment is not found.
      */
@@ -176,6 +187,7 @@ public class ShipmentService implements IShipmentService {
 
         return shipment;
     }
+
     /**
      * Retrieves the history of a shipment's statuses.
      *
@@ -183,15 +195,16 @@ public class ShipmentService implements IShipmentService {
      * @return List of shipment statuses.
      * @throws ShipmentNotFound If the shipment is not found.
      */
-    public List<ShipmentStatus> getShipmentHistory(Integer shipmentId) {
-        shipmentRepository.findById(shipmentId)
-                .orElseThrow(() -> new ShipmentNotFound("Shipment not found with ID: " + shipmentId));
-        return shipmentStatusRepository.findByShipmentId(shipmentId);
+    public List<ShipmentStatus> getShipmentHistory(String uniqueId) {
+        Shipment shipment = shipmentRepository.findByUniqueId(uniqueId);
+        return shipmentStatusRepository.findByShipmentId(shipment.getId());
     }
+
     /**
      * Retrieves shipment statistics.
      *
-     * @return A map containing total shipments, delivered shipments, total weight, and total revenue.
+     * @return A map containing total shipments, delivered shipments, total weight,
+     *         and total revenue.
      */
     public Map<String, Object> getShipmentStatistics() {
         long totalShipments = shipmentRepository.count();
@@ -213,11 +226,12 @@ public class ShipmentService implements IShipmentService {
 
         return stats;
     }
+
     /**
      * Retrieves shipments filtered by country and city.
      *
      * @param countryName The name of the country.
-     * @param cityName The name of the city.
+     * @param cityName    The name of the city.
      * @return List of shipments filtered by the specified location.
      */
     public List<Shipment> getShipmentsByCountryAndCity(String countryName, String cityName) {
@@ -227,12 +241,37 @@ public class ShipmentService implements IShipmentService {
                 .toList();
     }
 
+    // Get all Shipments
+    public List<Shipment> getAllShipments() {
+        return shipmentRepository.findAll();
+    }
+
+    // Get a Shipment by ID
+    public Optional<Shipment> getShipmentById(Integer id) {
+        return shipmentRepository.findById(id);
+    }
+
+    // Update Shipment and its Status
+    public Shipment updateShipment(Integer id, Shipment updatedShipment, ShipmentStatus updatedStatus) {
+        if (shipmentRepository.existsById(id)) {
+            updatedShipment.setId(id);
+            Shipment updatedShipmentEntity = shipmentRepository.save(updatedShipment);
+
+            // Update shipment status
+            updatedStatus.setShipment(updatedShipmentEntity);
+            shipmentStatusRepository.save(updatedStatus);
+
+            return updatedShipmentEntity;
+        }
+        return null;
+    }
 
     /**
      * Deletes a shipment from the system by its ID.
      *
      * @param shipmentId The ID of the shipment to delete.
-     * @throws ShipmentNotFound If the shipment with the specified ID does not exist.
+     * @throws ShipmentNotFound If the shipment with the specified ID does not
+     *                          exist.
      */
     public void deleteShipment(Integer shipmentId) {
         Shipment shipment = shipmentRepository.findById(shipmentId)

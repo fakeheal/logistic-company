@@ -1,5 +1,5 @@
-import nbu.team11.services.CustomPermissionEvaluator;
-import nbu.team11.services.CustomUserDetails;
+package nbu.team11.services;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -9,7 +9,6 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;

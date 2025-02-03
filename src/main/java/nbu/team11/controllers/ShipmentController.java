@@ -6,23 +6,25 @@ import nbu.team11.entities.Shipment;
 import nbu.team11.entities.ShipmentStatus;
 import nbu.team11.entities.enums.Status;
 import nbu.team11.services.ShipmentService;
-import nbu.team11.services.exceptions.ResourceNotFound;
 import nbu.team11.services.exceptions.ShipmentNotFound;
 import nbu.team11.services.exceptions.UnauthorizedAccess;
-import org.modelmapper.ModelMapper;
+import org.modelmapper.*;
+import org.springframework.ui.Model;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.stereotype.Controller;
 
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
 /**
  * Controller for managing shipments in the system.
  * Provides endpoints for employees and clients to interact with shipment data.
  */
-@RestController
+@Controller
 @RequestMapping("/shipments")
 public class ShipmentController {
 
@@ -32,6 +34,10 @@ public class ShipmentController {
     @Autowired
     private ModelMapper modelMapper;
 
+    private String withAppLayout(Model model) {
+        return "layouts/app";
+    }
+
     /**
      * Retrieves all shipments accessible to employees.
      *
@@ -39,12 +45,21 @@ public class ShipmentController {
      * @return List of all shipments as DTOs.
      */
     @GetMapping("/all")
-    public ResponseEntity<List<ShipmentDto>> getAllShipments(Authentication authentication) {
+    public String getAllShipments(Authentication authentication, Model model) {
         List<Shipment> shipments = shipmentService.getAllShipmentsForEmployee(authentication);
         List<ShipmentDto> shipmentDto = shipments.stream()
                 .map(shipment -> modelMapper.map(shipment, ShipmentDto.class))
                 .collect(Collectors.toList());
-        return ResponseEntity.ok(shipmentDto);
+        for (int i = 0; i < shipmentDto.size(); i++) {
+            ShipmentDto shipment = (ShipmentDto) shipmentDto.get(i);
+            String status = shipmentService.getShipmentHistory(shipment.getUniqueID()).getFirst().getStatus()
+                    .toString();
+            shipment.setStatus(status);
+        }
+        model.addAttribute("shipments", shipmentDto);
+        model.addAttribute("title", "employee");
+        model.addAttribute("content", "shipments/employee");
+        return withAppLayout(model);
     }
 
     /**
@@ -79,12 +94,13 @@ public class ShipmentController {
     /**
      * Registers a new shipment in the system.
      *
-     * @param shipmentDto The DTO containing shipment details.
+     * @param shipmentDto    The DTO containing shipment details.
      * @param authentication The authentication object containing user details.
      * @return The registered shipment as a DTO.
      */
     @PostMapping("/register")
-    public ResponseEntity<ShipmentDto> registerShipment(@RequestBody ShipmentDto shipmentDto, Authentication authentication) {
+    public ResponseEntity<ShipmentDto> registerShipment(@RequestBody ShipmentDto shipmentDto,
+            Authentication authentication) {
         try {
             Shipment shipment = modelMapper.map(shipmentDto, Shipment.class);
             Shipment registeredShipment = shipmentService.registerShipment(shipment, authentication);
@@ -106,23 +122,34 @@ public class ShipmentController {
      * @return List of shipments as DTOs.
      */
     @GetMapping("/client")
-    public ResponseEntity<List<ShipmentDto>> getShipmentsByClient(Authentication authentication) {
+    public String getShipmentsByClient(Model model, Authentication authentication) {
         List<Shipment> shipments = shipmentService.getShipmentsForClient(authentication);
         List<ShipmentDto> shipmentDto = shipments.stream()
                 .map(shipment -> modelMapper.map(shipment, ShipmentDto.class))
                 .collect(Collectors.toList());
-        return ResponseEntity.ok(shipmentDto);
+
+        for (int i = 0; i < shipmentDto.size(); i++) {
+            ShipmentDto shipment = (ShipmentDto) shipmentDto.get(i);
+            String status = shipmentService.getShipmentHistory(shipment.getUniqueID()).getFirst().getStatus()
+                    .toString();
+            shipment.setStatus(status);
+        }
+        model.addAttribute("shipments", shipmentDto);
+        model.addAttribute("title", "client");
+        model.addAttribute("content", "shipments/client");
+        return withAppLayout(model);
     }
 
     /**
      * Updates the status of a specific shipment.
      *
      * @param shipmentId The ID of the shipment.
-     * @param newStatus The new status to set.
+     * @param newStatus  The new status to set.
      * @return The updated shipment as a DTO.
      */
     @PatchMapping("/status/{shipmentId}")
-    public ResponseEntity<ShipmentDto> updateShipmentStatus(@PathVariable Integer shipmentId, @RequestBody Status newStatus) {
+    public ResponseEntity<ShipmentDto> updateShipmentStatus(@PathVariable Integer shipmentId,
+            @RequestBody Status newStatus) {
         try {
             Shipment updatedShipment = shipmentService.updateShipmentStatus(shipmentId, newStatus);
             ShipmentDto updatedShipmentDto = modelMapper.map(updatedShipment, ShipmentDto.class);
@@ -134,38 +161,53 @@ public class ShipmentController {
         }
     }
 
+    @GetMapping("/track")
+    public String track(Model model) {
+        model.addAttribute("title", "Track package");
+        model.addAttribute("content", "shipments/track");
+        return withAppLayout(model);
+    }
+
     /**
      * Retrieves the history of statuses for a specific shipment.
      *
      * @param shipmentId The ID of the shipment.
      * @return List of shipment statuses.
      */
-    @GetMapping("/history/{shipmentId}")
-    public ResponseEntity<List<ShipmentStatus>> getShipmentHistory(@PathVariable Integer shipmentId) {
+    @GetMapping("/history")
+    public String getShipmentHistory(@RequestParam String shipmentId, Model model) {
         try {
             List<ShipmentStatus> history = shipmentService.getShipmentHistory(shipmentId);
-            return ResponseEntity.ok(history);
+            model.addAttribute("shipmentStatuses", history);
+            model.addAttribute("title", "client");
+            model.addAttribute("content", "shipments/track");
+            return withAppLayout(model);
         } catch (ShipmentNotFound e) {
-            return ResponseEntity.notFound().build();
+            model.addAttribute("content", "shipments/track");
+            return withAppLayout(model);
         } catch (Exception e) {
-            return ResponseEntity.badRequest().build();
+            model.addAttribute("content", "shipments/track");
+            return withAppLayout(model);
         }
     }
+
     /**
      * Retrieves statistics about all shipments in the system.
      *
-     * @return A map containing total shipments, delivered shipments, total weight, and total revenue.
+     * @return A map containing total shipments, delivered shipments, total weight,
+     *         and total revenue.
      */
     @GetMapping("/statistics")
     public ResponseEntity<Map<String, Object>> getShipmentStatistics() {
         Map<String, Object> stats = shipmentService.getShipmentStatistics();
         return ResponseEntity.ok(stats);
     }
+
     /**
      * Retrieves shipments filtered by country and city.
      *
      * @param countryName The name of the country.
-     * @param cityName The name of the city.
+     * @param cityName    The name of the city.
      * @return List of shipments as DTOs.
      */
     @GetMapping("/by-location")
@@ -177,11 +219,13 @@ public class ShipmentController {
                 .collect(Collectors.toList());
         return ResponseEntity.ok(shipmentDto);
     }
+
     /**
      * Deletes a shipment by its ID.
      *
      * @param shipmentId The ID of the shipment to delete.
-     * @return A response with no content if the deletion is successful, or a 404 status if the shipment is not found.
+     * @return A response with no content if the deletion is successful, or a 404
+     *         status if the shipment is not found.
      */
     @DeleteMapping("/{shipmentId}")
     public ResponseEntity<Void> deleteShipment(@PathVariable Integer shipmentId) {

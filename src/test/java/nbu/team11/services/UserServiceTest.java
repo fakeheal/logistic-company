@@ -1,8 +1,9 @@
+package nbu.team11.services;
+
 import nbu.team11.dtos.UserDto;
 import nbu.team11.entities.User;
 import nbu.team11.entities.enums.Role;
 import nbu.team11.repositories.UserRepository;
-import nbu.team11.services.UserService;
 import nbu.team11.services.exceptions.EmailNotAvailable;
 import nbu.team11.services.exceptions.ResourceNotFound;
 import nbu.team11.services.exceptions.UsernameNotAvailable;
@@ -128,7 +129,6 @@ class UserServiceTest {
         verify(userRepository, times(1)).save(any(User.class));
     }
 
-
     @Test
     void testUpdate_WhenUsernameTaken_ShouldThrowException() {
         User anotherUser = new User();
@@ -139,7 +139,6 @@ class UserServiceTest {
 
         assertThrows(UsernameNotAvailable.class, () -> userService.update(userDto));
     }
-
 
     @Test
     void testUpdate_WhenEmailTaken_ShouldThrowException() {
@@ -166,7 +165,6 @@ class UserServiceTest {
         verify(userRepository, times(1)).deleteById(1);
     }
 
-
     @Test
     void testCreate_WhenUsernameAndEmailAvailable_ShouldCreateUser() throws Exception {
         when(userRepository.findByUsername("testUser")).thenReturn(null); // Username available
@@ -180,7 +178,6 @@ class UserServiceTest {
         assertEquals("testUser", result.getUsername());
         verify(userRepository, times(1)).save(any(User.class));
     }
-
 
     @Test
     void testCreate_WhenUsernameTaken_ShouldThrowException() {

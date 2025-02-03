@@ -19,11 +19,12 @@ public interface IShipmentService {
 
     List<Shipment> getUndeliveredShipments();
 
-    Shipment registerShipment(Shipment shipment, Authentication authentication) throws UnauthorizedAccess, ResourceNotFound;
+    Shipment registerShipment(Shipment shipment, Authentication authentication)
+            throws UnauthorizedAccess, ResourceNotFound;
 
     List<Shipment> getShipmentsForClient(Authentication authentication) throws UnauthorizedAccess;
 
     Shipment updateShipmentStatus(Integer shipmentId, Status newStatus) throws ShipmentNotFound;
 
-    List<ShipmentStatus> getShipmentHistory(Integer shipmentId) throws ShipmentNotFound;
+    List<ShipmentStatus> getShipmentHistory(String uniqueID) throws ShipmentNotFound;
 }

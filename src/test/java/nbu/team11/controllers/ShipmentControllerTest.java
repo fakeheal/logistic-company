@@ -1,3 +1,5 @@
+package nbu.team11.controllers;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import nbu.team11.controllers.ShipmentController;
 import nbu.team11.dtos.ShipmentDto;
@@ -108,8 +110,8 @@ class ShipmentControllerTest {
         when(modelMapper.map(any(Shipment.class), eq(ShipmentDto.class))).thenReturn(shipmentDto);
 
         mockMvc.perform(post("/shipments/register")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"id\":1,\"weight\":5.0}"))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"id\":1,\"weight\":5.0}"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(1)));
 
@@ -131,20 +133,21 @@ class ShipmentControllerTest {
                 .thenThrow(new UnauthorizedAccess("Unauthorized access!"));
 
         mockMvc.perform(post("/shipments/register")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(new ObjectMapper().writeValueAsString(shipmentDto)))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(new ObjectMapper().writeValueAsString(shipmentDto)))
                 .andExpect(status().isForbidden()); // Очаквано поведение: 403 Forbidden
 
         verify(shipmentService, times(1)).registerShipment(eq(mappedShipment), any());
     }
+
     @Test
     void testUpdateShipmentStatus_ShouldUpdateStatus() throws Exception {
         when(shipmentService.updateShipmentStatus(eq(1), eq(Status.IN_TRANSIT))).thenReturn(shipment);
         when(modelMapper.map(any(Shipment.class), eq(ShipmentDto.class))).thenReturn(shipmentDto);
 
         mockMvc.perform(patch("/shipments/status/1")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("\"IN_TRANSIT\""))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("\"IN_TRANSIT\""))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(1)));
 
@@ -153,11 +156,12 @@ class ShipmentControllerTest {
 
     @Test
     void testUpdateShipmentStatus_WhenShipmentNotFound_ShouldReturnNotFound() throws Exception {
-        when(shipmentService.updateShipmentStatus(eq(1), any(Status.class))).thenThrow(new ShipmentNotFound("The shipment is not found!"));
+        when(shipmentService.updateShipmentStatus(eq(1), any(Status.class)))
+                .thenThrow(new ShipmentNotFound("The shipment is not found!"));
 
         mockMvc.perform(patch("/shipments/status/1")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("\"IN_TRANSIT\""))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("\"IN_TRANSIT\""))
                 .andExpect(status().isNotFound());
 
         verify(shipmentService, times(1)).updateShipmentStatus(1, Status.IN_TRANSIT);

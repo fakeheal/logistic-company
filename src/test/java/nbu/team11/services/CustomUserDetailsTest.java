@@ -1,4 +1,5 @@
-import nbu.team11.services.CustomUserDetails;
+package nbu.team11.services;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.core.GrantedAuthority;

@@ -1,6 +1,5 @@
 package nbu.team11.controllers.forms;
 
-
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -25,7 +24,7 @@ public class EmployeeForm {
     @Size(min = 3, max = 50)
     private String lastName;
 
-    //@TODO: Find a way to reuse the enum PositionType
+    // @TODO: Find a way to reuse the enum PositionType
     private PositionType position;
 
     @NotNull
@@ -61,4 +60,3 @@ public class EmployeeForm {
         return userDto;
     }
 }
-

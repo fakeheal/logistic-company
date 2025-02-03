@@ -1,6 +1,5 @@
 package nbu.team11;
 
-
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -44,13 +43,6 @@ public class DemoPages {
     public String resetPassword(Model model) {
         model.addAttribute("title", "Reset password");
         model.addAttribute("content", "demo/pages/guest/reset-password");
-        return withAppLayout(model);
-    }
-
-    @GetMapping("/demo/track")
-    public String track(Model model) {
-        model.addAttribute("title", "Track package");
-        model.addAttribute("content", "demo/pages/track");
         return withAppLayout(model);
     }
 

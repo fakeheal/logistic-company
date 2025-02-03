@@ -1,9 +1,13 @@
 package nbu.team11.entities;
+
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.Setter;
+
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+
+import jakarta.validation.constraints.*;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -40,11 +44,18 @@ public class Shipment {
     @JoinColumn(name = "OfficeId", nullable = false)
     private Office office;
 
+    @Positive(message = "The weight must be greater than 0")
     @Column(name = "Weight", nullable = false)
     private double weight;
 
+    @Positive(message = "The price must be greater than 0")
     @Column(name = "Price", nullable = false)
     private BigDecimal price;
+
+    @NotBlank(message = "Unique ID cannot be blank!")
+    @Size(min = 10, max = 20, message = "Unique id has to be between 5 and 30 characters!")
+    @Column(name = "uniqueId", nullable = false, unique = true)
+    private String uniqueId;
 
     @CreationTimestamp
     @Column(name = "created_on", nullable = false, updatable = false)
@@ -53,5 +64,19 @@ public class Shipment {
     @Column(name = "updated_on", nullable = false)
     private Instant updatedOn;
 
+    public Shipment() {
+    }
+
+    public Shipment(Employee employee, Client recipient, Address recipientAddress, Client sender, Address senderAddress,
+            Office office, double weight, BigDecimal price) {
+        this.employee = employee;
+        this.recipient = recipient;
+        this.recipientAddress = recipientAddress;
+        this.sender = sender;
+        this.senderAddress = senderAddress;
+        this.office = office;
+        this.weight = weight;
+        this.price = price;
+    }
 
 }

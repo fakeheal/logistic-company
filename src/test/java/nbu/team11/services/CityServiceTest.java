@@ -1,9 +1,10 @@
+package nbu.team11.services;
+
 import nbu.team11.dtos.CityDto;
 import nbu.team11.entities.City;
 import nbu.team11.entities.Country;
 import nbu.team11.repositories.CityRepository;
 import nbu.team11.repositories.CountryRepository;
-import nbu.team11.services.CityService;
 import nbu.team11.services.exceptions.CityNotFound;
 import nbu.team11.services.exceptions.CountryNotFound;
 import org.junit.jupiter.api.BeforeEach;
@@ -13,7 +14,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
-import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.Arrays;
 import java.util.List;
@@ -21,7 +21,6 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
-
 
 @ExtendWith(MockitoExtension.class)
 class CityServiceTest {
@@ -108,7 +107,6 @@ class CityServiceTest {
 
         assertThrows(CountryNotFound.class, () -> cityService.createCity(cityDto));
     }
-
 
     @Test
     void testUpdateCity_Success() {
