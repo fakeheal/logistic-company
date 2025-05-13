@@ -2,8 +2,12 @@ package nbu.team11.services;
 import nbu.team11.configurations.ModelMapperConfig;
 import nbu.team11.entities.enums.Role;
 import nbu.team11.services.contracts.IUserService;
+import nbu.team11.services.exceptions.EmailNotAvailable;
+import nbu.team11.services.exceptions.UsernameNotAvailable;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -68,16 +72,29 @@ public class UserService implements IUserService {
         return true;
     }
 
+    public Page<UserDto> paginate(int page, int size, Role role) {
+        Page<User> users = this.userRepository.findAll(PageRequest.of(page, size));
+        return users.map(employee -> (new ModelMapperConfig()).modelMapper().map(employee, UserDto.class));
+    }
+
 
     @Override
     public void delete(Integer id) {
         userRepository.deleteById(id);
     }
 
-    //TODO: Return automap user dto
     @Override
-    public User create(UserDto userDto) {
+    public User create(UserDto userDto) throws UsernameNotAvailable, EmailNotAvailable {
+        if (this.userRepository.findByEmail(userDto.getEmail()) != null) {
+            throw new UsernameNotAvailable();
+        }
+
+        if (this.userRepository.findByEmail(userDto.getEmail()) != null) {
+            throw new EmailNotAvailable();
+        }
+
         User user = new User(Role.CLIENT, userDto.getEmail(), passwordEncoder.encode(userDto.getPassword()), userDto.getFirstName(), userDto.getLastName());
         return userRepository.save(user);
     }
+
 }

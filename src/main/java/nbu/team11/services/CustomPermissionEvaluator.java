@@ -2,6 +2,7 @@ package nbu.team11.services;
 
 import nbu.team11.entities.enums.PositionType;
 import nbu.team11.entities.enums.Role;
+import nbu.team11.services.customImplementations.models.CustomUserDetails;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
@@ -18,7 +19,7 @@ public class CustomPermissionEvaluator {
         return authentication.getAuthorities()
                 .stream()
                 .anyMatch(auth -> auth.getAuthority().equals(role.toString()))
-                && userDetails.getPositionType() == positionType;
+                && userDetails.getUserDto().getEmployeeDto().getPosition() == positionType;
     }
 
     public boolean isAdmin(Authentication authentication) {

@@ -54,7 +54,6 @@ public class EmployeeForm {
         userDto.setRole(Role.EMPLOYEE);
         userDto.setFirstName(this.getFirstName());
         userDto.setLastName(this.getLastName());
-        userDto.setUsername(this.getUsername());
         userDto.setEmail(this.getEmail());
         userDto.setPassword(this.getPassword());
         return userDto;

@@ -153,7 +153,7 @@ public class EmployeeController extends AbstractBaseController {
             EmployeeDto employeeDto = this.employeeService.getById(Integer.parseInt(id));
 
             UserDto userDto = updateEmployeeForm.toUserDto();
-            userDto.setId(employeeDto.getUserId());
+            userDto.setEmployeeDto(employeeDto);
             employeeService.update(employeeDto, userDto);
         } catch (UsernameNotAvailable | EmailNotAvailable | ResourceNotFound e) {
             switch (e.getClass().getSimpleName()) {

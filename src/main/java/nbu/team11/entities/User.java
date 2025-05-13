@@ -74,4 +74,8 @@ public class User {
     public Integer getId() {
         return id;
     }
+
+    public String getFullName() {
+        return this.firstName + " " + this.lastName;
+    }
 }

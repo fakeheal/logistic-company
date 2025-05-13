@@ -2,21 +2,24 @@ package nbu.team11.services.customImplementations.models;
 
 import java.util.Collection;
 
+import lombok.Getter;
+import lombok.Setter;
+import nbu.team11.dtos.UserDto;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 public class CustomUserDetails implements UserDetails {
-
     private String password;
     private String email;
-    private String role;
     private Collection<? extends GrantedAuthority> authorities;
+    @Getter
+    private UserDto userDto;
 
-    public CustomUserDetails(String password, String email, Collection<? extends GrantedAuthority> authorities) {
+    public CustomUserDetails(String password, String email, Collection<? extends GrantedAuthority> authorities, UserDto userDto) {
         this.password = password;
         this.email = email;
         this.authorities = authorities;
-        this.role = role;
+        this.userDto = userDto;
     }
 
 

@@ -4,80 +4,34 @@ import lombok.Getter;
 import lombok.Setter;
 import nbu.team11.entities.enums.Role;
 
+@Getter
+@Setter
 public class UserDto {
-    private String username;
     private String password;
     private String email;
     private Role role;
     private String firstName;
     private String lastName;
+    private String id;
 
-    @Getter
-    @Setter
-    public ClientDto ClientDto;
+    private ClientDto clientDto;
+    private EmployeeDto employeeDto;
 
     public UserDto() {
 
     }
 
-    public UserDto(String username, String password, String email, Role role) {
-        this.username = username;
+    public UserDto(String email, String password, Role role, EmployeeDto employeeDto) {
         this.password = password;
         this.email = email;
         this.role = role;
+        this.employeeDto = employeeDto;
     }
 
-
-    public String getUsername() {
-        return username;
-    }
-
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-
-    public String getPassword() {
-        return password;
-    }
-
-
-    public void setPassword(String password) {
+    public UserDto(String email, String password, Role role, ClientDto clientDto) {
         this.password = password;
-    }
-
-
-    public String getEmail() {
-        return this.email;
-    }
-
-
-    public void setEmail(String email) {
         this.email = email;
-    }
-
-    public Role getRole() {
-        return role;
-    }
-
-    public void setRole(Role role) {
         this.role = role;
-    }
-
-    public String getFirstName() {
-        return firstName;
-    }
-
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
-    }
-
-    public String getLastName() {
-        return lastName;
-    }
-
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
+        this.clientDto = clientDto;
     }
 }

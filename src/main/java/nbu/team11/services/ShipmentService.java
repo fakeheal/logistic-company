@@ -152,7 +152,7 @@ public class ShipmentService implements IShipmentService {
      * @return The user ID.
      */
     private Integer getUserIdFromAuthentication(Authentication authentication) {
-        User user = userRepository.findByUsername(authentication.getName());
+        User user = userRepository.findByEmail(authentication.getName());
         return user.getId();
     }
 

@@ -96,7 +96,7 @@ public class UserController extends AbstractBaseController {
     }
 
     private void authenticateUserAndSetSession(UserDto user, HttpServletRequest request) {
-        UserDetails userDetails = userDetailsService.loadUserByUsername(user.getUsername());
+        UserDetails userDetails = userDetailsService.loadUserByUsername(user.getEmail());
         UsernamePasswordAuthenticationToken authToken =
                 new UsernamePasswordAuthenticationToken(userDetails, user.getPassword(), userDetails.getAuthorities());
 

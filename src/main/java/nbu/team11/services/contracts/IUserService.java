@@ -14,6 +14,6 @@ public interface IUserService {
     User getUserById(Integer id);
     User create (UserDto userDto) throws UsernameNotAvailable, EmailNotAvailable;
     List<User> getUsersByRole(Role role);
-    UserDto update(UserDto updatedUser) throws UsernameNotAvailable, EmailNotAvailable, ResourceNotFound;
+    boolean update(UserDto updatedUser) throws UsernameNotAvailable, EmailNotAvailable, ResourceNotFound;
     void delete(Integer id);
 }
