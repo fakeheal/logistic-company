@@ -13,7 +13,6 @@ public class UserDto {
     private String firstName;
     private String lastName;
     private String id;
-
     private ClientDto clientDto;
     private EmployeeDto employeeDto;
 
@@ -34,4 +33,14 @@ public class UserDto {
         this.role = role;
         this.clientDto = clientDto;
     }
+
+    //NOTE: Username is used by spring security in the user/login template
+    public String getUsername(){
+        return email;
+    }
+
+    public void setUsername(String username){
+        this.email = username;
+    }
+
 }
