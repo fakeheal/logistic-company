@@ -2,6 +2,8 @@ package nbu.team11.entities;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import nbu.team11.entities.enums.Role;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -27,6 +29,12 @@ public class User {
 
     @Enumerated(EnumType.STRING)
     private Role role;
+
+    @Getter
+    @Setter
+    @OneToOne
+    @JoinColumn(name = "address_id", nullable = false)
+    private Address address;
 
     @CreationTimestamp
     @Column(name = "created_on", nullable = false, updatable = false)

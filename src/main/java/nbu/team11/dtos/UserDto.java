@@ -15,6 +15,7 @@ public class UserDto {
     private String id;
     private ClientDto clientDto;
     private EmployeeDto employeeDto;
+    private AddressDto addressDto;
 
     public UserDto() {
 
