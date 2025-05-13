@@ -10,7 +10,7 @@ import nbu.team11.services.exceptions.UsernameNotAvailable;
 import java.util.List;
 
 public interface IUserService {
-    UserDto getByUsername(String username);
+    UserDto getByEmail(String email);
     User getUserById(Integer id);
     User create (UserDto userDto) throws UsernameNotAvailable, EmailNotAvailable;
     List<User> getUsersByRole(Role role);

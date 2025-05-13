@@ -1,27 +1,22 @@
-package nbu.team11.services;
-
-import lombok.Getter;
-import nbu.team11.entities.enums.PositionType;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
+package nbu.team11.services.customImplementations.models;
 
 import java.util.Collection;
 
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+
 public class CustomUserDetails implements UserDetails {
 
-    private String username;
     private String password;
     private String email;
+    private String role;
     private Collection<? extends GrantedAuthority> authorities;
-    @Getter
-    private PositionType positionType;
 
-    public CustomUserDetails(String username, String password, String email, Collection<? extends GrantedAuthority> authorities, PositionType positionType) {
-        this.username = username;
+    public CustomUserDetails(String password, String email, Collection<? extends GrantedAuthority> authorities) {
         this.password = password;
         this.email = email;
         this.authorities = authorities;
-        this.positionType = positionType;
+        this.role = role;
     }
 
 
@@ -40,10 +35,15 @@ public class CustomUserDetails implements UserDetails {
     @Override
     public String getUsername() {
         // TODO Auto-generated method stub
-        return username;
+        return email;
     }
 
     public String getEmail() {
+        // TODO Auto-generated method stub
+        return email;
+    }
+
+    public String getRole() {
         // TODO Auto-generated method stub
         return email;
     }

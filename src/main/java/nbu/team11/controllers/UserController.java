@@ -79,7 +79,7 @@ public class UserController extends AbstractBaseController {
 
     @PostMapping("/register")
     public String registerSave(@ModelAttribute("user") UserDto userDto, Model model, HttpServletRequest request) {
-        UserDto matchedUser = userService.getByUsername(userDto.getUsername());
+        UserDto matchedUser = userService.getByEmail(userDto.getEmail());
         if (matchedUser != null) {
             model.addAttribute("userexist", matchedUser);
             return "user/register";

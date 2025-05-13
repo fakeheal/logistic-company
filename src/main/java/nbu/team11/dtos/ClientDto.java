@@ -1,17 +1,17 @@
 package nbu.team11.dtos;
 
-import java.time.Instant;
+import lombok.Getter;
+import lombok.Setter;
 
-import jakarta.validation.constraints.Size;
-import lombok.Data;
-
-@Data
+@Getter
+@Setter
 public class ClientDto {
-    private Integer id;
-    private Integer userId;
-
-    @Size(min = 10, max = 10, message = "Phone number has to be exactly 10 characters!")
     private String phoneNumber;
-    private Instant createdOn;
-    private Instant updatedOn;
+
+    public ClientDto() {
+    }
+
+    public ClientDto(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
+    }
 }

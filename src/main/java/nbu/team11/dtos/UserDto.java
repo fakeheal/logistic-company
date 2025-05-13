@@ -1,35 +1,20 @@
 package nbu.team11.dtos;
 
-import jakarta.validation.constraints.*;
 import lombok.Getter;
 import lombok.Setter;
 import nbu.team11.entities.enums.Role;
 
-@Getter
-@Setter
 public class UserDto {
-    private Integer id;
-
-    @NotBlank(message = "Username cannot be blank!")
-    @Size(min = 5, max = 20, message = "Username has to be between 5 and 20 characters!")
     private String username;
-
-    @NotBlank(message = "Password cannot be blank!")
     private String password;
-
-    @NotBlank(message = "Email cannot be blank!")
-    @Email(message = "Invalid email address. Please enter a proper email!")
     private String email;
-
     private Role role;
-
-    @NotBlank(message = "First Name cannot be blank!")
-    @Size(max = 20, message = "First name has to be up to 20 characters!")
     private String firstName;
-
-    @NotBlank(message = "Last Name cannot be blank!")
-    @Size(max = 20, message = "Last name has to be up to 20 characters!")
     private String lastName;
+
+    @Getter
+    @Setter
+    public ClientDto ClientDto;
 
     public UserDto() {
 
@@ -42,7 +27,57 @@ public class UserDto {
         this.role = role;
     }
 
-    public String getFullName() {
-        return this.getFirstName() + " " + this.getLastName();
+
+    public String getUsername() {
+        return username;
+    }
+
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+
+    public String getPassword() {
+        return password;
+    }
+
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+
+    public String getEmail() {
+        return this.email;
+    }
+
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public Role getRole() {
+        return role;
+    }
+
+    public void setRole(Role role) {
+        this.role = role;
+    }
+
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
     }
 }
