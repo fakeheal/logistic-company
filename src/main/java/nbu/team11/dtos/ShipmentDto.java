@@ -11,11 +11,11 @@ import java.time.Instant;
 import lombok.Getter;
 import lombok.Setter;
 
+@Getter
+@Setter
 @Data
 public class ShipmentDto {
-    @Getter
     private Integer id;
-
     private Employee employee;
     private Client recipient;
     private Address recipientAddress;
@@ -26,8 +26,7 @@ public class ShipmentDto {
     private BigDecimal price;
     private Instant createdOn;
     private Instant updatedOn;
-    @Getter
     private String uniqueID;
-    @Setter
     private String status;
+    private boolean payed;
 }

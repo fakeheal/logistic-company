@@ -2,6 +2,7 @@ package nbu.team11.entities;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.Getter;
 import lombok.Setter;
 
 import org.hibernate.annotations.CreationTimestamp;
@@ -12,6 +13,8 @@ import jakarta.validation.constraints.*;
 import java.math.BigDecimal;
 import java.time.Instant;
 
+@Getter
+@Setter
 @Entity
 @Data
 public class Shipment {
@@ -51,6 +54,9 @@ public class Shipment {
     @Positive(message = "The price must be greater than 0")
     @Column(name = "Price", nullable = false)
     private BigDecimal price;
+
+    @Column(name = "Payed", nullable = false)
+    private boolean payed;
 
     @NotBlank(message = "Unique ID cannot be blank!")
     @Size(min = 10, max = 20, message = "Unique id has to be between 5 and 30 characters!")
