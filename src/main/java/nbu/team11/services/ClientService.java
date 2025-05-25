@@ -1,8 +1,13 @@
 package nbu.team11.services;
 
+import nbu.team11.dtos.AddressDto;
 import nbu.team11.dtos.ClientDto;
+import nbu.team11.entities.Address;
 import nbu.team11.entities.Client;
+import nbu.team11.entities.User;
+import nbu.team11.repositories.AddressRepository;
 import nbu.team11.repositories.ClientRepository;
+import nbu.team11.repositories.UserRepository;
 import nbu.team11.services.contracts.IClientService;
 import nbu.team11.services.exceptions.ResourceNotFound;
 import org.modelmapper.ModelMapper;
@@ -20,10 +25,28 @@ public class ClientService implements IClientService {
     @Autowired
     private ModelMapper modelMapper;
 
-    public ClientDto createClient(ClientDto clientDto) {
-        Client client = modelMapper.map(clientDto, Client.class);
+    @Autowired
+    private AddressService addressService;
+
+    @Autowired private AddressRepository addressRepository;
+    @Autowired private UserRepository userRepository;
+
+    @Override
+    public ClientDto createClient(ClientDto clientDto, Integer userId) throws ResourceNotFound {
+        User user = userRepository.findById(userId)
+                .orElseThrow(ResourceNotFound::new);
+
+        Address address = addressService.create(clientDto.getAddressDto());
+
+        Client client = new Client();
+        client.setUser(user);
+        client.setPhoneNumber(clientDto.getPhoneNumber());
+        client.setAddress(address);
         Client savedClient = clientRepository.save(client);
-        return modelMapper.map(savedClient, ClientDto.class);
+
+        ClientDto out = modelMapper.map(savedClient, ClientDto.class);
+        out.setAddressDto(modelMapper.map(address, AddressDto.class));
+        return out;
     }
 
     public ClientDto getClientByUserId(Integer userId) throws ResourceNotFound {
@@ -33,6 +56,15 @@ public class ClientService implements IClientService {
         }
         return modelMapper.map(client, ClientDto.class);
     }
+
+    public ClientDto getClientByEmail(String email) throws ResourceNotFound {
+        Client client = clientRepository.findByUser_Email(email);
+        if (client == null) {
+            throw new ResourceNotFound();
+        }
+        return modelMapper.map(client, ClientDto.class);
+    }
+
 
     public ClientDto getClientById(Integer id) throws ResourceNotFound {
         Client client = clientRepository.findById(id).orElse(null);

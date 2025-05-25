@@ -26,9 +26,15 @@ public class Client {
 
     @Setter
     @Getter
-    @Size(min = 10, max = 10, message = "Phone number has to be exactly 10 characters!")
+    @Size(min = 10, max = 13, message = "Phone number has to be exactly 10 characters!")
     @Column(name = "phone_number", unique = true, nullable = false)
     private String phoneNumber;
+
+    @Getter
+    @Setter
+    @OneToOne
+    @JoinColumn(name = "address_id", nullable = false)
+    private Address address;
 
     @CreationTimestamp
     @Column(name = "created_on", nullable = false, updatable = false)

@@ -4,7 +4,7 @@ import nbu.team11.dtos.ClientDto;
 import nbu.team11.services.exceptions.ResourceNotFound;
 
 public interface IClientService {
-    ClientDto createClient(ClientDto clientDto);
+    ClientDto createClient(ClientDto clientDto, Integer userId) throws ResourceNotFound;
     ClientDto getClientByUserId(Integer userId) throws ResourceNotFound;
     ClientDto getClientById(Integer id) throws ResourceNotFound;
     ClientDto updateClient(Integer id, ClientDto updatedClient) throws ResourceNotFound;

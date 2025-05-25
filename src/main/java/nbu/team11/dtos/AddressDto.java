@@ -6,7 +6,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class AddressDto {
-    private String street;
-    private String postalCode;
-    private String cityName; // optional, if you want city title instead of full object
+
+    private String formattedAddress;
+    private String coordinates;
 }

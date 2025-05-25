@@ -7,6 +7,7 @@ import lombok.Setter;
 @Setter
 public class ClientDto {
     private String phoneNumber;
+    private AddressDto addressDto;
 
     public ClientDto() {
     }

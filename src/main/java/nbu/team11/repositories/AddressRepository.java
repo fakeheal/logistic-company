@@ -11,9 +11,5 @@ import java.util.Optional;
 //TODO: Write find by country explicitly
 @Repository
 public interface AddressRepository extends JpaRepository<Address, Integer> {
-    List<Address> findByPostalCodeAndStreetAndCity_Country_Name(String postalCode, String street, String country);
-    Optional<Address> findByStreet(String street);
-    //List<Address> findByCountry(String country);
-    List<Address> findByCity(City city);
 }
 

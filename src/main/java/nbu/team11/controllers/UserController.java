@@ -1,11 +1,18 @@
 package nbu.team11.controllers;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
+import nbu.team11.dtos.AddressDto;
+import nbu.team11.dtos.ClientDto;
 import nbu.team11.dtos.UserDto;
+import nbu.team11.entities.User;
 import nbu.team11.entities.enums.Role;
+import nbu.team11.services.AddressService;
+import nbu.team11.services.ClientService;
 import nbu.team11.services.CustomPermissionEvaluator;
 import nbu.team11.services.UserService;
 import nbu.team11.services.exceptions.EmailNotAvailable;
+import nbu.team11.services.exceptions.ResourceNotFound;
 import nbu.team11.services.exceptions.UsernameNotAvailable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
@@ -16,6 +23,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetails;
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -27,6 +35,9 @@ public class UserController extends AbstractBaseController {
 
     @Autowired
     private UserDetailsService userDetailsService;
+
+    @Autowired
+    private ClientService clientService;
 
     @Autowired
     private AuthenticationManager authenticationManager;
@@ -71,6 +82,10 @@ public class UserController extends AbstractBaseController {
             return "redirect:/demo";
         }
 
+        ClientDto client = new ClientDto();
+        client.setAddressDto(new AddressDto());
+        userDto.setClientDto(client);
+
         model.addAttribute("user", userDto);
         model.addAttribute("title", "Register");
         model.addAttribute("content", "user/register");
@@ -78,7 +93,7 @@ public class UserController extends AbstractBaseController {
     }
 
     @PostMapping("/register")
-    public String registerSave(@ModelAttribute("user") UserDto userDto, Model model, HttpServletRequest request) {
+    public String registerSave(@ModelAttribute("user") UserDto userDto, Model model, HttpServletRequest request) throws ResourceNotFound {
         UserDto matchedUser = userService.getByEmail(userDto.getEmail());
         if (matchedUser != null) {
             model.addAttribute("userexist", matchedUser);
@@ -86,7 +101,9 @@ public class UserController extends AbstractBaseController {
         }
         userDto.setRole(Role.CLIENT);
         try {
-            userService.create(userDto);
+            User created = userService.create(userDto);
+            ClientDto c = userDto.getClientDto();
+            clientService.createClient(c, created.getId());
         } catch (UsernameNotAvailable | EmailNotAvailable e) {
             // @TODO: Handle exception
             throw new RuntimeException(e);
@@ -103,5 +120,11 @@ public class UserController extends AbstractBaseController {
         authToken.setDetails(new WebAuthenticationDetails(request));
         Authentication authentication = authenticationManager.authenticate(authToken);
         SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        HttpSession session = request.getSession(true);
+        session.setAttribute(
+                "SPRING_SECURITY_CONTEXT",
+                SecurityContextHolder.getContext()
+        );
     }
 }

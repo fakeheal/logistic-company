@@ -7,6 +7,7 @@ import nbu.team11.repositories.ClientRepository;
 import nbu.team11.repositories.EmployeeRepository;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeMap;
+import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -24,96 +25,100 @@ public class ModelMapperConfig {
     public ModelMapper modelMapper() {
         ModelMapper modelMapper = new ModelMapper();
 
+        modelMapper.getConfiguration()
+                .setMatchingStrategy(MatchingStrategies.STRICT)
+                .setImplicitMappingEnabled(false);
+
         modelMapper.typeMap(Employee.class, EmployeeDto.class)
                 .addMappings(mapping -> {
-                    mapping.map(src -> src.getUser().getFullName(), EmployeeDto::setUserFullName);
-                    mapping.map(src -> src.getUser().getEmail(), EmployeeDto::setUserEmail);
-                    mapping.map(src -> src.getOffice().getTitle(), EmployeeDto::setOfficeTitle);
-                    mapping.map(src -> src.getUser().getId(), EmployeeDto::setUserId);
+                    mapping.map(src -> src.getUser().getId(),          EmployeeDto::setUserId);
+                    mapping.map(src -> src.getUser().getFullName(),    EmployeeDto::setUserFullName);
+                    mapping.map(src -> src.getUser().getEmail(),       EmployeeDto::setUserEmail);
+                    mapping.map(src -> src.getOffice().getTitle(),     EmployeeDto::setOfficeTitle);
                 });
 
         modelMapper.typeMap(Address.class, AddressDto.class)
                 .addMappings(mapping -> {
-                    mapping.map(Address::getStreet, AddressDto::setStreet);
-                    mapping.map(Address::getPostalCode, AddressDto::setPostalCode);
-                    mapping.map(src -> src.getCity().getName(), AddressDto::setCityName);
+                    mapping.map(src -> src.getCoordinates(),     AddressDto::setCoordinates);
+                    mapping.map(src -> src.getFormattedAddress(),     AddressDto::setFormattedAddress);
                 });
 
-        TypeMap<User, UserDto> userToDtoTypeMap = modelMapper.createTypeMap(User.class, UserDto.class);
-        userToDtoTypeMap.addMappings(mapping -> {
-            mapping.map(src -> src.getId().toString(), UserDto::setId);
-            mapping.map(User::getFirstName, UserDto::setFirstName);
-            mapping.map(User::getLastName, UserDto::setLastName);
-            mapping.map(User::getEmail, UserDto::setEmail);
-            mapping.map(User::getPassword, UserDto::setPassword);
-            mapping.map(User::getRole, UserDto::setRole);
-            mapping.map(User::getEmail, UserDto::setEmail); // Also used for username
-        });
+        modelMapper.typeMap(AddressDto.class, Address.class)
+                .addMappings(mapping -> {
+                    mapping.map(src -> src.getCoordinates(),     Address::setCoordinates);
+                    mapping.map(src -> src.getFormattedAddress(),     Address::setFormattedAddress);
+                });
 
-        userToDtoTypeMap.setPostConverter(context -> {
-            User source = context.getSource();
-            UserDto destination = context.getDestination();
-
-            if (source.getAddress() != null) {
-                AddressDto addressDto = modelMapper.map(source.getAddress(), AddressDto.class);
-                destination.setAddressDto(addressDto);
-            }
+        TypeMap<User, UserDto> userMap = modelMapper.emptyTypeMap(User.class, UserDto.class);
+        userMap.addMappings(mapping -> {
+            mapping.map(src -> src.getId().toString(),               UserDto::setId);
+            mapping.map(User::getFirstName,                          UserDto::setFirstName);
+            mapping.map(User::getLastName,                           UserDto::setLastName);
+            mapping.map(User::getEmail,                              UserDto::setEmail);
+            mapping.map(User::getPassword,                           UserDto::setPassword);
+            mapping.map(User::getRole,                               UserDto::setRole);
+        }).setPostConverter(context -> {
+            User source      = context.getSource();
+            UserDto dest     = context.getDestination();
 
             if (source.getRole() == Role.CLIENT) {
                 var client = clientRepository.findByUserId(source.getId());
                 if (client != null) {
                     ClientDto clientDto = modelMapper.map(client, ClientDto.class);
-                    destination.setClientDto(clientDto);
+                    dest.setClientDto(clientDto);
+                    if (client.getAddress() != null) {
+                        AddressDto addressDto = modelMapper.map(client.getAddress(), AddressDto.class);
+                        clientDto.setAddressDto(addressDto);
+                    }
                 }
             } else if (source.getRole() == Role.EMPLOYEE) {
                 var employee = employeeRepository.findByUserId(source.getId());
                 if (employee != null) {
                     EmployeeDto employeeDto = modelMapper.map(employee, EmployeeDto.class);
-                    destination.setEmployeeDto(employeeDto);
+                    dest.setEmployeeDto(employeeDto);
                 }
             }
-
-            return destination;
+            return dest;
         });
 
-        modelMapper.createTypeMap(UserDto.class, User.class)
+        modelMapper.emptyTypeMap(UserDto.class, User.class)
                 .addMappings(mapping -> {
                     mapping.map(UserDto::getFirstName, User::setFirstName);
-                    mapping.map(UserDto::getLastName, User::setLastName);
-                    mapping.map(UserDto::getEmail, User::setEmail);
-                    mapping.map(UserDto::getPassword, User::setPassword);
-                    mapping.map(UserDto::getRole, User::setRole);
+                    mapping.map(UserDto::getLastName,  User::setLastName);
+                    mapping.map(UserDto::getEmail,     User::setEmail);
+                    mapping.map(UserDto::getPassword,  User::setPassword);
+                    mapping.map(UserDto::getRole,      User::setRole);
                 });
 
         modelMapper.typeMap(Shipment.class, ShipmentDto.class)
                 .addMappings(mapping -> {
-                    mapping.map(Shipment::getId, ShipmentDto::setId);
-                    mapping.map(Shipment::getEmployee, ShipmentDto::setEmployee);
-                    mapping.map(Shipment::getRecipient, ShipmentDto::setRecipient);
+                    mapping.map(Shipment::getId,               ShipmentDto::setId);
+                    mapping.map(Shipment::getUniqueId,         ShipmentDto::setUniqueID);
+                    mapping.map(Shipment::isPayed,              ShipmentDto::setPayed);
+                    mapping.map(Shipment::getWeight,           ShipmentDto::setWeight);
+                    mapping.map(Shipment::getPrice,            ShipmentDto::setPrice);
+                    mapping.map(Shipment::getCreatedOn,        ShipmentDto::setCreatedOn);
+                    mapping.map(Shipment::getUpdatedOn,        ShipmentDto::setUpdatedOn);
+                    mapping.map(Shipment::getEmployee,         ShipmentDto::setEmployee);
+                    mapping.map(Shipment::getSenderClient,     ShipmentDto::setSenderClient);
+                    mapping.map(Shipment::getRecipientClient,  ShipmentDto::setRecipientClient);
+                    mapping.map(Shipment::getOffice,           ShipmentDto::setOffice);
+                    mapping.map(Shipment::getSenderAddress,    ShipmentDto::setSenderAddress);
                     mapping.map(Shipment::getRecipientAddress, ShipmentDto::setRecipientAddress);
-                    mapping.map(Shipment::getSender, ShipmentDto::setSender);
-                    mapping.map(Shipment::getSenderAddress, ShipmentDto::setSenderAddress);
-                    mapping.map(Shipment::getOffice, ShipmentDto::setOffice);
-                    mapping.map(Shipment::getWeight, ShipmentDto::setWeight);
-                    mapping.map(Shipment::getPrice, ShipmentDto::setPrice);
-                    mapping.map(Shipment::getUniqueId, ShipmentDto::setUniqueID);
-                    mapping.map(Shipment::isPayed, ShipmentDto::setPayed);
-                    mapping.map(Shipment::getCreatedOn, ShipmentDto::setCreatedOn);
-                    mapping.map(Shipment::getUpdatedOn, ShipmentDto::setUpdatedOn);
                 });
 
         modelMapper.typeMap(ShipmentDto.class, Shipment.class)
                 .addMappings(mapping -> {
-                    mapping.map(ShipmentDto::getEmployee, Shipment::setEmployee);
-                    mapping.map(ShipmentDto::getRecipient, Shipment::setRecipient);
-                    mapping.map(ShipmentDto::getRecipientAddress, Shipment::setRecipientAddress);
-                    mapping.map(ShipmentDto::getSender, Shipment::setSender);
-                    mapping.map(ShipmentDto::getSenderAddress, Shipment::setSenderAddress);
-                    mapping.map(ShipmentDto::getOffice, Shipment::setOffice);
-                    mapping.map(ShipmentDto::getWeight, Shipment::setWeight);
-                    mapping.map(ShipmentDto::getPrice, Shipment::setPrice);
-                    mapping.map(ShipmentDto::getUniqueID, Shipment::setUniqueId);
-                    mapping.map(ShipmentDto::isPayed, Shipment::setPayed);
+                    mapping.map(ShipmentDto::getUniqueID,        Shipment::setUniqueId);
+                    mapping.map(ShipmentDto::isPayed,             Shipment::setPayed);
+                    mapping.map(ShipmentDto::getWeight,          Shipment::setWeight);
+                    mapping.map(ShipmentDto::getPrice,           Shipment::setPrice);
+                    mapping.map(ShipmentDto::getEmployee,        Shipment::setEmployee);
+                    mapping.map(ShipmentDto::getSenderClient,    Shipment::setSenderClient);
+                    mapping.map(ShipmentDto::getRecipientClient, Shipment::setRecipientClient);
+                    mapping.map(ShipmentDto::getOffice,          Shipment::setOffice);
+                    mapping.map(ShipmentDto::getSenderAddress,   Shipment::setSenderAddress);
+                    mapping.map(ShipmentDto::getRecipientAddress,Shipment::setRecipientAddress);
                 });
 
         return modelMapper;

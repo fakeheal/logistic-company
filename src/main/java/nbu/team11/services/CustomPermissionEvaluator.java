@@ -22,6 +22,21 @@ public class CustomPermissionEvaluator {
                 && userDetails.getUserDto().getEmployeeDto().getPosition() == positionType;
     }
 
+    public boolean hasRole(Authentication authentication, String roleName) {
+        if (authentication == null || "anonymousUser".equals(authentication.getPrincipal())) {
+            return false;
+        }
+
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+
+        try {
+            Role roleEnum = Role.valueOf(roleName);
+            return userDetails.getUserDto().getRole() == roleEnum;
+        } catch (IllegalArgumentException e) {
+            return false;
+        }
+    }
+
     public boolean isAdmin(Authentication authentication) {
         return this.hasRoleAndPosition(authentication, Role.EMPLOYEE, PositionType.ADMIN);
     }

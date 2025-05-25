@@ -1,10 +1,7 @@
 package nbu.team11.entities;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -16,19 +13,18 @@ import java.time.Instant;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Getter
+@Setter
 public class Address {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
-    @ManyToOne
-    @JoinColumn(name = "CityId", nullable = false)
-    private City city;
 
-    @Column(name = "Street", nullable = false)
-    private String street;
+    @Column(name = "FormattedAddress", nullable = false)
+    private String formattedAddress;
 
-    @Column(name = "PostalCode", nullable = false)
-    private String postalCode;
+    @Column(name = "Coordinates", nullable = false)
+    private String coordinates;
 
     @CreationTimestamp
     @Column(name = "created_on", nullable = false, updatable = false)
@@ -40,29 +36,4 @@ public class Address {
     public Integer getId() {
         return id;
     }
-
-    public City getCity() {
-        return city;
-    }
-
-    public void setCity(City city) {
-        this.city = city;
-    }
-
-    public String getStreet() {
-        return street;
-    }
-
-    public void setStreet(String street) {
-        this.street = street;
-    }
-
-    public String getPostalCode() {
-        return postalCode;
-    }
-
-    public void setPostalCode(String postalCode) {
-        this.postalCode = postalCode;
-    }
-
 }
