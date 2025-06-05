@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Register Shipment</title>
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        const apiBase = /*[[@{/}]]*/ '';
+        const allUsers = /*[[${users}]]*/ [];
+        /*]]>*/
+    </script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss/dist/tailwind.min.css"/>
+</head>
+<body>
+<div th:fragment="registerShipmentPage">
+    <form th:action="@{/client/registerShipment}"
+          th:object="${form}"
+          method="post"
+          class="max-w-lg mx-auto my-12 p-6 bg-white border rounded shadow">
+
+        <h2 class="text-2xl font-bold mb-6">Register Shipment</h2>
+
+        <!-- Weight -->
+        <div class="mb-4">
+            <label for="weight" class="block mb-1">Weight (kg)</label>
+            <input th:field="*{weight}"
+                   type="number"
+                   step="0.01"
+                   id="weight"
+                   class="w-full p-2 border rounded"
+                   required/>
+        </div>
+
+        <!-- Use profile address -->
+        <div class="mb-4 flex items-center">
+            <input th:field="*{useProfileAddress}"
+                   type="checkbox"
+                   id="useProfileAddress"
+                   class="mr-2"/>
+            <label for="useProfileAddress">Use Profile Address</label>
+        </div>
+
+        <!-- Profile address (readonly) -->
+        <div id="profileAddressContainer" class="mb-4">
+            <label class="block mb-1">Profile Address</label>
+            <input type="text"
+                   th:value="${form.senderAddress.formattedAddress}"
+                   readonly
+                   class="w-full p-2 border rounded bg-gray-100"/>
+        </div>
+
+        <!-- Manual sender address -->
+        <div id="senderAddressContainer" class="mb-4 hidden">
+            <label for="senderAutocomplete" class="block mb-1">Sender Address</label>
+            <input th:field="*{senderAddress.formattedAddress}"
+                   type="text"
+                   id="senderAutocomplete"
+                   placeholder="Start typing your address..."
+                   autocomplete="off"
+                   class="w-full p-2 border rounded"/>
+            <input th:field="*{senderAddress.coordinates}"
+                   type="hidden"
+                   id="senderCoordinates"/>
+        </div>
+
+        <!-- Recipient client autocomplete -->
+        <div id="recipientClientContainer" class="mb-4 relative">
+            <label for="recipientClientSearch" class="block mb-1">
+                Recipient Client
+            </label>
+
+            <!-- 1) Visible text input for typing first/last name or phone -->
+            <input type="text"
+                   id="recipientClientSearch"
+                   class="w-full p-2 border rounded"
+                   placeholder="Type first/last name or phone…"
+                   autocomplete="off" />
+
+            <!-- 2) Hidden field bound to your form’s recipientClientId -->
+            <input type="hidden"
+                   th:field="*{recipientClientId}"
+                   id="recipientClientId" />
+
+            <!-- 3) Suggestions container (initially hidden) -->
+            <div id="recipientClientSuggestions"
+                 class="absolute z-10 w-full bg-white border rounded shadow mt-1 max-h-48 overflow-y-auto hidden">
+                <!-- JS will inject <div> items here -->
+            </div>
+        </div>
+
+        <!-- Deliver to office? -->
+        <div class="mb-4 flex items-center">
+            <input th:field="*{deliverToOffice}"
+                   type="checkbox"
+                   id="deliverToOffice"
+                   class="mr-2"/>
+            <label for="deliverToOffice">Deliver to Office</label>
+        </div>
+
+        <!-- Office selection -->
+        <div id="officeContainer" class="mb-4">
+            <label for="officeSelect" class="block mb-1">Select Office</label>
+            <select th:field="*{officeId}"
+                    id="officeSelect"
+                    class="w-full p-2 border rounded">
+                <option th:each="office : ${offices}"
+                        th:value="${office.id}"
+                        th:text="${office.title}">
+                    Office Name
+                </option>
+            </select>
+        </div>
+
+        <!-- Recipient address (if not office) -->
+        <div id="recipientAddressContainer" class="mb-4 hidden">
+            <label for="recipientAutocomplete" class="block mb-1">Recipient Address</label>
+            <input th:field="*{recipientAddress.formattedAddress}"
+                   type="text"
+                   id="recipientAutocomplete"
+                   placeholder="Start typing recipient address..."
+                   autocomplete="off"
+                   class="w-full p-2 border rounded"/>
+            <input th:field="*{recipientAddress.coordinates}"
+                   type="hidden"
+                   id="recipientCoordinates"/>
+        </div>
+
+        <!-- Calculate Price -->
+        <div class="mb-4">
+            <button type="button"
+                    id="calculatePrice"
+                    class="px-4 py-2 bg-blue-600 text-white rounded">
+                Calculate Price
+            </button>
+        </div>
+
+        <!-- Price display -->
+        <div class="mb-4">
+            <label for="price" class="block mb-1">Price</label>
+            <input th:field="*{price}"
+                   type="text"
+                   id="price"
+                   readonly
+                   class="w-full p-2 border rounded bg-gray-100"/>
+        </div>
+
+        <!-- Submit -->
+        <div>
+            <button type="submit"
+                    id="submitBtn"
+                    class="px-4 py-2 bg-green-600 text-white rounded disabled:opacity-50"
+                    disabled>
+                Submit
+            </button>
+        </div>
+
+    </form>
+</div>
+
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    document.addEventListener('DOMContentLoaded', () => {
+      const searchInput    = document.getElementById('recipientClientSearch');
+      const hiddenClientId = document.getElementById('recipientClientId');
+      const suggestionsBox = document.getElementById('recipientClientSuggestions');
+
+      // Helper: clear any suggestions
+      function clearSuggestions() {
+        suggestionsBox.innerHTML = '';
+        suggestionsBox.classList.add('hidden');
+      }
+
+      // Helper: show matched clients as clickable items
+      function showSuggestions(matches) {
+        if (!matches.length) {
+          clearSuggestions();
+          return;
+        }
+        suggestionsBox.innerHTML = '';
+        matches.forEach(c => {
+          // Safely get phone number
+          const phoneNum = (c.clientDto && c.clientDto.phoneNumber)
+                             ? c.clientDto.phoneNumber
+                             : '';
+          const label = `${c.firstName} ${c.lastName}` + (phoneNum ? ` – ${phoneNum}` : '');
+          const item  = document.createElement('div');
+          item.classList.add('px-2', 'py-1', 'hover:bg-gray-200', 'cursor-pointer');
+          item.textContent       = label;
+          item.dataset.clientId  = c.id;
+
+          item.addEventListener('click', () => {
+            // 1) set the visible text
+            searchInput.value    = label;
+            // 2) set the hidden form field
+            hiddenClientId.value = c.id;
+            // 3) close suggestions
+            clearSuggestions();
+          });
+          suggestionsBox.appendChild(item);
+        });
+        suggestionsBox.classList.remove('hidden');
+      }
+
+      // On every input event, filter the in‐memory allClients array
+      searchInput.addEventListener('input', () => {
+        const query = searchInput.value.trim().toLowerCase();
+        hiddenClientId.value = ''; // clear previous selection
+
+        if (!query) {
+          clearSuggestions();
+          return;
+        }
+
+        // Filter by “firstName lastName” or phoneNumber containing the query
+        const matches = allUsers.filter(c => {
+          const fullName = (c.firstName + ' ' + c.lastName).toLowerCase();
+          // Safely get phone number for filtering
+          const phone    = (c.clientDto && c.clientDto.phoneNumber)
+                             ? c.clientDto.phoneNumber.toLowerCase()
+                             : '';
+          return fullName.includes(query) || phone.includes(query);
+        });
+
+        // Show up to 10 matches
+        showSuggestions(matches.slice(0, 10));
+      });
+
+      // If user clicks outside, hide suggestions
+      document.addEventListener('click', (e) => {
+        const outside =
+          !suggestionsBox.contains(e.target) && e.target !== searchInput;
+        if (outside) {
+          clearSuggestions();
+        }
+      });
+    });
+    /*]]>*/
+</script>
+
+
+<!-- Google Maps Places API -->
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD-6hhLmJouM3QMHt1qB8cblAOB_lz1ua0&libraries=places&callback=initAutocomplete" async defer></script>
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    function initAutocomplete() {
+      // Sender address autocomplete
+      const senderInput = document.getElementById('senderAutocomplete');
+      const senderAuto  = new google.maps.places.Autocomplete(senderInput);
+      senderAuto.setFields(['formatted_address','geometry']);
+      senderAuto.addListener('place_changed', () => {
+        const p = senderAuto.getPlace();
+        if (!p.geometry) return;
+        senderInput.value = p.formatted_address;
+        document.getElementById('senderCoordinates')
+                .value = p.geometry.location.lat() + ',' + p.geometry.location.lng();
+      });
+
+      // Recipient address autocomplete
+      const recInput = document.getElementById('recipientAutocomplete');
+      const recAuto  = new google.maps.places.Autocomplete(recInput);
+      recAuto.setFields(['formatted_address','geometry']);
+      recAuto.addListener('place_changed', () => {
+        const p = recAuto.getPlace();
+        if (!p.geometry) return;
+        recInput.value = p.formatted_address;
+        document.getElementById('recipientCoordinates')
+                .value = p.geometry.location.lat() + ',' + p.geometry.location.lng();
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      initAutocomplete();
+
+      // Toggle sender address vs profile
+      const useProfile = document.getElementById('useProfileAddress');
+      const profCont   = document.getElementById('profileAddressContainer');
+      const senderCont = document.getElementById('senderAddressContainer');
+      const toggleSender = () => {
+        if (useProfile.checked) {
+          profCont.classList.remove('hidden');
+          senderCont.classList.add('hidden');
+        } else {
+          profCont.classList.add('hidden');
+          senderCont.classList.remove('hidden');
+        }
+      };
+      useProfile.addEventListener('change', toggleSender);
+      toggleSender();
+
+      // Toggle office vs recipient address
+      const deliverChk = document.getElementById('deliverToOffice');
+      const officeCont = document.getElementById('officeContainer');
+      const recipAddr  = document.getElementById('recipientAddressContainer');
+      const toggleDeliver = () => {
+        if (deliverChk.checked) {
+          officeCont.classList.remove('hidden');
+          recipAddr.classList.add('hidden');
+        } else {
+          officeCont.classList.add('hidden');
+          recipAddr.classList.remove('hidden');
+        }
+      };
+      deliverChk.addEventListener('change', toggleDeliver);
+      toggleDeliver();
+
+      // Load clients
+      fetch(`${apiBase}/api/clients`)
+        .then(r => r.json())
+        .then(clients => {
+          const sel = document.getElementById('clientSelect');
+          clients.forEach(c => sel.add(new Option(`${c.firstName} ${c.lastName}`, c.id)));
+        });
+
+      // Price calculation
+      document.getElementById('calculatePrice').addEventListener('click', () => {
+        const wt  = document.getElementById('weight').value;
+        const toO = deliverChk.checked;
+        if (!wt) { alert('Enter weight first'); return; }
+        fetch(`${apiBase}/api/shipments/price?weight=${wt}&deliverToOffice=${toO}`)
+          .then(r => r.json())
+          .then(data => {
+            document.getElementById('price').value = data.price;
+            document.getElementById('submitBtn').disabled = false;
+          });
+      });
+    });
+    /*]]>*/
+</script>
+</body>
+</html>

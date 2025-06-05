@@ -1,240 +1,183 @@
-
 package nbu.team11.controllers;
 
-import nbu.team11.dtos.ShipmentDto;
+import nbu.team11.controllers.forms.RegisterShipmentForm;
+import nbu.team11.dtos.*;
 import nbu.team11.entities.Shipment;
-import nbu.team11.entities.ShipmentStatus;
 import nbu.team11.entities.enums.Status;
+import nbu.team11.services.ClientService;
+import nbu.team11.services.OfficeService;
 import nbu.team11.services.ShipmentService;
+import nbu.team11.services.UserService;
+import nbu.team11.services.exceptions.ResourceNotFound;
 import nbu.team11.services.exceptions.ShipmentNotFound;
-import nbu.team11.services.exceptions.UnauthorizedAccess;
-import org.modelmapper.*;
-import org.springframework.ui.Model;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.modelmapper.ModelMapper;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.*;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
- * Controller for managing shipments in the system.
- * Provides endpoints for employees and clients to interact with shipment data.
+ * Handles UI pages and REST endpoints for shipments.
  */
 @Controller
-@RequestMapping("/shipments")
+@RequestMapping
 public class ShipmentController {
 
-    @Autowired
-    private ShipmentService shipmentService;
+    private final ClientService clientService;
+    private final OfficeService officeService;
+    private final ShipmentService shipmentService;
+    private final ModelMapper modelMapper;
+    private final UserService userService;
 
-    @Autowired
-    private ModelMapper modelMapper;
+    public ShipmentController(ClientService clientService,
+                              OfficeService officeService,
+                              ShipmentService shipmentService,
+                              ModelMapper modelMapper,
+                              UserService userService) {
+        this.clientService = clientService;
+        this.officeService = officeService;
+        this.shipmentService = shipmentService;
+        this.modelMapper = modelMapper;
+        this.userService = userService;
+    }
 
-    private String withAppLayout(Model model) {
+    private List<ShipmentDto> mapAndSetStatus(List<Shipment> shipments) {
+        return shipments.stream()
+                .map(s -> {
+                    ShipmentDto dto = modelMapper.map(s, ShipmentDto.class);
+                    String status = shipmentService.getShipmentHistory(dto.getUniqueID())
+                            .getFirst()
+                            .getStatus()
+                            .toString();
+                    dto.setStatus(status);
+                    return dto;
+                })
+                .collect(Collectors.toList());
+    }
+
+    private String render(Model model, String contentFragment) {
+        model.addAttribute("content", contentFragment);
         return "layouts/app";
     }
 
-    /**
-     * Retrieves all shipments accessible to employees.
-     *
-     * @param authentication The authentication object containing user details.
-     * @return List of all shipments as DTOs.
-     */
-    @GetMapping("/all")
-    public String getAllShipments(Authentication authentication, Model model) {
-        List<Shipment> shipments = shipmentService.getAllShipmentsForEmployee(authentication);
-        List<ShipmentDto> shipmentDto = shipments.stream()
-                .map(shipment -> modelMapper.map(shipment, ShipmentDto.class))
-                .collect(Collectors.toList());
-        for (int i = 0; i < shipmentDto.size(); i++) {
-            ShipmentDto shipment = (ShipmentDto) shipmentDto.get(i);
-            String status = shipmentService.getShipmentHistory(shipment.getUniqueID()).getFirst().getStatus()
-                    .toString();
-            shipment.setStatus(status);
+    @GetMapping("/shipments/all")
+    public String viewAllForEmployee(Authentication auth, Model model) {
+        List<Shipment> shipments = shipmentService.getAllShipmentsForEmployee(auth);
+        model.addAttribute("shipments", mapAndSetStatus(shipments));
+        model.addAttribute("title", "Employee Shipments");
+        return render(model, "shipments/employee");
+    }
+
+    @GetMapping("/client/registerShipment")
+    public String showRegisterForm(Model model, Authentication auth) throws ResourceNotFound {
+        RegisterShipmentForm form = new RegisterShipmentForm();
+        form.setUseProfileAddress(true);
+        form.setDeliverToOffice(true);
+
+        ClientDto me = clientService.getClientByEmail(auth.getName());
+        if (me.getAddressDto() != null) {
+            form.setSenderAddress(me.getAddressDto());
         }
-        model.addAttribute("shipments", shipmentDto);
-        model.addAttribute("title", "employee");
-        model.addAttribute("content", "shipments/employee");
-        return withAppLayout(model);
+
+        List<UserDtoSanitized> allUsers = this.userService.getAllUsers();
+        model.addAttribute("users", allUsers);
+
+        model.addAttribute("title", "Register Shipment");
+        model.addAttribute("form", form);
+        model.addAttribute("offices", officeService.getAll());
+        return render(model, "client/registerShipment");
     }
 
-    /**
-     * Retrieves all shipments registered by a specific employee.
-     *
-     * @param employeeId The ID of the employee.
-     * @return List of shipments registered by the employee as DTOs.
-     */
-    @GetMapping("/employee/{employeeId}")
-    public ResponseEntity<List<ShipmentDto>> getShipmentsByEmployee(@PathVariable Integer employeeId) {
-        List<Shipment> shipments = shipmentService.getShipmentsByEmployeeId(employeeId);
-        List<ShipmentDto> shipmentDto = shipments.stream()
-                .map(shipment -> modelMapper.map(shipment, ShipmentDto.class))
+    @PostMapping("/client/registerShipment")
+    public String submitRegisterForm(@ModelAttribute RegisterShipmentForm form,
+                                     Authentication auth) throws ResourceNotFound {
+        ClientDto me = clientService.getClientByEmail(auth.getName());
+        ShipmentDto dto = new ShipmentDto();
+        dto.setWeight(form.getWeight());
+        dto.setSenderClient(me);
+        dto.setSenderAddress(
+                form.isUseProfileAddress() ? me.getAddressDto() : form.getSenderAddress()
+        );
+
+        if (form.isDeliverToOffice()) {
+            OfficeDto office = officeService.getById(form.getOfficeId());
+            dto.setReceivingOffice(office);
+        } else {
+            ClientDto recipient = clientService.getClientById(form.getRecipientClientId());
+            dto.setRecipientClient(recipient);
+            dto.setRecipientAddress(form.getRecipientAddress());
+        }
+
+        double price = shipmentService.calculatePrice(form.getWeight(), form.isDeliverToOffice());
+        dto.setPrice(BigDecimal.valueOf(price));
+
+        shipmentService.registerShipment(modelMapper.map(dto, Shipment.class), auth);
+        return "redirect:/shipments/client";
+    }
+
+    @GetMapping("/api/shipments/price")
+    @ResponseBody
+    public Map<String, Double> apiPrice(@RequestParam double weight,
+                                        @RequestParam boolean deliverToOffice) {
+        return Map.of("price", shipmentService.calculatePrice(weight, deliverToOffice));
+    }
+
+    @GetMapping("/shipments/client")
+    public String viewClientShipments(Model model, Authentication auth) {
+        List<Shipment> shipments = shipmentService.getShipmentsForClient(auth);
+        model.addAttribute("shipments", mapAndSetStatus(shipments));
+        model.addAttribute("title", "My Shipments");
+        return render(model, "shipments/client");
+    }
+
+    @GetMapping("/api/shipments/employee/{id}")
+    @ResponseBody
+    public List<ShipmentDto> apiByEmployee(@PathVariable Integer id) {
+        return shipmentService.getShipmentsByEmployeeId(id).stream()
+                .map(s -> modelMapper.map(s, ShipmentDto.class))
                 .collect(Collectors.toList());
-        return ResponseEntity.ok(shipmentDto);
     }
 
-    /**
-     * Retrieves all shipments that have not been delivered.
-     *
-     * @return List of undelivered shipments as DTOs.
-     */
-    @GetMapping("/undelivered")
-    public ResponseEntity<List<ShipmentDto>> getUndeliveredShipments() {
-        List<Shipment> shipments = shipmentService.getUndeliveredShipments();
-        List<ShipmentDto> shipmentDtos = shipments.stream()
-                .map(shipment -> modelMapper.map(shipment, ShipmentDto.class))
+    @GetMapping("/api/shipments/undelivered")
+    @ResponseBody
+    public List<ShipmentDto> apiUndelivered() {
+        return shipmentService.getUndeliveredShipments().stream()
+                .map(s -> modelMapper.map(s, ShipmentDto.class))
                 .collect(Collectors.toList());
-        return ResponseEntity.ok(shipmentDtos);
     }
 
-    /**
-     * Registers a new shipment in the system.
-     *
-     * @param shipmentDto    The DTO containing shipment details.
-     * @param authentication The authentication object containing user details.
-     * @return The registered shipment as a DTO.
-     */
-    @PostMapping("/register")
-    public ResponseEntity<ShipmentDto> registerShipment(@RequestBody ShipmentDto shipmentDto,
-            Authentication authentication) {
+    @PatchMapping("/api/shipments/status/{id}")
+    @ResponseBody
+    public ResponseEntity<ShipmentDto> apiUpdateStatus(@PathVariable Integer id,
+                                                       @RequestBody Status newStatus) {
         try {
-            Shipment shipment = modelMapper.map(shipmentDto, Shipment.class);
-            Shipment registeredShipment = shipmentService.registerShipment(shipment, authentication);
-            ShipmentDto registeredShipmentDto = modelMapper.map(registeredShipment, ShipmentDto.class);
-            return ResponseEntity.ok(registeredShipmentDto);
-        } catch (UnauthorizedAccess e) {
-            return ResponseEntity.status(403).build();
+            Shipment updated = shipmentService.updateShipmentStatus(id, newStatus);
+            return ResponseEntity.ok(modelMapper.map(updated, ShipmentDto.class));
         } catch (ShipmentNotFound e) {
             return ResponseEntity.notFound().build();
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().build();
         }
     }
 
-    /**
-     * Retrieves shipments sent or received by the authenticated client.
-     *
-     * @param authentication The authentication object containing user details.
-     * @return List of shipments as DTOs.
-     */
-    @GetMapping("/client")
-    public String getShipmentsByClient(Model model, Authentication authentication) {
-        List<Shipment> shipments = shipmentService.getShipmentsForClient(authentication);
-        List<ShipmentDto> shipmentDto = shipments.stream()
-                .map(shipment -> modelMapper.map(shipment, ShipmentDto.class))
-                .collect(Collectors.toList());
-
-        for (int i = 0; i < shipmentDto.size(); i++) {
-            ShipmentDto shipment = (ShipmentDto) shipmentDto.get(i);
-            String status = shipmentService.getShipmentHistory(shipment.getUniqueID()).getFirst().getStatus()
-                    .toString();
-            shipment.setStatus(status);
-        }
-        model.addAttribute("shipments", shipmentDto);
-        model.addAttribute("title", "client");
-        model.addAttribute("content", "shipments/client");
-        return withAppLayout(model);
-    }
-
-    /**
-     * Updates the status of a specific shipment.
-     *
-     * @param shipmentId The ID of the shipment.
-     * @param newStatus  The new status to set.
-     * @return The updated shipment as a DTO.
-     */
-    @PatchMapping("/status/{shipmentId}")
-    public ResponseEntity<ShipmentDto> updateShipmentStatus(@PathVariable Integer shipmentId,
-            @RequestBody Status newStatus) {
+    @DeleteMapping("/api/shipments/{id}")
+    @ResponseBody
+    public ResponseEntity<Void> apiDelete(@PathVariable Integer id) {
         try {
-            Shipment updatedShipment = shipmentService.updateShipmentStatus(shipmentId, newStatus);
-            ShipmentDto updatedShipmentDto = modelMapper.map(updatedShipment, ShipmentDto.class);
-            return ResponseEntity.ok(updatedShipmentDto);
-        } catch (ShipmentNotFound e) {
-            return ResponseEntity.notFound().build();
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().build();
-        }
-    }
-
-    @GetMapping("/track")
-    public String track(Model model) {
-        model.addAttribute("title", "Track package");
-        model.addAttribute("content", "shipments/track");
-        return withAppLayout(model);
-    }
-
-    /**
-     * Retrieves the history of statuses for a specific shipment.
-     *
-     * @param shipmentId The ID of the shipment.
-     * @return List of shipment statuses.
-     */
-    @GetMapping("/history")
-    public String getShipmentHistory(@RequestParam String shipmentId, Model model) {
-        try {
-            List<ShipmentStatus> history = shipmentService.getShipmentHistory(shipmentId);
-            model.addAttribute("shipmentStatuses", history);
-            model.addAttribute("title", "client");
-            model.addAttribute("content", "shipments/track");
-            return withAppLayout(model);
-        } catch (ShipmentNotFound e) {
-            model.addAttribute("content", "shipments/track");
-            return withAppLayout(model);
-        } catch (Exception e) {
-            model.addAttribute("content", "shipments/track");
-            return withAppLayout(model);
-        }
-    }
-
-    /**
-     * Retrieves statistics about all shipments in the system.
-     *
-     * @return A map containing total shipments, delivered shipments, total weight,
-     *         and total revenue.
-     */
-    @GetMapping("/statistics")
-    public ResponseEntity<Map<String, Object>> getShipmentStatistics() {
-        Map<String, Object> stats = shipmentService.getShipmentStatistics();
-        return ResponseEntity.ok(stats);
-    }
-
-    /**
-     * Retrieves shipments filtered by country and city.
-     *
-     * @param countryName The name of the country.
-     * @param cityName    The name of the city.
-     * @return List of shipments as DTOs.
-     */
-    @GetMapping("/by-location")
-    public ResponseEntity<List<ShipmentDto>> getShipmentsByCountryAndCity(
-            @RequestParam String countryName, @RequestParam String cityName) {
-        List<Shipment> shipments = shipmentService.getShipmentsByCountryAndCity(countryName, cityName);
-        List<ShipmentDto> shipmentDto = shipments.stream()
-                .map(shipment -> modelMapper.map(shipment, ShipmentDto.class))
-                .collect(Collectors.toList());
-        return ResponseEntity.ok(shipmentDto);
-    }
-
-    /**
-     * Deletes a shipment by its ID.
-     *
-     * @param shipmentId The ID of the shipment to delete.
-     * @return A response with no content if the deletion is successful, or a 404
-     *         status if the shipment is not found.
-     */
-    @DeleteMapping("/{shipmentId}")
-    public ResponseEntity<Void> deleteShipment(@PathVariable Integer shipmentId) {
-        try {
-            shipmentService.deleteShipment(shipmentId);
+            shipmentService.deleteShipment(id);
             return ResponseEntity.noContent().build();
         } catch (ShipmentNotFound e) {
             return ResponseEntity.notFound().build();
         }
     }
 
+    @GetMapping("/api/shipments/statistics")
+    @ResponseBody
+    public Map<String, Object> apiStats() {
+        return shipmentService.getShipmentStatistics();
+    }
 }

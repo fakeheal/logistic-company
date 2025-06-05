@@ -16,12 +16,13 @@ import lombok.Setter;
 @Data
 public class ShipmentDto {
     private Integer id;
-    private Employee employee;
-    private Client recipient;
-    private Address recipientAddress;
-    private Client sender;
-    private Address senderAddress;
-    private Office office;
+    private EmployeeDto employee;
+    private ClientDto recipientClient;
+    private AddressDto recipientAddress;
+    private ClientDto senderClient;
+    private AddressDto senderAddress;
+    private OfficeDto sendingOffice;
+    private OfficeDto receivingOffice;
     private double weight;
     private BigDecimal price;
     private Instant createdOn;

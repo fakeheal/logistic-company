@@ -12,6 +12,7 @@ import org.springframework.security.core.Authentication;
 import java.util.List;
 
 public interface IShipmentService {
+    double calculatePrice(Double weight, boolean toOffice);
 
     List<Shipment> getAllShipmentsForEmployee(Authentication authentication) throws UnauthorizedAccess;
 

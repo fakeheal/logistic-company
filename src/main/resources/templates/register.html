@@ -110,6 +110,18 @@
                 <input th:field="*{clientDto.phoneNumber}" id="phoneNumber" name="phoneNumber" placeholder="Phone number" required>
             </div>
             <div class="form-group">
+                <label for="autocomplete">Address</label>
+                <input id="autocomplete" type="text"
+                       placeholder="Start typing your address"
+                       required>
+            </div>
+            <input type="hidden"
+                   th:field="*{clientDto.addressDto.formattedAddress}"
+                   id="formattedAddress">
+            <input type="hidden"
+                   th:field="*{clientDto.addressDto.coordinates}"
+                   id="coordinates">
+            <div class="form-group">
                 <label for="email">Email</label>
                 <input th:field="*{email}" type="text" id="email" name="email" placeholder="Enter your email address" required>
                 <span th:if="${userexist}" style="color: red;">There is already registration with this email.</span>
@@ -123,6 +135,27 @@
         <span> Already Registered <a th:href="@{/login}">Login</a></span>
     </div>
 </div>
+<script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&libraries=places"></script>
+<script>
+    function initAutocomplete() {
+      const input = document.getElementById('autocomplete');
+      const autocomplete = new google.maps.places.Autocomplete(input, {
+        types: ['geocode']
+      });
+      autocomplete.addListener('place_changed', () => {
+        const place = autocomplete.getPlace();
+        document.getElementById('formattedAddress')
+                .value = place.formatted_address;
+        const lat = place.geometry.location.lat();
+        const lng = place.geometry.location.lng();
+        document.getElementById('coordinates')
+                .value = lat + ',' + lng;
+      });
+    }
+    // init on load
+    window.addEventListener('load', initAutocomplete);
+</script>
+
 
 </body>
 </html>

@@ -1,5 +1,7 @@
 package nbu.team11.services;
 import nbu.team11.configurations.ModelMapperConfig;
+import nbu.team11.dtos.ClientDto;
+import nbu.team11.dtos.UserDtoSanitized;
 import nbu.team11.entities.enums.Role;
 import nbu.team11.services.contracts.IUserService;
 import nbu.team11.services.exceptions.EmailNotAvailable;
@@ -16,13 +18,13 @@ import nbu.team11.entities.*;
 import nbu.team11.repositories.UserRepository;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 //TODO: Revise all methods
 //TODO: Test all methods
 //TODO: Exception handling
 @Service
 public class UserService implements IUserService {
-
     @Autowired
     PasswordEncoder passwordEncoder;
 
@@ -34,6 +36,15 @@ public class UserService implements IUserService {
 
         this.userRepository = userRepository;
         this.modelMapper = modelMapper;
+    }
+
+    @Override
+    public List<UserDtoSanitized> getAllUsers() {
+        List<User> allUsers = userRepository.findAll();
+        return allUsers.stream().map(user -> {
+            UserDtoSanitized dto = modelMapper.map(user, UserDtoSanitized.class);
+            return dto;
+        }).collect(Collectors.toList());
     }
 
     @Override

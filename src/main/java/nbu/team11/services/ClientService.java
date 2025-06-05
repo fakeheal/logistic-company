@@ -14,6 +14,9 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 //TODO: Revise all methods
 //TODO: Test all methods
 //TODO: Exception handling
@@ -57,6 +60,14 @@ public class ClientService implements IClientService {
         return modelMapper.map(client, ClientDto.class);
     }
 
+    public List<ClientDto> getAllClients() {
+        List<Client> allClients = clientRepository.findAll();
+        return allClients.stream().map(client -> {
+            ClientDto dto = modelMapper.map(client, ClientDto.class);
+            return dto;
+        }).collect(Collectors.toList());
+    }
+
     public ClientDto getClientByEmail(String email) throws ResourceNotFound {
         Client client = clientRepository.findByUser_Email(email);
         if (client == null) {
@@ -64,7 +75,6 @@ public class ClientService implements IClientService {
         }
         return modelMapper.map(client, ClientDto.class);
     }
-
 
     public ClientDto getClientById(Integer id) throws ResourceNotFound {
         Client client = clientRepository.findById(id).orElse(null);

@@ -18,10 +18,15 @@ import java.time.Instant;
 @Entity
 @Data
 public class Shipment {
-    @Setter
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
+
+    @JoinColumn(name = "DeliverToOffice")
+    private boolean deliverToOffice;
+
+    @JoinColumn(name = "TakeFromClientAddress")
+    private boolean takeFromClientAddress;
 
     @ManyToOne
     @JoinColumn(name = "EmployeeId", nullable = false)
@@ -29,23 +34,27 @@ public class Shipment {
 
     @ManyToOne
     @JoinColumn(name = "RecipientId", nullable = false)
-    private Client recipient;
+    private Client recipientClient;
 
     @ManyToOne
-    @JoinColumn(name = "RecipientAddress", nullable = false)
+    @JoinColumn(name = "RecipientAddress")
     private Address recipientAddress;
 
     @ManyToOne
     @JoinColumn(name = "SenderId", nullable = false)
-    private Client sender;
+    private Client senderClient;
 
     @ManyToOne
-    @JoinColumn(name = "SenderAddress", nullable = false)
+    @JoinColumn(name = "SenderAddress")
     private Address senderAddress;
 
     @ManyToOne
-    @JoinColumn(name = "OfficeId", nullable = false)
-    private Office office;
+    @JoinColumn(name = "SendingOfficeId")
+    private Office sendingOffice;
+
+    @ManyToOne
+    @JoinColumn(name = "ReceivingOfficeId")
+    private Office receivingOffice;
 
     @Positive(message = "The weight must be greater than 0")
     @Column(name = "Weight", nullable = false)
@@ -74,13 +83,14 @@ public class Shipment {
     }
 
     public Shipment(Employee employee, Client recipient, Address recipientAddress, Client sender, Address senderAddress,
-            Office office, double weight, BigDecimal price) {
+            Office sendingOffice, Office receivingOffice, double weight, BigDecimal price) {
         this.employee = employee;
-        this.recipient = recipient;
+        this.recipientClient = recipient;
         this.recipientAddress = recipientAddress;
-        this.sender = sender;
+        this.senderClient = sender;
         this.senderAddress = senderAddress;
-        this.office = office;
+        this.sendingOffice = sendingOffice;
+        this.receivingOffice = receivingOffice;
         this.weight = weight;
         this.price = price;
     }
