@@ -1,6 +1,7 @@
 package nbu.team11.services;
 
 import nbu.team11.controllers.forms.RegisterShipmentForm;
+import nbu.team11.dtos.ShipmentDto;
 import nbu.team11.entities.Shipment;
 import nbu.team11.entities.ShipmentStatus;
 import nbu.team11.entities.User;
@@ -12,6 +13,7 @@ import nbu.team11.repositories.UserRepository;
 import nbu.team11.services.contracts.IShipmentService;
 import nbu.team11.services.exceptions.ShipmentNotFound;
 import nbu.team11.services.exceptions.UnauthorizedAccess;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
@@ -28,6 +30,8 @@ import java.util.Map;
  */
 @Service
 public class ShipmentService implements IShipmentService {
+    @Autowired
+    private ModelMapper modelMapper;
 
     @Autowired
     private ShipmentRepository shipmentRepository;
@@ -70,12 +74,30 @@ public class ShipmentService implements IShipmentService {
         return shipmentRepository.findUndeliveredShipments(Status.DELIVERED);
     }
 
-    public Shipment registerShipment(Shipment shipment, Authentication authentication) {
-        if (!isEmployee(authentication)) {
-            throw new UnauthorizedAccess("Only employees can register shipments.");
+    public Shipment registerShipment(ShipmentDto shipmentDto, Authentication authentication) {
+        if (shipmentDto.getWeight() <= 0) {
+            throw new IllegalArgumentException("Weight must be positive");
         }
-        validateShipment(shipment);
-        return shipmentRepository.save(shipment);
+
+        if (shipmentDto.getSenderAddress() == null) {
+            throw new IllegalArgumentException("Sender address must be provided");
+        }
+
+        if (shipmentDto.getReceivingOffice() != null && shipmentDto.getRecipientAddress() == null) {
+            throw new IllegalArgumentException("Recipient address must be provided for non-office delivery");
+        }
+
+        Shipment shipment = modelMapper.map(shipmentDto, Shipment.class);
+        shipment.setPayed(false);
+
+        Shipment savedShipment = shipmentRepository.save(shipment);
+
+        ShipmentStatus initialStatus = new ShipmentStatus();
+        initialStatus.setShipment(savedShipment);
+        initialStatus.setStatus(Status.SUBMITTED);
+        shipmentStatusRepository.save(initialStatus);
+
+        return savedShipment;
     }
 
     public List<Shipment> getShipmentsForClient(Authentication authentication) {

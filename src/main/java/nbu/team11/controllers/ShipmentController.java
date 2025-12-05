@@ -2,12 +2,10 @@ package nbu.team11.controllers;
 
 import nbu.team11.controllers.forms.RegisterShipmentForm;
 import nbu.team11.dtos.*;
+import nbu.team11.entities.Address;
 import nbu.team11.entities.Shipment;
 import nbu.team11.entities.enums.Status;
-import nbu.team11.services.ClientService;
-import nbu.team11.services.OfficeService;
-import nbu.team11.services.ShipmentService;
-import nbu.team11.services.UserService;
+import nbu.team11.services.*;
 import nbu.team11.services.exceptions.ResourceNotFound;
 import nbu.team11.services.exceptions.ShipmentNotFound;
 import org.modelmapper.ModelMapper;
@@ -32,6 +30,7 @@ public class ShipmentController {
     private final ClientService clientService;
     private final OfficeService officeService;
     private final ShipmentService shipmentService;
+    private final AddressService addressService;
     private final ModelMapper modelMapper;
     private final UserService userService;
 
@@ -39,12 +38,14 @@ public class ShipmentController {
                               OfficeService officeService,
                               ShipmentService shipmentService,
                               ModelMapper modelMapper,
-                              UserService userService) {
+                              UserService userService,
+                              AddressService addressService) {
         this.clientService = clientService;
         this.officeService = officeService;
         this.shipmentService = shipmentService;
         this.modelMapper = modelMapper;
         this.userService = userService;
+        this.addressService = addressService;
     }
 
     private List<ShipmentDto> mapAndSetStatus(List<Shipment> shipments) {
@@ -77,12 +78,22 @@ public class ShipmentController {
     @GetMapping("/client/registerShipment")
     public String showRegisterForm(Model model, Authentication auth) throws ResourceNotFound {
         RegisterShipmentForm form = new RegisterShipmentForm();
-        form.setUseProfileAddress(true);
+        form.setCreateNewAddress(false);
         form.setDeliverToOffice(true);
 
-        ClientDto me = clientService.getClientByEmail(auth.getName());
-        if (me.getAddressDto() != null) {
-            form.setSenderAddress(me.getAddressDto());
+        ClientDto client = clientService.getClientByEmail(auth.getName());
+
+        // If client has addresses, add them to the form and choose the first as default
+        if (client.getAddresses() != null && !client.getAddresses().isEmpty()) {
+            form.setAddresses(client.getAddresses()); // full list for the view
+            // choose a default selected address id if AddressDto has `id`
+            // otherwise copy the first AddressDto into senderAddress (existing behavior)
+            AddressDto first = client.getAddresses().get(0);
+            if (first.getId() != null) {
+                form.setSelectedSenderAddressId(first.getId());
+            } else {
+                form.setSenderAddress(first); // fallback if DTO doesn't carry id
+            }
         }
 
         List<UserDtoSanitized> allUsers = this.userService.getAllUsers();
@@ -101,25 +112,36 @@ public class ShipmentController {
         ShipmentDto dto = new ShipmentDto();
         dto.setWeight(form.getWeight());
         dto.setSenderClient(me);
-        dto.setSenderAddress(
-                form.isUseProfileAddress() ? me.getAddressDto() : form.getSenderAddress()
-        );
+
+        if (form.isCreateNewAddress()) {
+            AddressDto address = clientService.addAddress(me.getId(), addressService.create(form.getSenderAddress()));
+            dto.setSenderAddress(address);
+        } else {
+            if (form.getSelectedSenderAddressId() != null) {
+                AddressDto selected = me.getAddresses().stream()
+                        .filter(a -> a.getId().equals(form.getSelectedSenderAddressId()))
+                        .findFirst().get();
+                dto.setSenderAddress(selected);
+            }
+        }
+
+        ClientDto recipient = clientService.getClientById(form.getRecipientClientId());
+        dto.setRecipientClient(recipient);
 
         if (form.isDeliverToOffice()) {
             OfficeDto office = officeService.getById(form.getOfficeId());
             dto.setReceivingOffice(office);
         } else {
-            ClientDto recipient = clientService.getClientById(form.getRecipientClientId());
-            dto.setRecipientClient(recipient);
             dto.setRecipientAddress(form.getRecipientAddress());
         }
 
-        double price = shipmentService.calculatePrice(form.getWeight(), form.isDeliverToOffice());
-        dto.setPrice(BigDecimal.valueOf(price));
+        dto.setPrice(form.getPrice());
 
-        shipmentService.registerShipment(modelMapper.map(dto, Shipment.class), auth);
+        shipmentService.registerShipment(dto, auth);
         return "redirect:/shipments/client";
     }
+
+
 
     @GetMapping("/api/shipments/price")
     @ResponseBody

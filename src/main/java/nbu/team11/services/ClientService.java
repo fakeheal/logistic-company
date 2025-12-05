@@ -11,9 +11,12 @@ import nbu.team11.repositories.UserRepository;
 import nbu.team11.services.contracts.IClientService;
 import nbu.team11.services.exceptions.ResourceNotFound;
 import org.modelmapper.ModelMapper;
+import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.lang.reflect.Type;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -25,31 +28,37 @@ import java.util.stream.Collectors;
 public class ClientService implements IClientService {
     @Autowired
     private ClientRepository clientRepository;
+
     @Autowired
     private ModelMapper modelMapper;
 
     @Autowired
-    private AddressService addressService;
+    private UserRepository userRepository;
 
-    @Autowired private AddressRepository addressRepository;
-    @Autowired private UserRepository userRepository;
+    @Autowired
+    private AddressRepository addressRepository;
 
     @Override
+    @Transactional
     public ClientDto createClient(ClientDto clientDto, Integer userId) throws ResourceNotFound {
         User user = userRepository.findById(userId)
                 .orElseThrow(ResourceNotFound::new);
 
-        Address address = addressService.create(clientDto.getAddressDto());
-
         Client client = new Client();
         client.setUser(user);
         client.setPhoneNumber(clientDto.getPhoneNumber());
-        client.setAddress(address);
+
+        if (clientDto.getAddresses() != null && !clientDto.getAddresses().isEmpty()) {
+            Type listType = new TypeToken<List<AddressDto>>() {}.getType(); // for clarity; not strictly required
+            for (AddressDto adto : clientDto.getAddresses()) {
+                Address addr = modelMapper.map(adto, Address.class);
+                client.addAddress(addr);
+            }
+        }
+
         Client savedClient = clientRepository.save(client);
 
-        ClientDto out = modelMapper.map(savedClient, ClientDto.class);
-        out.setAddressDto(modelMapper.map(address, AddressDto.class));
-        return out;
+        return modelMapper.map(savedClient, ClientDto.class);
     }
 
     public ClientDto getClientByUserId(Integer userId) throws ResourceNotFound {
@@ -62,10 +71,9 @@ public class ClientService implements IClientService {
 
     public List<ClientDto> getAllClients() {
         List<Client> allClients = clientRepository.findAll();
-        return allClients.stream().map(client -> {
-            ClientDto dto = modelMapper.map(client, ClientDto.class);
-            return dto;
-        }).collect(Collectors.toList());
+        return allClients.stream()
+                .map(client -> modelMapper.map(client, ClientDto.class))
+                .collect(Collectors.toList());
     }
 
     public ClientDto getClientByEmail(String email) throws ResourceNotFound {
@@ -84,18 +92,38 @@ public class ClientService implements IClientService {
         return modelMapper.map(client, ClientDto.class);
     }
 
+    public AddressDto addAddress(Integer id, Address address){
+        Client client = clientRepository.getById(id);
+        client.addAddress(address);
+        clientRepository.save(client);
+        return modelMapper.map(address, AddressDto.class);
+    }
+
+    @Transactional
     public ClientDto updateClient(Integer id, ClientDto updatedClient) throws ResourceNotFound {
         Client existingClient = clientRepository.findById(id).orElse(null);
         if (existingClient == null) {
             throw new ResourceNotFound();
         }
+
         if (updatedClient.getPhoneNumber() != null) {
             existingClient.setPhoneNumber(updatedClient.getPhoneNumber());
         }
-        existingClient = clientRepository.save(existingClient);
-        return modelMapper.map(existingClient, ClientDto.class);
+
+        if (updatedClient.getAddresses() != null) {
+            existingClient.getAddresses().clear();
+
+            for (AddressDto adto : updatedClient.getAddresses()) {
+                Address addr = modelMapper.map(adto, Address.class);
+                existingClient.addAddress(addr);
+            }
+        }
+
+        Client saved = clientRepository.save(existingClient);
+        return modelMapper.map(saved, ClientDto.class);
     }
 
+    @Transactional
     public void deleteClient(Integer id) throws ResourceNotFound {
         if (!clientRepository.existsById(id)) {
             throw new ResourceNotFound();
