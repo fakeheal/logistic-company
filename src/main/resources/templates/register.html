@@ -116,7 +116,7 @@
                        required>
             </div>
             <input type="hidden"
-                   th:field="*{clientDto.addressDto.formattedAddress}"
+                   th:field="*{clientDto.addresses[0].formattedAddress}"
                    id="formattedAddress">
             <input type="hidden"
                    th:field="*{clientDto.addressDto.coordinates}"
@@ -135,7 +135,7 @@
         <span> Already Registered <a th:href="@{/login}">Login</a></span>
     </div>
 </div>
-<script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&libraries=places"></script>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAxIJvVWlMNNR22-FzoJshWD5kthDBtaaU&libraries=places"></script>
 <script>
     function initAutocomplete() {
       const input = document.getElementById('autocomplete');

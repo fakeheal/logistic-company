@@ -30,19 +30,33 @@
                    required/>
         </div>
 
-        <!-- Use profile address -->
+        <!-- Create new address -->
         <div class="mb-4 flex items-center">
-            <input th:field="*{useProfileAddress}"
+            <input th:field="*{createNewAddress}"
                    type="checkbox"
-                   id="useProfileAddress"
+                   id="createNewAddress"
                    class="mr-2"/>
-            <label for="useProfileAddress">Use Profile Address</label>
+            <label for="createNewAddress">Create New Address</label>
         </div>
 
-        <!-- Profile address (readonly) -->
+        <!-- Profile address (readonly or select) -->
         <div id="profileAddressContainer" class="mb-4">
-            <label class="block mb-1">Profile Address</label>
-            <input type="text"
+            <label class="block mb-1">Your Address</label>
+
+            <select th:if="${form.addresses != null and #lists.size(form.addresses) > 0}"
+                    th:field="*{selectedSenderAddressId}"
+                    id="senderAddressSelect"
+                    class="w-full p-2 border rounded">
+                <option th:each="addr : ${form.addresses}"
+                        th:value="${addr.id}"
+                        th:text="${addr.formattedAddress + ' — ' + addr.coordinates}"
+                        th:selected="${addr.id == form.selectedSenderAddressId}">
+                    Address
+                </option>
+            </select>
+
+            <input th:if="${form.addresses == null or #lists.size(form.addresses) == 0}"
+                   type="text"
                    th:value="${form.senderAddress.formattedAddress}"
                    readonly
                    class="w-full p-2 border rounded bg-gray-100"/>
@@ -50,11 +64,11 @@
 
         <!-- Manual sender address -->
         <div id="senderAddressContainer" class="mb-4 hidden">
-            <label for="senderAutocomplete" class="block mb-1">Sender Address</label>
+            <label for="senderAutocomplete" class="block mb-1">Your Address</label>
             <input th:field="*{senderAddress.formattedAddress}"
                    type="text"
                    id="senderAutocomplete"
-                   placeholder="Start typing your address..."
+                   placeholder="Start typing the sender address..."
                    autocomplete="off"
                    class="w-full p-2 border rounded"/>
             <input th:field="*{senderAddress.coordinates}"
@@ -64,30 +78,20 @@
 
         <!-- Recipient client autocomplete -->
         <div id="recipientClientContainer" class="mb-4 relative">
-            <label for="recipientClientSearch" class="block mb-1">
-                Recipient Client
-            </label>
-
-            <!-- 1) Visible text input for typing first/last name or phone -->
+            <label for="recipientClientSearch" class="block mb-1">Recipient Client</label>
             <input type="text"
                    id="recipientClientSearch"
                    class="w-full p-2 border rounded"
                    placeholder="Type first/last name or phone…"
                    autocomplete="off" />
-
-            <!-- 2) Hidden field bound to your form’s recipientClientId -->
             <input type="hidden"
                    th:field="*{recipientClientId}"
                    id="recipientClientId" />
-
-            <!-- 3) Suggestions container (initially hidden) -->
             <div id="recipientClientSuggestions"
                  class="absolute z-10 w-full bg-white border rounded shadow mt-1 max-h-48 overflow-y-auto hidden">
-                <!-- JS will inject <div> items here -->
             </div>
         </div>
 
-        <!-- Deliver to office? -->
         <div class="mb-4 flex items-center">
             <input th:field="*{deliverToOffice}"
                    type="checkbox"
@@ -159,171 +163,124 @@
 <script th:inline="javascript">
     /*<![CDATA[*/
     document.addEventListener('DOMContentLoaded', () => {
-      const searchInput    = document.getElementById('recipientClientSearch');
-      const hiddenClientId = document.getElementById('recipientClientId');
-      const suggestionsBox = document.getElementById('recipientClientSuggestions');
 
-      // Helper: clear any suggestions
-      function clearSuggestions() {
-        suggestionsBox.innerHTML = '';
-        suggestionsBox.classList.add('hidden');
-      }
+        // --- Recipient client autocomplete ---
+        const searchInput    = document.getElementById('recipientClientSearch');
+        const hiddenClientId = document.getElementById('recipientClientId');
+        const suggestionsBox = document.getElementById('recipientClientSuggestions');
 
-      // Helper: show matched clients as clickable items
-      function showSuggestions(matches) {
-        if (!matches.length) {
-          clearSuggestions();
-          return;
-        }
-        suggestionsBox.innerHTML = '';
-        matches.forEach(c => {
-          // Safely get phone number
-          const phoneNum = (c.clientDto && c.clientDto.phoneNumber)
-                             ? c.clientDto.phoneNumber
-                             : '';
-          const label = `${c.firstName} ${c.lastName}` + (phoneNum ? ` – ${phoneNum}` : '');
-          const item  = document.createElement('div');
-          item.classList.add('px-2', 'py-1', 'hover:bg-gray-200', 'cursor-pointer');
-          item.textContent       = label;
-          item.dataset.clientId  = c.id;
+        const clearSuggestions = () => {
+            suggestionsBox.innerHTML = '';
+            suggestionsBox.classList.add('hidden');
+        };
 
-          item.addEventListener('click', () => {
-            // 1) set the visible text
-            searchInput.value    = label;
-            // 2) set the hidden form field
-            hiddenClientId.value = c.id;
-            // 3) close suggestions
-            clearSuggestions();
-          });
-          suggestionsBox.appendChild(item);
-        });
-        suggestionsBox.classList.remove('hidden');
-      }
+        const showSuggestions = (matches) => {
+            if (!matches.length) { clearSuggestions(); return; }
+            suggestionsBox.innerHTML = '';
+            matches.forEach(c => {
+                const phoneNum = (c.clientDto && c.clientDto.phoneNumber) ? c.clientDto.phoneNumber : '';
+                const label = `${c.firstName} ${c.lastName}` + (phoneNum ? ` – ${phoneNum}` : '');
+                const item  = document.createElement('div');
+                item.classList.add('px-2','py-1','hover:bg-gray-200','cursor-pointer');
+                item.textContent = label;
+                item.dataset.clientId = c.id;
+                item.addEventListener('click', () => {
+                    searchInput.value = label;
+                    hiddenClientId.value = c.id;
+                    clearSuggestions();
+                });
+                suggestionsBox.appendChild(item);
+            });
+            suggestionsBox.classList.remove('hidden');
+        };
 
-      // On every input event, filter the in‐memory allClients array
-      searchInput.addEventListener('input', () => {
-        const query = searchInput.value.trim().toLowerCase();
-        hiddenClientId.value = ''; // clear previous selection
-
-        if (!query) {
-          clearSuggestions();
-          return;
-        }
-
-        // Filter by “firstName lastName” or phoneNumber containing the query
-        const matches = allUsers.filter(c => {
-          const fullName = (c.firstName + ' ' + c.lastName).toLowerCase();
-          // Safely get phone number for filtering
-          const phone    = (c.clientDto && c.clientDto.phoneNumber)
-                             ? c.clientDto.phoneNumber.toLowerCase()
-                             : '';
-          return fullName.includes(query) || phone.includes(query);
+        searchInput.addEventListener('input', () => {
+            const query = searchInput.value.trim().toLowerCase();
+            hiddenClientId.value = '';
+            if (!query) { clearSuggestions(); return; }
+            const matches = allUsers.filter(c => {
+                const fullName = (c.firstName + ' ' + c.lastName).toLowerCase();
+                const phone    = (c.clientDto && c.clientDto.phoneNumber) ? c.clientDto.phoneNumber.toLowerCase() : '';
+                return fullName.includes(query) || phone.includes(query);
+            });
+            showSuggestions(matches.slice(0,10));
         });
 
-        // Show up to 10 matches
-        showSuggestions(matches.slice(0, 10));
-      });
+        document.addEventListener('click', (e) => {
+            if (!suggestionsBox.contains(e.target) && e.target !== searchInput) clearSuggestions();
+        });
 
-      // If user clicks outside, hide suggestions
-      document.addEventListener('click', (e) => {
-        const outside =
-          !suggestionsBox.contains(e.target) && e.target !== searchInput;
-        if (outside) {
-          clearSuggestions();
-        }
-      });
+        // --- Toggle Create New Address ---
+        const createNew = document.getElementById('createNewAddress');
+        const profileCont = document.getElementById('profileAddressContainer');
+        const senderCont = document.getElementById('senderAddressContainer');
+        const senderInput = document.getElementById('senderAutocomplete');
+
+        let senderAutocompleteInitialized = false;
+
+        const toggleSender = () => {
+            if (createNew.checked) {
+                profileCont.style.display = 'none';
+                senderCont.style.display = 'block';
+
+                // initialize Google autocomplete once
+                if (!senderAutocompleteInitialized && window.google && google.maps && google.maps.places) {
+                    const autocomplete = new google.maps.places.Autocomplete(senderInput);
+                    autocomplete.setFields(['formatted_address','geometry']);
+                    autocomplete.addListener('place_changed', () => {
+                        const place = autocomplete.getPlace();
+                        if (!place.geometry) return;
+                        senderInput.value = place.formatted_address;
+                        document.getElementById('senderCoordinates').value =
+                            place.geometry.location.lat() + ',' + place.geometry.location.lng();
+                    });
+                    senderAutocompleteInitialized = true;
+                }
+
+            } else {
+                profileCont.style.display = 'block';
+                senderCont.style.display = 'none';
+            }
+        };
+
+        createNew.addEventListener('change', toggleSender);
+        toggleSender(); // initialize state
+
+        // --- Toggle deliver to office ---
+        const deliverChk = document.getElementById('deliverToOffice');
+        const officeCont = document.getElementById('officeContainer');
+        const recipAddr  = document.getElementById('recipientAddressContainer');
+
+        const toggleDeliver = () => {
+            if (deliverChk.checked) {
+                officeCont.style.display = 'block';
+                recipAddr.style.display = 'none';
+            } else {
+                officeCont.style.display = 'none';
+                recipAddr.style.display = 'block';
+            }
+        };
+        deliverChk.addEventListener('change', toggleDeliver);
+        toggleDeliver();
+
+        // --- Calculate price ---
+        document.getElementById('calculatePrice').addEventListener('click', () => {
+            const wt  = document.getElementById('weight').value;
+            const toO = deliverChk.checked;
+            if (!wt) { alert('Enter weight first'); return; }
+            fetch(`/api/shipments/price?weight=${wt}&deliverToOffice=${toO}`)
+                .then(r => r.json())
+                .then(data => {
+                    document.getElementById('price').value = data.price;
+                    document.getElementById('submitBtn').disabled = false;
+                });
+        });
+
     });
     /*]]>*/
 </script>
 
-
-<!-- Google Maps Places API -->
-<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD-6hhLmJouM3QMHt1qB8cblAOB_lz1ua0&libraries=places&callback=initAutocomplete" async defer></script>
-<script th:inline="javascript">
-    /*<![CDATA[*/
-    function initAutocomplete() {
-      // Sender address autocomplete
-      const senderInput = document.getElementById('senderAutocomplete');
-      const senderAuto  = new google.maps.places.Autocomplete(senderInput);
-      senderAuto.setFields(['formatted_address','geometry']);
-      senderAuto.addListener('place_changed', () => {
-        const p = senderAuto.getPlace();
-        if (!p.geometry) return;
-        senderInput.value = p.formatted_address;
-        document.getElementById('senderCoordinates')
-                .value = p.geometry.location.lat() + ',' + p.geometry.location.lng();
-      });
-
-      // Recipient address autocomplete
-      const recInput = document.getElementById('recipientAutocomplete');
-      const recAuto  = new google.maps.places.Autocomplete(recInput);
-      recAuto.setFields(['formatted_address','geometry']);
-      recAuto.addListener('place_changed', () => {
-        const p = recAuto.getPlace();
-        if (!p.geometry) return;
-        recInput.value = p.formatted_address;
-        document.getElementById('recipientCoordinates')
-                .value = p.geometry.location.lat() + ',' + p.geometry.location.lng();
-      });
-    }
-
-    document.addEventListener('DOMContentLoaded', () => {
-      initAutocomplete();
-
-      // Toggle sender address vs profile
-      const useProfile = document.getElementById('useProfileAddress');
-      const profCont   = document.getElementById('profileAddressContainer');
-      const senderCont = document.getElementById('senderAddressContainer');
-      const toggleSender = () => {
-        if (useProfile.checked) {
-          profCont.classList.remove('hidden');
-          senderCont.classList.add('hidden');
-        } else {
-          profCont.classList.add('hidden');
-          senderCont.classList.remove('hidden');
-        }
-      };
-      useProfile.addEventListener('change', toggleSender);
-      toggleSender();
-
-      // Toggle office vs recipient address
-      const deliverChk = document.getElementById('deliverToOffice');
-      const officeCont = document.getElementById('officeContainer');
-      const recipAddr  = document.getElementById('recipientAddressContainer');
-      const toggleDeliver = () => {
-        if (deliverChk.checked) {
-          officeCont.classList.remove('hidden');
-          recipAddr.classList.add('hidden');
-        } else {
-          officeCont.classList.add('hidden');
-          recipAddr.classList.remove('hidden');
-        }
-      };
-      deliverChk.addEventListener('change', toggleDeliver);
-      toggleDeliver();
-
-      // Load clients
-      fetch(`${apiBase}/api/clients`)
-        .then(r => r.json())
-        .then(clients => {
-          const sel = document.getElementById('clientSelect');
-          clients.forEach(c => sel.add(new Option(`${c.firstName} ${c.lastName}`, c.id)));
-        });
-
-      // Price calculation
-      document.getElementById('calculatePrice').addEventListener('click', () => {
-        const wt  = document.getElementById('weight').value;
-        const toO = deliverChk.checked;
-        if (!wt) { alert('Enter weight first'); return; }
-        fetch(`${apiBase}/api/shipments/price?weight=${wt}&deliverToOffice=${toO}`)
-          .then(r => r.json())
-          .then(data => {
-            document.getElementById('price').value = data.price;
-            document.getElementById('submitBtn').disabled = false;
-          });
-      });
-    });
-    /*]]>*/
-</script>
+<!-- Google Maps API -->
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAxIJvVWlMNNR22-FzoJshWD5kthDBtaaU&libraries=places" async defer></script>
 </body>
 </html>
