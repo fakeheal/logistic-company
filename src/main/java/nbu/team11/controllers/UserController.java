@@ -83,7 +83,7 @@ public class UserController extends AbstractBaseController {
         }
 
         ClientDto client = new ClientDto();
-        client.setAddressDto(new AddressDto());
+        client.getAddresses().add(new AddressDto());
         userDto.setClientDto(client);
 
         model.addAttribute("user", userDto);

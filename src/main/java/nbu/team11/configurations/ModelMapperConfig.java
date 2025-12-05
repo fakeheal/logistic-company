@@ -7,10 +7,13 @@ import nbu.team11.repositories.ClientRepository;
 import nbu.team11.repositories.EmployeeRepository;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeMap;
+import org.modelmapper.TypeToken;
 import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import java.util.List;
 
 @Configuration
 public class ModelMapperConfig {
@@ -39,12 +42,14 @@ public class ModelMapperConfig {
 
         modelMapper.typeMap(Address.class, AddressDto.class)
                 .addMappings(mapping -> {
+                    mapping.map(src -> src.getId(),                    AddressDto::setId);
                     mapping.map(src -> src.getCoordinates(),     AddressDto::setCoordinates);
                     mapping.map(src -> src.getFormattedAddress(),     AddressDto::setFormattedAddress);
                 });
 
         modelMapper.typeMap(AddressDto.class, Address.class)
                 .addMappings(mapping -> {
+                    mapping.map(src -> src.getId(),                       Address::setId);
                     mapping.map(src -> src.getCoordinates(),     Address::setCoordinates);
                     mapping.map(src -> src.getFormattedAddress(),     Address::setFormattedAddress);
                 });
@@ -65,11 +70,15 @@ public class ModelMapperConfig {
                 var client = clientRepository.findByUserId(source.getId());
                 if (client != null) {
                     ClientDto clientDto = modelMapper.map(client, ClientDto.class);
-                    dest.setClientDto(clientDto);
-                    if (client.getAddress() != null) {
-                        AddressDto addressDto = modelMapper.map(client.getAddress(), AddressDto.class);
-                        clientDto.setAddressDto(addressDto);
+                    // map addresses list explicitly (in case strict mapping didn't)
+                    if (client.getAddresses() != null && !client.getAddresses().isEmpty()) {
+                        List<AddressDto> addressDtos = modelMapper.map(
+                                client.getAddresses(),
+                                new TypeToken<List<AddressDto>>() {}.getType()
+                        );
+                        clientDto.setAddresses(addressDtos);
                     }
+                    dest.setClientDto(clientDto);
                 }
             } else if (source.getRole() == Role.EMPLOYEE) {
                 var employee = employeeRepository.findByUserId(source.getId());
@@ -95,11 +104,14 @@ public class ModelMapperConfig {
                 var client = clientRepository.findByUserId(source.getId());
                 if (client != null) {
                     ClientDto clientDto = modelMapper.map(client, ClientDto.class);
-                    dest.setClientDto(clientDto);
-                    if (client.getAddress() != null) {
-                        AddressDto addressDto = modelMapper.map(client.getAddress(), AddressDto.class);
-                        clientDto.setAddressDto(addressDto);
+                    if (client.getAddresses() != null && !client.getAddresses().isEmpty()) {
+                        List<AddressDto> addressDtos = modelMapper.map(
+                                client.getAddresses(),
+                                new TypeToken<List<AddressDto>>() {}.getType()
+                        );
+                        clientDto.setAddresses(addressDtos);
                     }
+                    dest.setClientDto(clientDto);
                 }
             } else if (source.getRole() == Role.EMPLOYEE) {
                 var employee = employeeRepository.findByUserId(source.getId());
@@ -153,10 +165,12 @@ public class ModelMapperConfig {
                     mapping.map(ShipmentDto::getRecipientAddress,Shipment::setRecipientAddress);
                 });
 
+        // Client -> ClientDto: map phone and addresses list
         modelMapper.typeMap(Client.class, ClientDto.class)
                 .addMappings(mapping -> {
+                    mapping.map(Client::getId,   ClientDto::setId);
                     mapping.map(Client::getPhoneNumber,   ClientDto::setPhoneNumber);
-                    mapping.map(src -> src.getAddress(),  ClientDto::setAddressDto);
+                    mapping.map(src -> src.getAddresses(),  ClientDto::setAddresses);
                 });
 
         modelMapper.typeMap(Office.class, OfficeDto.class)
