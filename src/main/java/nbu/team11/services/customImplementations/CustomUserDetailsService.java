@@ -5,6 +5,7 @@ import java.util.Collection;
 
 import nbu.team11.dtos.UserDto;
 import nbu.team11.entities.User;
+import nbu.team11.entities.enums.Role;
 import nbu.team11.repositories.UserRepository;
 import nbu.team11.services.customImplementations.models.CustomUserDetails;
 import org.modelmapper.ModelMapper;
@@ -33,10 +34,10 @@ public class CustomUserDetailsService implements UserDetailsService {
         }
 
         UserDto userDto = modelMapper.map(user, UserDto.class);
-        return new CustomUserDetails(user.getPassword(), user.getEmail(), authorities(), userDto);
+        return new CustomUserDetails(user.getPassword(), user.getEmail(), authorities(user.getRole().name()), userDto);
     }
 
-    public Collection<? extends GrantedAuthority> authorities() {
-        return Arrays.asList(new SimpleGrantedAuthority("USER"));
+    public Collection<? extends GrantedAuthority> authorities(String role) {
+        return Arrays.asList(new SimpleGrantedAuthority(role));
     }
 }
