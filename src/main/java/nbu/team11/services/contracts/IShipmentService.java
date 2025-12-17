@@ -20,7 +20,7 @@ public interface IShipmentService {
 
     List<Shipment> getUndeliveredShipments();
 
-    Shipment registerShipment(ShipmentDto shipment, Authentication authentication)
+    Shipment registerShipmentByClient(ShipmentDto shipment, Authentication authentication)
             throws UnauthorizedAccess, ResourceNotFound;
 
     List<Shipment> getShipmentsForClient(Authentication authentication) throws UnauthorizedAccess;

@@ -2,14 +2,17 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <title>Register Shipment</title>
+
     <script th:inline="javascript">
         /*<![CDATA[*/
         const apiBase = /*[[@{/}]]*/ '';
         const allUsers = /*[[${users}]]*/ [];
         /*]]>*/
     </script>
+
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss/dist/tailwind.min.css"/>
 </head>
+
 <body>
 <div th:fragment="registerShipmentPage">
     <form th:action="@{/client/registerShipment}"
@@ -79,14 +82,17 @@
         <!-- Recipient client autocomplete -->
         <div id="recipientClientContainer" class="mb-4 relative">
             <label for="recipientClientSearch" class="block mb-1">Recipient Client</label>
+
             <input type="text"
                    id="recipientClientSearch"
                    class="w-full p-2 border rounded"
                    placeholder="Type first/last name or phone…"
                    autocomplete="off" />
+
             <input type="hidden"
                    th:field="*{recipientClientId}"
                    id="recipientClientId" />
+
             <div id="recipientClientSuggestions"
                  class="absolute z-10 w-full bg-white border rounded shadow mt-1 max-h-48 overflow-y-auto hidden">
             </div>
@@ -108,7 +114,7 @@
                     class="w-full p-2 border rounded">
                 <option th:each="office : ${offices}"
                         th:value="${office.id}"
-                        th:text="${office.title}">
+                        th:text="${office.title + ' - ' + office.addressDto.formattedAddress}">
                     Office Name
                 </option>
             </select>
@@ -164,10 +170,16 @@
     /*<![CDATA[*/
     document.addEventListener('DOMContentLoaded', () => {
 
+        const form = document.querySelector('form[action="/client/registerShipment"], form[method="post"]') || document.querySelector('form');
+
         // --- Recipient client autocomplete ---
-        const searchInput    = document.getElementById('recipientClientSearch');
-        const hiddenClientId = document.getElementById('recipientClientId');
-        const suggestionsBox = document.getElementById('recipientClientSuggestions');
+        const searchInput    = form.querySelector('#recipientClientSearch');
+        const hiddenClientId = form.querySelector('#recipientClientId');
+        const suggestionsBox = form.querySelector('#recipientClientSuggestions');
+
+        const getCandidateId = (c) => {
+            return (c && (c.id ?? c.clientId ?? c.clientDto?.id ?? c.clientDto?.clientId)) ?? null;
+        };
 
         const clearSuggestions = () => {
             suggestionsBox.innerHTML = '';
@@ -175,43 +187,60 @@
         };
 
         const showSuggestions = (matches) => {
-            if (!matches.length) { clearSuggestions(); return; }
+            if (!matches.length) {
+                clearSuggestions();
+                return;
+            }
             suggestionsBox.innerHTML = '';
-            matches.forEach(c => {
+            matches.slice(0, 10).forEach(c => {
                 const phoneNum = (c.clientDto && c.clientDto.phoneNumber) ? c.clientDto.phoneNumber : '';
                 const label = `${c.firstName} ${c.lastName}` + (phoneNum ? ` – ${phoneNum}` : '');
+
                 const item  = document.createElement('div');
                 item.classList.add('px-2','py-1','hover:bg-gray-200','cursor-pointer');
-                item.textContent = label;
-                item.dataset.clientId = c.id;
+
+                const id = getCandidateId(c);
+                item.textContent = `${label} (id: ${id})`;
+                item.dataset.clientId = id ?? '';
+
                 item.addEventListener('click', () => {
                     searchInput.value = label;
-                    hiddenClientId.value = c.id;
+                    hiddenClientId.value = id ?? '';
+
                     clearSuggestions();
                 });
+
                 suggestionsBox.appendChild(item);
             });
+
             suggestionsBox.classList.remove('hidden');
         };
 
         searchInput.addEventListener('input', () => {
             const query = searchInput.value.trim().toLowerCase();
+
             hiddenClientId.value = '';
-            if (!query) { clearSuggestions(); return; }
+
+            if (!query) {
+                clearSuggestions();
+                setDebug('');
+                return;
+            }
+
             const matches = allUsers.filter(c => {
-                const fullName = (c.firstName + ' ' + c.lastName).toLowerCase();
-                const phone    = (c.clientDto && c.clientDto.phoneNumber) ? c.clientDto.phoneNumber.toLowerCase() : '';
+                const fullName = ((c.firstName ?? '') + ' ' + (c.lastName ?? '')).toLowerCase();
+                const phone    = (c.clientDto && c.clientDto.phoneNumber) ? String(c.clientDto.phoneNumber).toLowerCase() : '';
                 return fullName.includes(query) || phone.includes(query);
             });
-            showSuggestions(matches.slice(0,10));
+
+            showSuggestions(matches);
         });
 
         document.addEventListener('click', (e) => {
             if (!suggestionsBox.contains(e.target) && e.target !== searchInput) clearSuggestions();
         });
 
-        // --- Toggle Create New Address ---
-        const createNew = document.getElementById('createNewAddress');
+        const createNew = form.querySelector('#createNewAddress');
         const profileCont = document.getElementById('profileAddressContainer');
         const senderCont = document.getElementById('senderAddressContainer');
         const senderInput = document.getElementById('senderAutocomplete');
@@ -247,7 +276,7 @@
         toggleSender(); // initialize state
 
         // --- Toggle deliver to office ---
-        const deliverChk = document.getElementById('deliverToOffice');
+        const deliverChk = form.querySelector('#deliverToOffice');
         const officeCont = document.getElementById('officeContainer');
         const recipAddr  = document.getElementById('recipientAddressContainer');
 

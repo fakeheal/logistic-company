@@ -28,8 +28,9 @@ public class Shipment {
     @JoinColumn(name = "TakeFromClientAddress")
     private boolean takeFromClientAddress;
 
+    //Employee id may be null if client submits the shipment by himself
     @ManyToOne
-    @JoinColumn(name = "EmployeeId", nullable = false)
+    @JoinColumn(name = "EmployeeId")
     private Employee employee;
 
     @ManyToOne
@@ -68,7 +69,7 @@ public class Shipment {
     private boolean payed;
 
     @NotBlank(message = "Unique ID cannot be blank!")
-    @Size(min = 10, max = 20, message = "Unique id has to be between 5 and 30 characters!")
+    @Size(message = "Unique id has to be between 5 and 30 characters!")
     @Column(name = "uniqueId", nullable = false, unique = true)
     private String uniqueId;
 

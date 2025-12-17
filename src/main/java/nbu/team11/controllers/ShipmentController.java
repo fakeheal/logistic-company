@@ -83,11 +83,9 @@ public class ShipmentController {
 
         ClientDto client = clientService.getClientByEmail(auth.getName());
 
-        // If client has addresses, add them to the form and choose the first as default
         if (client.getAddresses() != null && !client.getAddresses().isEmpty()) {
             form.setAddresses(client.getAddresses()); // full list for the view
-            // choose a default selected address id if AddressDto has `id`
-            // otherwise copy the first AddressDto into senderAddress (existing behavior)
+
             AddressDto first = client.getAddresses().get(0);
             if (first.getId() != null) {
                 form.setSelectedSenderAddressId(first.getId());
@@ -137,7 +135,7 @@ public class ShipmentController {
 
         dto.setPrice(form.getPrice());
 
-        shipmentService.registerShipment(dto, auth);
+        shipmentService.registerShipmentByClient(dto, auth);
         return "redirect:/shipments/client";
     }
 
