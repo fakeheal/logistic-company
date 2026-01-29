@@ -1,6 +1,15 @@
 <!-- component -->
 <section class="container mx-auto p-6 font-mono">
-  <div class="w-full mb-8 overflow-hidden rounded-lg shadow-lg">
+  <div class="w-full mb-8 overflow-hidden rounded-lg shadow-lg" th:if="${#lists.isEmpty(shipments)}">
+    <div class="w-full p-8 text-center">
+      <p class="text-xl text-gray-600 dark:text-gray-400">You don't have any shipments yet.</p>
+      <a th:href="@{/client/registerShipment}"
+         class="mt-4 inline-block px-6 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700">
+        Register Your First Shipment
+      </a>
+    </div>
+  </div>
+  <div class="w-full mb-8 overflow-hidden rounded-lg shadow-lg" th:if="${!#lists.isEmpty(shipments)}">
     <div class="w-full overflow-x-auto">
       <table class="w-full">
         <thead>
@@ -18,13 +27,13 @@
         </thead>
         <tbody class="bg-white">
           <tr class="text-gray-700" th:each="shipment, iterStat : ${shipments}">
-            <td class="px-4 py-3 text-sm border" th:text = "${shipment.recipient.user.getFullName}"></td>
-            <td class="px-4 py-3 text-sm border" th:text = "${shipment.recipientAddress.getFullAddress}"></td>
-            <td class="px-4 py-3 text-sm border" th:text = "${shipment.sender.user.getFullName}"></td>
-            <td class="px-4 py-3 text-sm border" th:text = "${shipment.senderAddress.getFullAddress}"></td>
+            <td class="px-4 py-3 text-sm border" th:text = "${shipment.recipientClient.userFullName}"></td>
+            <td class="px-4 py-3 text-sm border" th:text = "${shipment.recipientAddress?.formattedAddress}"></td>
+            <td class="px-4 py-3 text-sm border" th:text = "${shipment.senderClient.userFullName}"></td>
+            <td class="px-4 py-3 text-sm border" th:text = "${shipment.senderAddress?.formattedAddress}"></td>
             <td class="px-4 py-3 text-sm border" th:text = "${shipment.price}"></td>
             <td class="px-4 py-3 text-sm border" th:text = "${shipment.weight}"></td>
-            <td class="px-4 py-3 text-sm border" th:text = "${shipment.office.getTitle()}"></td>
+            <td class="px-4 py-3 text-sm border" th:text = "${shipment.receivingOffice?.title}"></td>
             <td class="px-4 py-3 text-sm border" th:text = "${shipment.status}"></td>
             <td class="px-4 py-3 text-sm border" th:text = "${shipment.uniqueID}"></td>
           </tr>

@@ -170,6 +170,7 @@ public class ModelMapperConfig {
                 .addMappings(mapping -> {
                     mapping.map(Client::getId,   ClientDto::setId);
                     mapping.map(Client::getPhoneNumber,   ClientDto::setPhoneNumber);
+                    mapping.map(src -> src.getUser().getFullName(), ClientDto::setUserFullName);
                     mapping.map(src -> src.getAddresses(),  ClientDto::setAddresses);
                 });
 

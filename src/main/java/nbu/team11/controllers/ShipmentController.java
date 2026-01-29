@@ -1,9 +1,11 @@
 package nbu.team11.controllers;
 
+import nbu.team11.controllers.forms.EmployeeRegisterShipmentForm;
 import nbu.team11.controllers.forms.RegisterShipmentForm;
 import nbu.team11.dtos.*;
 import nbu.team11.entities.Address;
 import nbu.team11.entities.Shipment;
+import nbu.team11.entities.enums.Role;
 import nbu.team11.entities.enums.Status;
 import nbu.team11.services.*;
 import nbu.team11.services.exceptions.ResourceNotFound;
@@ -94,7 +96,9 @@ public class ShipmentController {
             }
         }
 
-        List<UserDtoSanitized> allUsers = this.userService.getAllUsers();
+        List<UserDtoSanitized> allUsers = this.userService.getAllUsers().stream()
+                .filter(user -> user.getRole() == Role.CLIENT)
+                .collect(Collectors.toList());
         model.addAttribute("users", allUsers);
 
         model.addAttribute("title", "Register Shipment");
@@ -137,6 +141,51 @@ public class ShipmentController {
 
         shipmentService.registerShipmentByClient(dto, auth);
         return "redirect:/shipments/client";
+    }
+
+    @GetMapping("/employee/registerShipment")
+    public String showEmployeeRegisterForm(Model model, Authentication auth) throws ResourceNotFound {
+        EmployeeRegisterShipmentForm form = new EmployeeRegisterShipmentForm();
+        form.setDeliverToOffice(true);
+
+        List<UserDtoSanitized> allUsers = this.userService.getAllUsers().stream()
+                .filter(user -> user.getRole() == Role.CLIENT)
+                .collect(Collectors.toList());
+        model.addAttribute("users", allUsers);
+
+        model.addAttribute("title", "Register Shipment");
+        model.addAttribute("form", form);
+        model.addAttribute("offices", officeService.getAll());
+        return render(model, "employee/registerShipment");
+    }
+
+    @PostMapping("/employee/registerShipment")
+    public String submitEmployeeRegisterForm(@ModelAttribute EmployeeRegisterShipmentForm form,
+                                             Authentication auth) throws ResourceNotFound {
+        ShipmentDto dto = new ShipmentDto();
+        dto.setWeight(form.getWeight());
+
+        ClientDto sender = clientService.getClientById(form.getSenderClientId());
+        dto.setSenderClient(sender);
+
+        OfficeDto sendingOffice = officeService.getById(form.getSendingOfficeId());
+        dto.setSendingOffice(sendingOffice);
+        dto.setSenderAddress(sendingOffice.getAddressDto());
+
+        ClientDto recipient = clientService.getClientById(form.getRecipientClientId());
+        dto.setRecipientClient(recipient);
+
+        if (form.isDeliverToOffice()) {
+            OfficeDto office = officeService.getById(form.getOfficeId());
+            dto.setReceivingOffice(office);
+        } else {
+            dto.setRecipientAddress(form.getRecipientAddress());
+        }
+
+        dto.setPrice(form.getPrice());
+
+        shipmentService.registerShipmentByEmployee(dto, auth);
+        return "redirect:/shipments/all";
     }
 
 

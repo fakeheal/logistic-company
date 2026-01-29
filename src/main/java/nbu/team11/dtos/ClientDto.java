@@ -11,6 +11,7 @@ import java.util.List;
 public class ClientDto {
     private Integer id;
     private String phoneNumber;
+    private String userFullName;
 
     private List<AddressDto> addresses = new ArrayList<>();
 

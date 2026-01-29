@@ -140,6 +140,85 @@ public class ShipmentService implements IShipmentService {
         return saved;
     }
 
+    public Shipment registerShipmentByEmployee(ShipmentDto dto, Authentication authentication) {
+
+        if (dto.getWeight() <= 0) throw new IllegalArgumentException("Weight must be positive");
+        if (dto.getSenderAddress() == null) throw new IllegalArgumentException("Sender address must be provided");
+        if (dto.getReceivingOffice() == null && dto.getRecipientAddress() == null)
+            throw new IllegalArgumentException("Recipient address must be provided for non-office delivery");
+
+        Client sender = clientRepository.findById(dto.getSenderClient().getId())
+                .orElseThrow(() -> new IllegalArgumentException("Sender client not found"));
+
+        Client recipient = clientRepository.findById(dto.getRecipientClient().getId())
+                .orElseThrow(() -> new IllegalArgumentException("Recipient client not found"));
+
+        Address recipientAddress = (dto.getRecipientAddress() == null) ? null
+                : addressRepository.findById(dto.getRecipientAddress().getId())
+                .orElseThrow(() -> new IllegalArgumentException("Recipient address not found"));
+
+        Office receivingOffice = (dto.getReceivingOffice() == null) ? null
+                : officeRepository.findById(dto.getReceivingOffice().getId())
+                .orElseThrow(() -> new IllegalArgumentException("Office not found"));
+
+        Address senderAddress = (dto.getSenderAddress() == null) ? null
+                : addressRepository.findById(dto.getSenderAddress().getId())
+                .orElseThrow(() -> new IllegalArgumentException("Sender address not found"));
+
+        Office sendingOffice = (dto.getSendingOffice() == null) ? null
+                : officeRepository.findById(dto.getSendingOffice().getId())
+                .orElseThrow(() -> new IllegalArgumentException("Sending office not found"));
+
+        // Get employee from authentication
+        Integer userId = getUserIdFromAuthentication(authentication);
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+        nbu.team11.entities.Employee employee = employeeRepository.findByUserId(userId);
+        if (employee == null) {
+            throw new IllegalArgumentException("Employee not found for user");
+        }
+
+        Shipment shipment = new Shipment();
+        shipment.setEmployee(employee);
+
+        if (dto.getReceivingOffice() != null){
+            shipment.setDeliverToOffice(true);
+            shipment.setReceivingOffice(receivingOffice);
+        }
+        else{
+            shipment.setDeliverToOffice(false);
+            shipment.setRecipientAddress(recipientAddress);
+        }
+
+        if(dto.getSenderAddress() != null){
+            shipment.setSenderAddress(senderAddress);
+            shipment.setTakeFromClientAddress(true);
+        }
+        else{
+            shipment.setTakeFromClientAddress(false);
+        }
+
+        if (sendingOffice != null) {
+            shipment.setSendingOffice(sendingOffice);
+        }
+
+        shipment.setSenderClient(sender);
+        shipment.setRecipientClient(recipient);
+        shipment.setWeight(dto.getWeight());
+        shipment.setPrice(dto.getPrice());
+        shipment.setPayed(false);
+        shipment.setUniqueId(UUID.randomUUID().toString());
+
+        Shipment saved = shipmentRepository.save(shipment);
+
+        ShipmentStatus initialStatus = new ShipmentStatus();
+        initialStatus.setShipment(saved);
+        initialStatus.setStatus(Status.SUBMITTED);
+        shipmentStatusRepository.save(initialStatus);
+
+        return saved;
+    }
+
     public List<Shipment> getShipmentsForClient(Authentication authentication) {
         if (isClient(authentication)) {
             Integer userId = getUserIdFromAuthentication(authentication);
