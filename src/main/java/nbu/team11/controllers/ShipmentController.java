@@ -18,6 +18,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -192,9 +193,14 @@ public class ShipmentController {
 
     @GetMapping("/api/shipments/price")
     @ResponseBody
-    public Map<String, Double> apiPrice(@RequestParam double weight,
+    public Map<String, BigDecimal> apiPrice(@RequestParam double weight,
                                         @RequestParam boolean deliverToOffice) {
-        return Map.of("price", shipmentService.calculatePrice(weight, deliverToOffice));
+        BigDecimal price = shipmentService.calculatePrice(weight, deliverToOffice)
+                .setScale(2, RoundingMode.HALF_UP);
+
+        return Map.of(
+                "price", price
+        );
     }
 
     @GetMapping("/shipments/client")

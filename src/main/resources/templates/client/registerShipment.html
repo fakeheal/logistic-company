@@ -10,10 +10,12 @@
         /*]]>*/
     </script>
 
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss/dist/tailwind.min.css"/>
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/tailwindcss/dist/tailwind.min.css"/>
 </head>
 
 <body>
+
 <div th:fragment="registerShipmentPage">
     <form th:action="@{/client/registerShipment}"
           th:object="${form}"
@@ -143,25 +145,23 @@
             </button>
         </div>
 
-        <!-- Price display -->
         <div class="mb-4">
-            <label for="price" class="block mb-1">Price</label>
-            <input th:field="*{price}"
-                   type="text"
-                   id="price"
+            <label class="block mb-1">Price</label>
+            <input type="hidden"
+                   th:field="*{price}"
+                   id="price"/>
+            <input type="text"
+                   id="priceDisplay"
                    readonly
-                   class="w-full p-2 border rounded bg-gray-100"/>
+                   class="w-full p-2 border rounded bg-gray-100 font-semibold"/>
         </div>
 
-        <!-- Submit -->
-        <div>
-            <button type="submit"
-                    id="submitBtn"
-                    class="px-4 py-2 bg-green-600 text-white rounded disabled:opacity-50"
-                    disabled>
-                Submit
-            </button>
-        </div>
+        <button type="submit"
+                id="submitBtn"
+                disabled
+                class="px-4 py-2 bg-green-600 text-white rounded disabled:opacity-50">
+            Submit
+        </button>
 
     </form>
 </div>
@@ -292,24 +292,27 @@
         deliverChk.addEventListener('change', toggleDeliver);
         toggleDeliver();
 
-        // --- Calculate price ---
         document.getElementById('calculatePrice').addEventListener('click', () => {
-            const wt  = document.getElementById('weight').value;
-            const toO = deliverChk.checked;
-            if (!wt) { alert('Enter weight first'); return; }
-            fetch(`/api/shipments/price?weight=${wt}&deliverToOffice=${toO}`)
+            const wt = document.getElementById('weight').value;
+            if (!wt) return alert('Enter weight');
+
+            fetch(`/api/shipments/price?weight=${wt}&deliverToOffice=${deliverChk.checked}`)
                 .then(r => r.json())
-                .then(data => {
-                    document.getElementById('price').value = data.price;
+                .then(d => {
+                    const numeric = Number(d.price).toFixed(2);
+                    document.getElementById('price').value = numeric;          // submitted
+                    document.getElementById('priceDisplay').value = numeric + ' EUR'; // shown
                     document.getElementById('submitBtn').disabled = false;
                 });
         });
 
     });
-    /*]]>*/
 </script>
 
-<!-- Google Maps API -->
-<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAxIJvVWlMNNR22-FzoJshWD5kthDBtaaU&libraries=places" async defer></script>
+<script
+        src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&libraries=places&callback=initShipmentAutocomplete"
+        async defer>
+</script>
+
 </body>
 </html>

@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
+import java.math.RoundingMode;
 import java.util.*;
 
 import java.math.BigDecimal;
@@ -67,10 +68,14 @@ public class ShipmentService implements IShipmentService {
     }
 
     @Override
-    public double calculatePrice(Double weight, boolean toOffice) {
+    public BigDecimal calculatePrice(Double weight, boolean toOffice) {
         double base = toOffice ? BASE_PRICE_TO_OFFICE : BASE_PRICE_TO_ADDRESS;
-        return base + (weight * PRICE_PER_KILO);
+        double total = base + (weight * PRICE_PER_KILO);
+
+        return BigDecimal.valueOf(total)
+                .setScale(2, RoundingMode.HALF_UP);
     }
+
 
     public List<Shipment> getShipmentsByEmployeeId(Integer employeeId) {
         return shipmentRepository.findAllByEmployeeId(employeeId);

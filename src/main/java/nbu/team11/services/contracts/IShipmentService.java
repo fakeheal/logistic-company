@@ -9,10 +9,11 @@ import nbu.team11.services.exceptions.ShipmentNotFound;
 import nbu.team11.services.exceptions.UnauthorizedAccess;
 import org.springframework.security.core.Authentication;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 public interface IShipmentService {
-    double calculatePrice(Double weight, boolean toOffice);
+    BigDecimal calculatePrice(Double weight, boolean toOffice);
 
     List<Shipment> getAllShipmentsForEmployee(Authentication authentication) throws UnauthorizedAccess;
 
