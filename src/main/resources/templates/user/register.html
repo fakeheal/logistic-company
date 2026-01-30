@@ -25,10 +25,27 @@
             <span th:if="${userexist}" style="color: red;">Email is Taken</span>
         </div>
         <div class="mb-5">
-            <label for="phoneNumber" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Phone Number</label>
-            <input th:field="*{clientDto.phoneNumber}" type="text" id="phoneNumber"
-                   class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                   placeholder="+359 88 123 4567" required/>
+            <div class="mb-5">
+                <label for="phoneNumber"
+                       class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                    Phone Number
+                </label>
+                <input th:field="*{clientDto.phoneNumber}"
+                       type="text"
+                       id="phoneNumber"
+                       minlength="10"
+                       maxlength="13"
+                       pattern="^\+?[0-9]{10,13}$"
+                       title="Phone number must be 10–13 digits"
+                       placeholder="+359881234567"
+                       required
+                       class="block w-full p-2.5 text-sm
+                  bg-gray-50 border border-gray-300 text-gray-900
+                  rounded-lg focus:ring-blue-500 focus:border-blue-500
+                  dark:bg-gray-700 dark:border-gray-600
+                  dark:placeholder-gray-400 dark:text-white
+                  dark:focus:ring-blue-500 dark:focus:border-blue-500"/>
+            </div>
         </div>
         <div class="mb-5">
             <label for="autocomplete" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Address</label>
@@ -66,7 +83,13 @@
         </div>
     </form>
 </div>
+<script>
+    const phoneInput = document.getElementById('phoneNumber');
 
+    phoneInput.addEventListener('input', () => {
+        phoneInput.value = phoneInput.value.replace(/[^0-9+]/g, '');
+    });
+</script>
 <script th:inline="javascript">
     function initAutocomplete() {
         const input = document.getElementById('autocomplete');
