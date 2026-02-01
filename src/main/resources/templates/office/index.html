@@ -1,0 +1,140 @@
+<!--/*@thymesVar id="offices" type="org.springframework.data.domain.Page<nbu.team11.dtos.OfficeDto>"*/-->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:fragment="officePage">
+    <div class="container mx-auto my-12 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
+        <div class="border-b-2 border-neutral-100 p-4 dark:border-white/10">
+            <div class="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
+                <h2 class="font-semibold text-lg dark:text-white">Offices</h2>
+                <div class="flex flex-col md:flex-row gap-4 items-stretch md:items-center">
+                    <form th:action="@{/office}" method="get" class="flex gap-2">
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
+                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
+                                </svg>
+                            </div>
+                            <input type="text" name="search" th:value="${search}"
+                                   class="block w-full md:w-80 p-2 pl-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                                   placeholder="Search by address..."/>
+                        </div>
+                        <button type="submit"
+                                class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">
+                            Search
+                        </button>
+                        <a th:if="${search != null and !search.isEmpty()}" th:href="@{/office}"
+                           class="text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-4 py-2 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700">
+                            Clear
+                        </a>
+                    </form>
+                    <a href="/office/create"
+                       class="flex items-center justify-center text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                             stroke="currentColor" class="size-4 mr-2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
+                        </svg>
+                        New Office
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div th:if="${search != null and !search.isEmpty()}" class="px-4 py-2 bg-blue-50 dark:bg-gray-700">
+            <p class="text-sm text-gray-600 dark:text-gray-300">
+                Showing results for: <span class="font-medium" th:text="${search}"></span>
+                <span class="text-gray-500">(<span th:text="${offices.getTotalElements()}"></span> found)</span>
+            </p>
+        </div>
+
+        <div class="relative overflow-x-auto">
+            <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+                <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                <tr>
+                    <th scope="col" class="px-6 py-3">
+                        Title
+                    </th>
+                    <th scope="col" class="px-6 py-3">
+                        Address
+                    </th>
+                    <th scope="col" class="px-6 py-3">
+                        Coordinates
+                    </th>
+                    <th scope="col" class="px-6 py-3">
+                        <span class="sr-only">Actions</span>
+                    </th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:if="${offices.isEmpty()}">
+                    <td colspan="4" class="px-6 py-8 text-center text-gray-500 dark:text-gray-400">
+                        <div class="flex flex-col items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-12 h-12 mb-2 text-gray-400">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M6.75 21v-3.375c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21M3 3h12m-.75 4.5H21m-3.75 3.75h.008v.008h-.008v-.008Zm0 3h.008v.008h-.008v-.008Zm0 3h.008v.008h-.008v-.008Z" />
+                            </svg>
+                            <p th:if="${search != null and !search.isEmpty()}">No offices found matching your search.</p>
+                            <p th:unless="${search != null and !search.isEmpty()}">No offices found. Create your first office!</p>
+                        </div>
+                    </td>
+                </tr>
+                <tr th:each="office : ${offices}"
+                    class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
+                    <th th:text="${office.getTitle()}" scope="row"
+                        class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                        Office Name
+                    </th>
+                    <td th:text="${office.getAddressDto() != null ? office.getAddressDto().getFormattedAddress() : 'N/A'}" class="px-6 py-4">
+                        123 Main St, Sofia
+                    </td>
+                    <td th:text="${office.getAddressDto() != null ? office.getAddressDto().getCoordinates() : 'N/A'}" class="px-6 py-4">
+                        42.6977,23.3219
+                    </td>
+                    <td class="px-6 py-4 text-right">
+                        <a th:href="@{'/office/' + ${office.getId()}}"
+                           class="font-medium text-blue-600 dark:text-blue-500 hover:underline mr-3">View</a>
+                        <a th:href="@{'/office/' + ${office.getId()} + '/edit'}"
+                           class="font-medium text-blue-600 dark:text-blue-500 hover:underline">Edit</a>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="border-t-2 border-neutral-100 p-4 dark:border-white/10" th:if="${offices.getTotalPages() > 1}">
+            <div class="flex items-center justify-center mt-4">
+                <nav aria-label="Page navigation">
+                    <ul class="inline-flex -space-x-px text-sm">
+                        <!-- Previous Button -->
+                        <li>
+                            <a th:href="@{/office(page=${offices.number - 1}, size=${offices.size}, search=${search})}"
+                               th:classappend="${offices.first} ? 'pointer-events-none text-gray-400' : ''"
+                               class="flex items-center justify-center px-3 h-8 ml-0 leading-tight text-gray-500 bg-white border border-gray-300 rounded-l-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">
+                                Previous
+                            </a>
+                        </li>
+
+                        <!-- Page Numbers -->
+                        <li th:each="i : ${#numbers.sequence(0, offices.totalPages - 1)}">
+                            <a th:href="@{/office(page=${i}, size=${offices.size}, search=${search})}"
+                               th:classappend="${i == offices.number} ? 'text-blue-600 border-blue-300 bg-blue-50 dark:border-gray-700 dark:bg-gray-700 dark:text-white' : ''"
+                               class="flex items-center justify-center px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
+                               th:text="${i + 1}">
+                            </a>
+                        </li>
+
+                        <!-- Next Button -->
+                        <li>
+                            <a th:href="@{/office(page=${offices.number + 1}, size=${offices.size}, search=${search})}"
+                               th:classappend="${offices.last} ? 'pointer-events-none text-gray-400' : ''"
+                               class="flex items-center justify-center px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300 rounded-r-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">
+                                Next
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
