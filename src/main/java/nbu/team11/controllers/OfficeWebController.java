@@ -1,5 +1,7 @@
 package nbu.team11.controllers;
 
+import jakarta.validation.Valid;
+import nbu.team11.controllers.forms.CreateOfficeForm;
 import nbu.team11.dtos.OfficeDto;
 import nbu.team11.services.CustomPermissionEvaluator;
 import nbu.team11.services.OfficeService;
@@ -7,9 +9,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequestMapping("/office")
@@ -38,5 +43,35 @@ public class OfficeWebController extends AbstractBaseController {
         model.addAttribute("search", search);
 
         return "layouts/app";
+    }
+
+    @GetMapping("/create")
+    public String create(Model model) {
+        model.addAttribute("title", "Create Office");
+        model.addAttribute("content", "office/create");
+
+        if (!model.containsAttribute("form")) {
+            model.addAttribute("form", new CreateOfficeForm());
+        }
+
+        return "layouts/app";
+    }
+
+    @PostMapping("/store")
+    public String store(
+            @Valid CreateOfficeForm form,
+            BindingResult bindingResult,
+            RedirectAttributes attributes
+    ) {
+        if (bindingResult.hasErrors()) {
+            attributes.addFlashAttribute("org.springframework.validation.BindingResult.form", bindingResult);
+            attributes.addFlashAttribute("form", form);
+            return "redirect:/office/create";
+        }
+
+        officeService.create(form.getTitle(), form.getFormattedAddress(), form.getCoordinates());
+
+        attributes.addFlashAttribute("successMessage", "Office created successfully");
+        return "redirect:/office";
     }
 }

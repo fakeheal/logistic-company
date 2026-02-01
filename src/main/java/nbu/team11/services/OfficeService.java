@@ -2,6 +2,9 @@ package nbu.team11.services;
 
 import lombok.AllArgsConstructor;
 import nbu.team11.dtos.OfficeDto;
+import nbu.team11.entities.Address;
+import nbu.team11.entities.Office;
+import nbu.team11.repositories.AddressRepository;
 import nbu.team11.repositories.OfficeRepository;
 import nbu.team11.services.contracts.IOfficeService;
 import nbu.team11.services.exceptions.ResourceNotFound;
@@ -11,6 +14,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -19,6 +23,9 @@ import java.util.List;
 public class OfficeService implements IOfficeService {
     @Autowired
     private final OfficeRepository officeRepository;
+
+    @Autowired
+    private final AddressRepository addressRepository;
 
     @Autowired
     private final ModelMapper modelMapper;
@@ -47,5 +54,20 @@ public class OfficeService implements IOfficeService {
 
         return officeRepository.findAll(pageable)
                 .map(office -> modelMapper.map(office, OfficeDto.class));
+    }
+
+    @Transactional
+    public OfficeDto create(String title, String formattedAddress, String coordinates) {
+        Address address = new Address();
+        address.setFormattedAddress(formattedAddress);
+        address.setCoordinates(coordinates);
+        addressRepository.save(address);
+
+        Office office = new Office();
+        office.setTitle(title);
+        office.setAddress(address);
+        Office saved = officeRepository.save(office);
+
+        return modelMapper.map(saved, OfficeDto.class);
     }
 }
