@@ -5,15 +5,19 @@ import nbu.team11.controllers.forms.CreateOfficeForm;
 import nbu.team11.dtos.OfficeDto;
 import nbu.team11.services.CustomPermissionEvaluator;
 import nbu.team11.services.OfficeService;
+import nbu.team11.services.exceptions.ResourceNotFound;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
@@ -72,6 +76,55 @@ public class OfficeWebController extends AbstractBaseController {
         officeService.create(form.getTitle(), form.getFormattedAddress(), form.getCoordinates());
 
         attributes.addFlashAttribute("successMessage", "Office created successfully");
+        return "redirect:/office";
+    }
+
+    @GetMapping("/{id}/edit")
+    public String edit(@PathVariable Integer id, Model model) {
+        OfficeDto office;
+        try {
+            office = officeService.getById(id);
+        } catch (ResourceNotFound e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Office not found");
+        }
+
+        model.addAttribute("title", "Edit Office - " + office.getTitle());
+        model.addAttribute("content", "office/edit");
+        model.addAttribute("office", office);
+
+        if (!model.containsAttribute("form")) {
+            CreateOfficeForm form = new CreateOfficeForm();
+            form.setTitle(office.getTitle());
+            if (office.getAddressDto() != null) {
+                form.setFormattedAddress(office.getAddressDto().getFormattedAddress());
+                form.setCoordinates(office.getAddressDto().getCoordinates());
+            }
+            model.addAttribute("form", form);
+        }
+
+        return "layouts/app";
+    }
+
+    @PostMapping("/{id}/update")
+    public String update(
+            @PathVariable Integer id,
+            @Valid CreateOfficeForm form,
+            BindingResult bindingResult,
+            RedirectAttributes attributes
+    ) {
+        if (bindingResult.hasErrors()) {
+            attributes.addFlashAttribute("org.springframework.validation.BindingResult.form", bindingResult);
+            attributes.addFlashAttribute("form", form);
+            return "redirect:/office/" + id + "/edit";
+        }
+
+        try {
+            officeService.update(id, form.getTitle(), form.getFormattedAddress(), form.getCoordinates());
+        } catch (ResourceNotFound e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Office not found");
+        }
+
+        attributes.addFlashAttribute("successMessage", "Office updated successfully");
         return "redirect:/office";
     }
 }

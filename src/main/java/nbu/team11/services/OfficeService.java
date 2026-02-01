@@ -70,4 +70,19 @@ public class OfficeService implements IOfficeService {
 
         return modelMapper.map(saved, OfficeDto.class);
     }
+
+    @Transactional
+    public OfficeDto update(Integer id, String title, String formattedAddress, String coordinates) throws ResourceNotFound {
+        Office office = officeRepository.findById(id).orElseThrow(ResourceNotFound::new);
+
+        office.setTitle(title);
+
+        Address address = office.getAddress();
+        address.setFormattedAddress(formattedAddress);
+        address.setCoordinates(coordinates);
+        addressRepository.save(address);
+
+        Office saved = officeRepository.save(office);
+        return modelMapper.map(saved, OfficeDto.class);
+    }
 }
