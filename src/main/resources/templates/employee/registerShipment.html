@@ -1,0 +1,296 @@
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    const allUsers = /*[[${users}]]*/ [];
+    /*]]>*/
+</script>
+
+<form th:action="@{/employee/registerShipment}"
+      th:object="${form}"
+      method="post"
+      class="max-w-lg mx-auto my-12 p-6 bg-white dark:bg-gray-800 border rounded shadow">
+
+    <h2 class="text-2xl font-bold mb-6 dark:text-white">Register Shipment</h2>
+
+    <!-- Weight -->
+    <div class="mb-4">
+        <label for="weight" class="block mb-1 dark:text-white">Weight (kg)</label>
+        <input th:field="*{weight}"
+               type="number"
+               step="0.01"
+               id="weight"
+               class="w-full p-2 border rounded dark:bg-gray-700 dark:text-white"
+               required/>
+    </div>
+
+    <!-- Sender client autocomplete -->
+    <div id="senderClientContainer" class="mb-4 relative">
+        <label for="senderClientSearch" class="block mb-1 dark:text-white">Sender Client</label>
+
+        <input type="text"
+               id="senderClientSearch"
+               class="w-full p-2 border rounded dark:bg-gray-700 dark:text-white"
+               placeholder="Type first/last name or phone…"
+               autocomplete="off" />
+
+        <input type="hidden"
+               th:field="*{senderClientId}"
+               id="senderClientId" />
+
+        <div id="senderClientSuggestions"
+             class="absolute z-10 w-full bg-white border rounded shadow mt-1 max-h-48 overflow-y-auto hidden dark:bg-gray-700">
+        </div>
+    </div>
+
+    <!-- Sending Office -->
+    <div class="mb-4">
+        <label for="sendingOfficeSelect" class="block mb-1 dark:text-white">Sending Office</label>
+        <select th:field="*{sendingOfficeId}"
+                id="sendingOfficeSelect"
+                class="w-full p-2 border rounded dark:bg-gray-700 dark:text-white"
+                required>
+            <option value="">Select Office</option>
+            <option th:each="office : ${offices}"
+                    th:value="${office.id}"
+                    th:text="${office.title + ' - ' + office.addressDto.formattedAddress}">
+                Office Name
+            </option>
+        </select>
+    </div>
+
+    <!-- Recipient client autocomplete -->
+    <div id="recipientClientContainer" class="mb-4 relative">
+        <label for="recipientClientSearch" class="block mb-1 dark:text-white">Recipient Client</label>
+
+        <input type="text"
+               id="recipientClientSearch"
+               class="w-full p-2 border rounded dark:bg-gray-700 dark:text-white"
+               placeholder="Type first/last name or phone…"
+               autocomplete="off" />
+
+        <input type="hidden"
+               th:field="*{recipientClientId}"
+               id="recipientClientId" />
+
+        <div id="recipientClientSuggestions"
+             class="absolute z-10 w-full bg-white border rounded shadow mt-1 max-h-48 overflow-y-auto hidden dark:bg-gray-700">
+        </div>
+    </div>
+
+    <div class="mb-4 flex items-center">
+        <input th:field="*{deliverToOffice}"
+               type="checkbox"
+               id="deliverToOffice"
+               class="mr-2"/>
+        <label for="deliverToOffice" class="dark:text-white">Deliver to Office</label>
+    </div>
+
+    <!-- Office selection -->
+    <div id="officeContainer" class="mb-4">
+        <label for="officeSelect" class="block mb-1 dark:text-white">Select Office</label>
+        <select th:field="*{officeId}"
+                id="officeSelect"
+                class="w-full p-2 border rounded dark:bg-gray-700 dark:text-white">
+            <option th:each="office : ${offices}"
+                    th:value="${office.id}"
+                    th:text="${office.title + ' - ' + office.addressDto.formattedAddress}">
+                Office Name
+            </option>
+        </select>
+    </div>
+
+    <!-- Recipient address (if not office) -->
+    <div id="recipientAddressContainer" class="mb-4 hidden">
+        <label for="recipientAutocomplete" class="block mb-1 dark:text-white">Recipient Address</label>
+        <input th:field="*{recipientAddress.formattedAddress}"
+               type="text"
+               id="recipientAutocomplete"
+               placeholder="Start typing recipient address..."
+               autocomplete="off"
+               class="w-full p-2 border rounded dark:bg-gray-700 dark:text-white"/>
+        <input th:field="*{recipientAddress.coordinates}"
+               type="hidden"
+               id="recipientCoordinates"/>
+    </div>
+
+    <!-- Calculate Price -->
+    <div class="mb-4">
+        <button type="button"
+                id="calculatePrice"
+                class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+            Calculate Price
+        </button>
+    </div>
+
+    <!-- Price display -->
+    <div class="mb-4">
+        <label for="price" class="block mb-1 dark:text-white">Price</label>
+        <input th:field="*{price}"
+               type="text"
+               id="price"
+               readonly
+               class="w-full p-2 border rounded bg-gray-100 dark:bg-gray-600 dark:text-white"/>
+    </div>
+
+    <!-- Submit -->
+    <div>
+        <button type="submit"
+                id="submitBtn"
+                class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50"
+                disabled>
+            Submit
+        </button>
+    </div>
+
+</form>
+
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    document.addEventListener('DOMContentLoaded', () => {
+
+        const form = document.querySelector('form[action="/employee/registerShipment"], form[method="post"]') || document.querySelector('form');
+
+        // --- Sender client autocomplete ---
+        const senderSearchInput = form.querySelector('#senderClientSearch');
+        const hiddenSenderClientId = form.querySelector('#senderClientId');
+        const senderSuggestionsBox = form.querySelector('#senderClientSuggestions');
+
+        // --- Recipient client autocomplete ---
+        const recipientSearchInput = form.querySelector('#recipientClientSearch');
+        const hiddenRecipientClientId = form.querySelector('#recipientClientId');
+        const recipientSuggestionsBox = form.querySelector('#recipientClientSuggestions');
+
+        const getCandidateId = (c) => {
+            return (c && (c.id ?? c.clientId ?? c.clientDto?.id ?? c.clientDto?.clientId)) ?? null;
+        };
+
+        const clearSuggestions = (box) => {
+            box.innerHTML = '';
+            box.classList.add('hidden');
+        };
+
+        const showSuggestions = (matches, box, searchInput, hiddenInput) => {
+            if (!matches.length) {
+                clearSuggestions(box);
+                return;
+            }
+            box.innerHTML = '';
+            matches.slice(0, 10).forEach(c => {
+                const phoneNum = (c.clientDto && c.clientDto.phoneNumber) ? c.clientDto.phoneNumber : '';
+                const label = `${c.firstName} ${c.lastName}` + (phoneNum ? ` – ${phoneNum}` : '');
+
+                const item = document.createElement('div');
+                item.classList.add('px-2','py-1','hover:bg-gray-200','cursor-pointer','dark:hover:bg-gray-600');
+
+                const id = getCandidateId(c);
+                item.textContent = `${label} (id: ${id})`;
+                item.dataset.clientId = id ?? '';
+
+                item.addEventListener('click', () => {
+                    searchInput.value = label;
+                    hiddenInput.value = id ?? '';
+                    clearSuggestions(box);
+                });
+
+                box.appendChild(item);
+            });
+
+            box.classList.remove('hidden');
+        };
+
+        // Sender autocomplete
+        senderSearchInput.addEventListener('input', () => {
+            const query = senderSearchInput.value.trim().toLowerCase();
+            hiddenSenderClientId.value = '';
+
+            if (!query) {
+                clearSuggestions(senderSuggestionsBox);
+                return;
+            }
+
+            const matches = allUsers.filter(c => {
+                const fullName = ((c.firstName ?? '') + ' ' + (c.lastName ?? '')).toLowerCase();
+                const phone = (c.clientDto && c.clientDto.phoneNumber) ? String(c.clientDto.phoneNumber).toLowerCase() : '';
+                return fullName.includes(query) || phone.includes(query);
+            });
+
+            showSuggestions(matches, senderSuggestionsBox, senderSearchInput, hiddenSenderClientId);
+        });
+
+        // Recipient autocomplete
+        recipientSearchInput.addEventListener('input', () => {
+            const query = recipientSearchInput.value.trim().toLowerCase();
+            hiddenRecipientClientId.value = '';
+
+            if (!query) {
+                clearSuggestions(recipientSuggestionsBox);
+                return;
+            }
+
+            const matches = allUsers.filter(c => {
+                const fullName = ((c.firstName ?? '') + ' ' + (c.lastName ?? '')).toLowerCase();
+                const phone = (c.clientDto && c.clientDto.phoneNumber) ? String(c.clientDto.phoneNumber).toLowerCase() : '';
+                return fullName.includes(query) || phone.includes(query);
+            });
+
+            showSuggestions(matches, recipientSuggestionsBox, recipientSearchInput, hiddenRecipientClientId);
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!senderSuggestionsBox.contains(e.target) && e.target !== senderSearchInput) {
+                clearSuggestions(senderSuggestionsBox);
+            }
+            if (!recipientSuggestionsBox.contains(e.target) && e.target !== recipientSearchInput) {
+                clearSuggestions(recipientSuggestionsBox);
+            }
+        });
+
+        // --- Toggle deliver to office ---
+        const deliverChk = form.querySelector('#deliverToOffice');
+        const officeCont = document.getElementById('officeContainer');
+        const recipAddr = document.getElementById('recipientAddressContainer');
+
+        const toggleDeliver = () => {
+            if (deliverChk.checked) {
+                officeCont.style.display = 'block';
+                recipAddr.style.display = 'none';
+            } else {
+                officeCont.style.display = 'none';
+                recipAddr.style.display = 'block';
+
+                // Initialize Google autocomplete for recipient address
+                if (window.google && google.maps && google.maps.places) {
+                    const recipientInput = document.getElementById('recipientAutocomplete');
+                    const autocomplete = new google.maps.places.Autocomplete(recipientInput);
+                    autocomplete.setFields(['formatted_address','geometry']);
+                    autocomplete.addListener('place_changed', () => {
+                        const place = autocomplete.getPlace();
+                        if (!place.geometry) return;
+                        recipientInput.value = place.formatted_address;
+                        document.getElementById('recipientCoordinates').value =
+                            place.geometry.location.lat() + ',' + place.geometry.location.lng();
+                    });
+                }
+            }
+        };
+        deliverChk.addEventListener('change', toggleDeliver);
+        toggleDeliver();
+
+        // --- Calculate price ---
+        document.getElementById('calculatePrice').addEventListener('click', () => {
+            const wt = document.getElementById('weight').value;
+            const toO = deliverChk.checked;
+            if (!wt) { alert('Enter weight first'); return; }
+            fetch(`/api/shipments/price?weight=${wt}&deliverToOffice=${toO}`)
+                .then(r => r.json())
+                .then(data => {
+                    document.getElementById('price').value = data.price;
+                    document.getElementById('submitBtn').disabled = false;
+                });
+        });
+
+    });
+    /*]]>*/
+</script>
+
+<!-- Google Maps API -->
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAxIJvVWlMNNR22-FzoJshWD5kthDBtaaU&libraries=places" async defer></script>
