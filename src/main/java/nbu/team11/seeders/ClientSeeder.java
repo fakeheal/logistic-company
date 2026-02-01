@@ -7,11 +7,13 @@ import nbu.team11.entities.enums.Role;
 import nbu.team11.repositories.ClientRepository;
 import nbu.team11.repositories.UserRepository;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 @Component
+@Order(3)
 public class ClientSeeder implements CommandLineRunner {
 
     private final ClientRepository clientRepository;

@@ -5,11 +5,13 @@ import nbu.team11.entities.Office;
 import nbu.team11.repositories.AddressRepository;
 import nbu.team11.repositories.OfficeRepository;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 
 @Component
+@Order(1)
 public class OfficeSeeder implements CommandLineRunner {
     private final OfficeRepository officeRepository;
     private final AddressRepository addressRepository;

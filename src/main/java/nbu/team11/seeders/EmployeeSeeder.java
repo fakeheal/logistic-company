@@ -9,11 +9,13 @@ import nbu.team11.repositories.EmployeeRepository;
 import nbu.team11.repositories.OfficeRepository;
 import nbu.team11.repositories.UserRepository;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 @Component
+@Order(2)
 public class EmployeeSeeder implements CommandLineRunner {
 
     private final EmployeeRepository employeeRepository;
