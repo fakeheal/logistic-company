@@ -34,9 +34,12 @@ public class ModelMapperConfig {
 
         modelMapper.typeMap(Employee.class, EmployeeDto.class)
                 .addMappings(mapping -> {
+                    mapping.map(Employee::getId,                       EmployeeDto::setId);
+                    mapping.map(Employee::getPositionType,             EmployeeDto::setPosition);
                     mapping.map(src -> src.getUser().getId(),          EmployeeDto::setUserId);
                     mapping.map(src -> src.getUser().getFullName(),    EmployeeDto::setUserFullName);
                     mapping.map(src -> src.getUser().getEmail(),       EmployeeDto::setUserEmail);
+                    mapping.map(src -> src.getOffice().getId(),        EmployeeDto::setOfficeId);
                     mapping.map(src -> src.getOffice().getTitle(),     EmployeeDto::setOfficeTitle);
                 });
 

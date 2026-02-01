@@ -44,38 +44,72 @@
                        class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent"
                        aria-current="page">Home</a>
                 </li>
-                <li sec:authorize="@customPermissionEvaluator.hasRole(authentication, 'CLIENT')">
-                    <a th:href="@{/client/registerShipment}"
-                       class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent"
-                       aria-current="page">Register Shipment</a>
-                </li>
-                <li sec:authorize="@customPermissionEvaluator.hasRole(authentication, 'CLIENT')">
-                    <a th:href="@{/shipments/client}"
-                       class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent"
-                       aria-current="page">My Shipments</a>
-                </li>
-                <li sec:authorize="@customPermissionEvaluator.hasRole(authentication, 'EMPLOYEE')">
-                    <a th:href="@{/employee/registerShipment}"
-                       class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent"
-                       aria-current="page">Register Shipment</a>
-                </li>
-                <li sec:authorize="@customPermissionEvaluator.hasRole(authentication, 'EMPLOYEE')">
-                    <a th:href="@{/shipments/all}"
-                       class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent"
-                       aria-current="page">Shipments</a>
-                </li>
+
+                <!-- ADMIN: Office management -->
                 <li sec:authorize="@customPermissionEvaluator.isAdmin(authentication)">
-                    <a th:href="@{/client}"
+                    <a th:href="@{/office}"
                        class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent"
-                       aria-current="page">Clients</a>
+                       aria-current="page">Offices</a>
                 </li>
+
+                <!-- ADMIN: Employee management -->
                 <li sec:authorize="@customPermissionEvaluator.isAdmin(authentication)">
                     <a th:href="@{/employee}"
                        class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent"
                        aria-current="page">Employees</a>
                 </li>
+
+                <li sec:authorize="@customPermissionEvaluator.isAdmin(authentication)">
+                    <a th:href="@{/client}"
+                       class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent"
+                       aria-current="page">Clients</a>
+                </li>
+
+                <!-- ADMIN: All shipments -->
+                <li sec:authorize="@customPermissionEvaluator.isAdmin(authentication)">
+                    <a th:href="@{/shipments/all}"
+                       class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent"
+                       aria-current="page">Shipments</a>
+                </li>
+
+                <!-- COORDINATOR (Office Employee): Register shipment -->
+                <li sec:authorize="@customPermissionEvaluator.isCoordinator(authentication)">
+                    <a th:href="@{/employee/registerShipment}"
+                       class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent"
+                       aria-current="page">Register Shipment</a>
+                </li>
+
+                <!-- COORDINATOR (Office Employee): All shipments -->
+                <li sec:authorize="@customPermissionEvaluator.isCoordinator(authentication)">
+                    <a th:href="@{/shipments/all}"
+                       class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent"
+                       aria-current="page">Shipments</a>
+                </li>
+
+                <!-- DELIVERYMAN: My deliveries -->
+                <li sec:authorize="@customPermissionEvaluator.isDeliveryman(authentication)">
+                    <a th:href="@{/shipments/my-deliveries}"
+                       class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent"
+                       aria-current="page">My Deliveries</a>
+                </li>
+
+                <!-- CLIENT: Register shipment -->
+                <li sec:authorize="@customPermissionEvaluator.isClient(authentication)">
+                    <a th:href="@{/client/registerShipment}"
+                       class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent"
+                       aria-current="page">Register Shipment</a>
+                </li>
+
+                <!-- CLIENT: My shipments -->
+                <li sec:authorize="@customPermissionEvaluator.isClient(authentication)">
+                    <a th:href="@{/shipments/client}"
+                       class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent"
+                       aria-current="page">My Shipments</a>
+                </li>
+
+                <!-- Public: Track package -->
                 <li>
-                    <a href="/demo/track"
+                    <a href="/track"
                        class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent">Track
                         package</a>
                 </li>
