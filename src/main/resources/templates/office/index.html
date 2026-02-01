@@ -90,10 +90,17 @@
                         42.6977,23.3219
                     </td>
                     <td class="px-6 py-4 text-right">
-                        <a th:href="@{'/office/' + ${office.getId()}}"
-                           class="font-medium text-blue-600 dark:text-blue-500 hover:underline mr-3">View</a>
                         <a th:href="@{'/office/' + ${office.getId()} + '/edit'}"
-                           class="font-medium text-blue-600 dark:text-blue-500 hover:underline">Edit</a>
+                           class="font-medium text-blue-600 dark:text-blue-500 hover:underline mr-3">Edit</a>
+                        <form th:action="@{'/office/' + ${office.getId()} + '/delete'}"
+                              method="post"
+                              class="inline"
+                              onsubmit="return confirm('Are you sure you want to delete this office?');">
+                            <button type="submit"
+                                    class="font-medium text-red-600 dark:text-red-500 hover:underline">
+                                Delete
+                            </button>
+                        </form>
                     </td>
                 </tr>
                 </tbody>

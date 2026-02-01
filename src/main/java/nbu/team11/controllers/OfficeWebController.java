@@ -127,4 +127,16 @@ public class OfficeWebController extends AbstractBaseController {
         attributes.addFlashAttribute("successMessage", "Office updated successfully");
         return "redirect:/office";
     }
+
+    @PostMapping("/{id}/delete")
+    public String delete(@PathVariable Integer id, RedirectAttributes attributes) {
+        try {
+            officeService.delete(id);
+        } catch (ResourceNotFound e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Office not found");
+        }
+
+        attributes.addFlashAttribute("successMessage", "Office deleted successfully");
+        return "redirect:/office";
+    }
 }

@@ -85,4 +85,16 @@ public class OfficeService implements IOfficeService {
         Office saved = officeRepository.save(office);
         return modelMapper.map(saved, OfficeDto.class);
     }
+
+    @Transactional
+    public void delete(Integer id) throws ResourceNotFound {
+        Office office = officeRepository.findById(id).orElseThrow(ResourceNotFound::new);
+        Address address = office.getAddress();
+
+        officeRepository.delete(office);
+
+        if (address != null) {
+            addressRepository.delete(address);
+        }
+    }
 }
