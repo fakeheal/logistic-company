@@ -31,6 +31,7 @@ public class EmployeeService implements IEmployeeService {
     private final EmployeeRepository employeeRepository;
     private final UserService userService;
     private final OfficeService officeService;
+    private final nbu.team11.repositories.UserRepository userRepository;
 
     public Page<EmployeeDto> paginate(int page, int size) {
         Page<Employee> employees = employeeRepository.findAll(PageRequest.of(page, size));
@@ -79,5 +80,17 @@ public class EmployeeService implements IEmployeeService {
     public EmployeeDto getById(Integer id) throws ResourceNotFound {
         return (new ModelMapperConfig()).modelMapper()
                 .map(employeeRepository.findById(id).orElseThrow(ResourceNotFound::new), EmployeeDto.class);
+    }
+
+    @Transactional
+    public void delete(Integer id) throws ResourceNotFound {
+        Employee employee = employeeRepository.findById(id).orElseThrow(ResourceNotFound::new);
+        User user = employee.getUser();
+
+        employeeRepository.delete(employee);
+
+        if (user != null) {
+            userRepository.delete(user);
+        }
     }
 }

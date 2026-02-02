@@ -36,7 +36,7 @@
                         Office
                     </th>
                     <th scope="col" class="px-6 py-3">
-                        <span class="sr-only">Edit</span>
+                        <span class="sr-only">Actions</span>
                     </th>
                 </tr>
                 </thead>
@@ -58,7 +58,18 @@
                     </td>
                     <td class="px-6 py-4 text-right">
                         <a th:href="@{'/employee/' + ${employee.getId()}}"
-                           class="font-medium text-blue-600 dark:text-blue-500 hover:underline">View</a>
+                           class="font-medium text-blue-600 dark:text-blue-500 hover:underline mr-3">View</a>
+                        <a th:href="@{'/employee/' + ${employee.getId()} + '/edit'}"
+                           class="font-medium text-blue-600 dark:text-blue-500 hover:underline mr-3">Edit</a>
+                        <form th:action="@{'/employee/' + ${employee.getId()} + '/delete'}"
+                              method="post"
+                              class="inline"
+                              onsubmit="return confirm('Are you sure you want to delete this employee? This will also delete their user account.');">
+                            <button type="submit"
+                                    class="font-medium text-red-600 dark:text-red-500 hover:underline">
+                                Delete
+                            </button>
+                        </form>
                     </td>
                 </tr>
                 </tbody>

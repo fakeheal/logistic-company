@@ -16,6 +16,7 @@ import nbu.team11.services.exceptions.ResourceNotFound;
 import nbu.team11.services.exceptions.UsernameNotAvailable;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -25,6 +26,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequestMapping("/employee")
+@PreAuthorize("@customPermissionEvaluator.isAdmin(authentication)")
 public class EmployeeController extends AbstractBaseController {
     private final EmployeeService employeeService;
     private final OfficeService officeService;
@@ -170,5 +172,17 @@ public class EmployeeController extends AbstractBaseController {
 
         attributes.addFlashAttribute("successMessage", "Employee updated successfully");
         return "redirect:/employee/" + id;
+    }
+
+    @PostMapping("/{id}/delete")
+    public String delete(@PathVariable Integer id, RedirectAttributes attributes) {
+        try {
+            employeeService.delete(id);
+        } catch (ResourceNotFound e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Employee not found");
+        }
+
+        attributes.addFlashAttribute("successMessage", "Employee deleted successfully");
+        return "redirect:/employee";
     }
 }
