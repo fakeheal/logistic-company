@@ -13,6 +13,8 @@ import nbu.team11.entities.enums.PositionType;
 import nbu.team11.entities.enums.Role;
 import nbu.team11.repositories.EmployeeRepository;
 import nbu.team11.services.contracts.IEmployeeService;
+import nbu.team11.repositories.ShipmentRepository;
+import nbu.team11.services.exceptions.CannotDeleteEmployee;
 import nbu.team11.services.exceptions.EmailNotAvailable;
 import nbu.team11.services.exceptions.ResourceNotFound;
 import nbu.team11.services.exceptions.UsernameNotAvailable;
@@ -32,6 +34,7 @@ public class EmployeeService implements IEmployeeService {
     private final UserService userService;
     private final OfficeService officeService;
     private final nbu.team11.repositories.UserRepository userRepository;
+    private final ShipmentRepository shipmentRepository;
 
     public Page<EmployeeDto> paginate(int page, int size) {
         Page<Employee> employees = employeeRepository.findAll(PageRequest.of(page, size));
@@ -83,9 +86,37 @@ public class EmployeeService implements IEmployeeService {
     }
 
     @Transactional
-    public void delete(Integer id) throws ResourceNotFound {
+    public void delete(Integer id, Integer currentUserId) throws ResourceNotFound, CannotDeleteEmployee {
         Employee employee = employeeRepository.findById(id).orElseThrow(ResourceNotFound::new);
         User user = employee.getUser();
+
+        // Prevent admin from deleting themselves
+        if (user != null && user.getId().equals(currentUserId)) {
+            throw new CannotDeleteEmployee("You cannot delete your own account.");
+        }
+
+        // Find shipments assigned to this employee
+        var shipments = shipmentRepository.findAllByEmployeeId(id);
+
+        if (!shipments.isEmpty()) {
+            // Find another employee in the same office
+            List<Employee> colleaguesInOffice = employeeRepository.findByOfficeId(employee.getOffice().getId())
+                    .stream()
+                    .filter(e -> !e.getId().equals(id))
+                    .toList();
+
+            if (colleaguesInOffice.isEmpty()) {
+                throw new CannotDeleteEmployee("Cannot delete this employee. They have " + shipments.size() +
+                        " shipment(s) assigned and there are no other employees in the same office to transfer them to.");
+            }
+
+            // Transfer shipments to the first available colleague
+            Employee newAssignee = colleaguesInOffice.get(0);
+            for (var shipment : shipments) {
+                shipment.setEmployee(newAssignee);
+                shipmentRepository.save(shipment);
+            }
+        }
 
         employeeRepository.delete(employee);
 
