@@ -11,9 +11,12 @@ import nbu.team11.entities.enums.PositionType;
 import nbu.team11.services.CustomPermissionEvaluator;
 import nbu.team11.services.EmployeeService;
 import nbu.team11.services.OfficeService;
+import nbu.team11.services.customImplementations.models.CustomUserDetails;
+import nbu.team11.services.exceptions.CannotDeleteEmployee;
 import nbu.team11.services.exceptions.EmailNotAvailable;
 import nbu.team11.services.exceptions.ResourceNotFound;
 import nbu.team11.services.exceptions.UsernameNotAvailable;
+import org.springframework.security.core.Authentication;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -175,11 +178,17 @@ public class EmployeeController extends AbstractBaseController {
     }
 
     @PostMapping("/{id}/delete")
-    public String delete(@PathVariable Integer id, RedirectAttributes attributes) {
+    public String delete(@PathVariable Integer id, Authentication authentication, RedirectAttributes attributes) {
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        Integer currentUserId = Integer.parseInt(userDetails.getUserDto().getId());
+
         try {
-            employeeService.delete(id);
+            employeeService.delete(id, currentUserId);
         } catch (ResourceNotFound e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Employee not found");
+        } catch (CannotDeleteEmployee e) {
+            attributes.addFlashAttribute("errorMessage", e.getMessage());
+            return "redirect:/employee/" + id;
         }
 
         attributes.addFlashAttribute("successMessage", "Employee deleted successfully");
