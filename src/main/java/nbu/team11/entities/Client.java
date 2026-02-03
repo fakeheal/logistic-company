@@ -24,7 +24,7 @@ public class Client {
     private User user;
 
     @Size(min = 10, max = 13)
-    @Column(name = "phone_number", unique = true, nullable = false)
+    @Column(name = "phone_number",  nullable = false)
     private String phoneNumber;
 
     @OneToMany(mappedBy = "client", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
