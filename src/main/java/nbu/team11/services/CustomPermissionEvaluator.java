@@ -56,4 +56,8 @@ public class CustomPermissionEvaluator {
     public boolean isClient(Authentication authentication) {
         return hasRole(authentication, "CLIENT");
     }
+
+    public boolean canManageClients(Authentication authentication) {
+        return isAdmin(authentication) || isCoordinator(authentication);
+    }
 }

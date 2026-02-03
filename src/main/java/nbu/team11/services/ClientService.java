@@ -2,10 +2,12 @@ package nbu.team11.services;
 
 import nbu.team11.dtos.AddressDto;
 import nbu.team11.dtos.ClientDto;
+import nbu.team11.dtos.UserDto;
 import nbu.team11.entities.Address;
 import nbu.team11.entities.Client;
 import nbu.team11.entities.Shipment;
 import nbu.team11.entities.User;
+import nbu.team11.entities.enums.Role;
 import nbu.team11.entities.enums.Status;
 import nbu.team11.repositories.AddressRepository;
 import nbu.team11.repositories.ClientRepository;
@@ -13,14 +15,17 @@ import nbu.team11.repositories.ShipmentRepository;
 import nbu.team11.repositories.UserRepository;
 import nbu.team11.services.contracts.IClientService;
 import nbu.team11.services.exceptions.CannotDeleteClient;
+import nbu.team11.services.exceptions.EmailNotAvailable;
 import nbu.team11.services.exceptions.ResourceNotFound;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.lang.reflect.Type;
+import java.security.SecureRandom;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -46,6 +51,9 @@ public class ClientService implements IClientService {
     @Autowired
     private ShipmentRepository shipmentRepository;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     @Override
     @Transactional
     public ClientDto createClient(ClientDto clientDto, Integer userId) throws ResourceNotFound {
@@ -67,6 +75,58 @@ public class ClientService implements IClientService {
         Client savedClient = clientRepository.save(client);
 
         return modelMapper.map(savedClient, ClientDto.class);
+    }
+
+    @Override
+    @Transactional
+    public ClientDto createClientWithGeneratedPassword(ClientDto clientDto, UserDto userDto) throws EmailNotAvailable {
+        // Check if email is already in use
+        if (userRepository.findByEmail(userDto.getEmail()) != null) {
+            throw new EmailNotAvailable();
+        }
+
+        // Generate a secure random password
+        String generatedPassword = generateSecurePassword();
+
+        // Create User entity
+        User user = new User();
+        user.setFirstName(userDto.getFirstName());
+        user.setLastName(userDto.getLastName());
+        user.setEmail(userDto.getEmail());
+        user.setPassword(passwordEncoder.encode(generatedPassword));
+        user.setRole(Role.CLIENT);
+        User savedUser = userRepository.save(user);
+
+        // Create Client entity
+        Client client = new Client();
+        client.setUser(savedUser);
+        client.setPhoneNumber(clientDto.getPhoneNumber());
+
+        if (clientDto.getAddresses() != null && !clientDto.getAddresses().isEmpty()) {
+            for (AddressDto adto : clientDto.getAddresses()) {
+                Address addr = modelMapper.map(adto, Address.class);
+                client.addAddress(addr);
+            }
+        }
+
+        Client savedClient = clientRepository.save(client);
+
+        // @TODO: Send email with the generated password to the user
+        // Email should be sent to: userDto.getEmail()
+        // Password to include in email: generatedPassword
+        System.out.println("TODO: Send email to " + userDto.getEmail() + " with password: " + generatedPassword);
+
+        return modelMapper.map(savedClient, ClientDto.class);
+    }
+
+    private String generateSecurePassword() {
+        String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*";
+        SecureRandom random = new SecureRandom();
+        StringBuilder password = new StringBuilder();
+        for (int i = 0; i < 12; i++) {
+            password.append(chars.charAt(random.nextInt(chars.length())));
+        }
+        return password.toString();
     }
 
     public ClientDto getClientByUserId(Integer userId) throws ResourceNotFound {

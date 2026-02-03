@@ -1,5 +1,7 @@
 package nbu.team11.controllers;
 
+import jakarta.validation.Valid;
+import nbu.team11.controllers.forms.CreateClientForm;
 import nbu.team11.dtos.ClientDto;
 import nbu.team11.dtos.UserDto;
 import nbu.team11.entities.enums.Role;
@@ -7,12 +9,14 @@ import nbu.team11.services.ClientService;
 import nbu.team11.services.CustomPermissionEvaluator;
 import nbu.team11.services.UserService;
 import nbu.team11.services.exceptions.CannotDeleteClient;
+import nbu.team11.services.exceptions.EmailNotAvailable;
 import nbu.team11.services.exceptions.ResourceNotFound;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -51,7 +55,7 @@ public class ClientController extends AbstractBaseController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size
     ) {
-        if (!this.permissionEvaluator.isAdmin(authentication)) {
+        if (!this.permissionEvaluator.canManageClients(authentication)) {
             return "redirect:/home";
         }
 
@@ -62,6 +66,55 @@ public class ClientController extends AbstractBaseController {
         model.addAttribute("clients", clients);
 
         return "layouts/app";
+    }
+
+    @GetMapping("/client/create")
+    public String create(Model model, Authentication authentication) {
+        if (!this.permissionEvaluator.canManageClients(authentication)) {
+            return "redirect:/home";
+        }
+
+        model.addAttribute("title", "Create Client");
+        model.addAttribute("content", "client/create");
+
+        if (!model.containsAttribute("form")) {
+            model.addAttribute("form", new CreateClientForm());
+        }
+
+        return "layouts/app";
+    }
+
+    @PostMapping("/client/store")
+    public String store(
+            @Valid CreateClientForm createClientForm,
+            BindingResult bindingResult,
+            Authentication authentication,
+            RedirectAttributes attributes
+    ) {
+        if (!this.permissionEvaluator.canManageClients(authentication)) {
+            return "redirect:/home";
+        }
+
+        if (bindingResult.hasErrors()) {
+            attributes.addFlashAttribute("org.springframework.validation.BindingResult.form", bindingResult);
+            attributes.addFlashAttribute("form", createClientForm);
+            return "redirect:/client/create";
+        }
+
+        try {
+            clientService.createClientWithGeneratedPassword(
+                    createClientForm.toClientDto(),
+                    createClientForm.toUserDto()
+            );
+        } catch (EmailNotAvailable e) {
+            bindingResult.rejectValue("email", "error.email", "Email is already in use");
+            attributes.addFlashAttribute("org.springframework.validation.BindingResult.form", bindingResult);
+            attributes.addFlashAttribute("form", createClientForm);
+            return "redirect:/client/create";
+        }
+
+        attributes.addFlashAttribute("successMessage", "Client created successfully. Password has been sent to their email.");
+        return "redirect:/client";
     }
 
     @GetMapping("/api/client/current")
@@ -77,7 +130,7 @@ public class ClientController extends AbstractBaseController {
             Model model,
             Authentication authentication
     ) {
-        if (!this.permissionEvaluator.isAdmin(authentication)) {
+        if (!this.permissionEvaluator.canManageClients(authentication)) {
             return "redirect:/home";
         }
 
@@ -98,7 +151,7 @@ public class ClientController extends AbstractBaseController {
             Authentication authentication,
             RedirectAttributes redirectAttributes
     ) {
-        if (!this.permissionEvaluator.isAdmin(authentication)) {
+        if (!this.permissionEvaluator.canManageClients(authentication)) {
             return "redirect:/home";
         }
 
