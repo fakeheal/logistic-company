@@ -4,11 +4,15 @@ import nbu.team11.dtos.AddressDto;
 import nbu.team11.dtos.ClientDto;
 import nbu.team11.entities.Address;
 import nbu.team11.entities.Client;
+import nbu.team11.entities.Shipment;
 import nbu.team11.entities.User;
+import nbu.team11.entities.enums.Status;
 import nbu.team11.repositories.AddressRepository;
 import nbu.team11.repositories.ClientRepository;
+import nbu.team11.repositories.ShipmentRepository;
 import nbu.team11.repositories.UserRepository;
 import nbu.team11.services.contracts.IClientService;
+import nbu.team11.services.exceptions.CannotDeleteClient;
 import nbu.team11.services.exceptions.ResourceNotFound;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
@@ -18,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.lang.reflect.Type;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 //TODO: Revise all methods
@@ -37,6 +42,9 @@ public class ClientService implements IClientService {
 
     @Autowired
     private AddressRepository addressRepository;
+
+    @Autowired
+    private ShipmentRepository shipmentRepository;
 
     @Override
     @Transactional
@@ -129,5 +137,45 @@ public class ClientService implements IClientService {
             throw new ResourceNotFound();
         }
         clientRepository.deleteById(id);
+    }
+
+    @Override
+    @Transactional
+    public void anonymizeClient(Integer clientId, Integer currentUserId) throws ResourceNotFound, CannotDeleteClient {
+        Client client = clientRepository.findById(clientId).orElse(null);
+        if (client == null) {
+            throw new ResourceNotFound();
+        }
+
+        User user = client.getUser();
+
+        // Prevent self-deletion
+        if (user.getId().equals(currentUserId)) {
+            throw new CannotDeleteClient("You cannot delete your own account.");
+        }
+
+        // Check for active (undelivered) shipments
+        List<Shipment> activeShipments = shipmentRepository.findActiveShipmentsByClientId(clientId, Status.DELIVERED);
+        if (!activeShipments.isEmpty()) {
+            throw new CannotDeleteClient("Cannot delete client with active shipments. Please wait until all shipments are delivered.");
+        }
+
+        // Anonymize User fields
+        user.setFirstName("DELETED");
+        user.setLastName("USER_" + user.getId());
+        user.setEmail("deleted_" + user.getId() + "@anonymized.local");
+        user.setPassword(UUID.randomUUID().toString());
+        userRepository.save(user);
+
+        // Anonymize Client phone number
+        client.setPhoneNumber("0000000000");
+
+        // Anonymize all associated Address records
+        for (Address address : client.getAddresses()) {
+            address.setFormattedAddress("Address removed - GDPR");
+            address.setCoordinates("0.0,0.0");
+        }
+
+        clientRepository.save(client);
     }
 }

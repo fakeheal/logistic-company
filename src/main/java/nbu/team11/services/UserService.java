@@ -1,5 +1,4 @@
 package nbu.team11.services;
-import nbu.team11.configurations.ModelMapperConfig;
 import nbu.team11.dtos.ClientDto;
 import nbu.team11.dtos.UserDtoSanitized;
 import nbu.team11.entities.enums.Role;
@@ -84,8 +83,8 @@ public class UserService implements IUserService {
     }
 
     public Page<UserDto> paginate(int page, int size, Role role) {
-        Page<User> users = this.userRepository.findAll(PageRequest.of(page, size));
-        return users.map(employee -> (new ModelMapperConfig()).modelMapper().map(employee, UserDto.class));
+        Page<User> users = this.userRepository.findByRole(role, PageRequest.of(page, size));
+        return users.map(user -> this.modelMapper.map(user, UserDto.class));
     }
 
 

@@ -1,6 +1,7 @@
 package nbu.team11.services.contracts;
 
 import nbu.team11.dtos.ClientDto;
+import nbu.team11.services.exceptions.CannotDeleteClient;
 import nbu.team11.services.exceptions.ResourceNotFound;
 
 import java.util.List;
@@ -11,6 +12,7 @@ public interface IClientService {
     ClientDto getClientById(Integer id) throws ResourceNotFound;
     ClientDto updateClient(Integer id, ClientDto updatedClient) throws ResourceNotFound;
     void deleteClient(Integer id) throws ResourceNotFound;
+    void anonymizeClient(Integer clientId, Integer currentUserId) throws ResourceNotFound, CannotDeleteClient;
     List<ClientDto> getAllClients();
 }
 

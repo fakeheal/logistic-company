@@ -18,4 +18,11 @@ public interface ShipmentRepository extends JpaRepository<Shipment, Integer> {
     @Query("SELECT s FROM Shipment s WHERE s.id NOT IN (SELECT ss.shipment.id FROM ShipmentStatus ss WHERE ss.status = :deliveredStatus)")
     List<Shipment> findUndeliveredShipments(@Param("deliveredStatus") Status deliveredStatus);
 
+    List<Shipment> findBySenderClientId(Integer clientId);
+
+    List<Shipment> findByRecipientClientId(Integer clientId);
+
+    @Query("SELECT s FROM Shipment s WHERE (s.senderClient.id = :clientId OR s.recipientClient.id = :clientId) " +
+           "AND s.id NOT IN (SELECT ss.shipment.id FROM ShipmentStatus ss WHERE ss.status = :deliveredStatus)")
+    List<Shipment> findActiveShipmentsByClientId(@Param("clientId") Integer clientId, @Param("deliveredStatus") Status deliveredStatus);
 }

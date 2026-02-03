@@ -41,4 +41,8 @@ public class UserDto {
     public void setUsername(String username) {
         this.email = username;
     }
+
+    public String getFullName() {
+        return this.firstName + " " + this.lastName;
+    }
 }

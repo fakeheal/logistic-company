@@ -6,6 +6,7 @@ import nbu.team11.entities.enums.Role;
 import nbu.team11.services.ClientService;
 import nbu.team11.services.CustomPermissionEvaluator;
 import nbu.team11.services.UserService;
+import nbu.team11.services.exceptions.CannotDeleteClient;
 import nbu.team11.services.exceptions.ResourceNotFound;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -13,9 +14,12 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
 
@@ -65,5 +69,50 @@ public class ClientController extends AbstractBaseController {
     public ClientDto getCurrentClient(Authentication authentication)
             throws ResourceNotFound {
         return clientService.getClientByEmail(authentication.getName());
+    }
+
+    @GetMapping("/client/{id}")
+    public String view(
+            @PathVariable Integer id,
+            Model model,
+            Authentication authentication
+    ) {
+        if (!this.permissionEvaluator.isAdmin(authentication)) {
+            return "redirect:/home";
+        }
+
+        try {
+            ClientDto client = clientService.getClientById(id);
+            model.addAttribute("title", "View Client");
+            model.addAttribute("content", "client/view");
+            model.addAttribute("client", client);
+            return "layouts/app";
+        } catch (ResourceNotFound e) {
+            return "redirect:/client";
+        }
+    }
+
+    @PostMapping("/client/{id}/delete")
+    public String delete(
+            @PathVariable Integer id,
+            Authentication authentication,
+            RedirectAttributes redirectAttributes
+    ) {
+        if (!this.permissionEvaluator.isAdmin(authentication)) {
+            return "redirect:/home";
+        }
+
+        try {
+            UserDto currentUser = userService.getByEmail(authentication.getName());
+            Integer currentUserId = Integer.parseInt(currentUser.getId());
+            clientService.anonymizeClient(id, currentUserId);
+            redirectAttributes.addFlashAttribute("successMessage", "Client data has been anonymized successfully.");
+        } catch (ResourceNotFound e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Client not found.");
+        } catch (CannotDeleteClient e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+        }
+
+        return "redirect:/client";
     }
 }
