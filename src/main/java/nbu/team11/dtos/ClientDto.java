@@ -10,8 +10,12 @@ import java.util.List;
 @Setter
 public class ClientDto {
     private Integer id;
+    private Integer userId;
     private String phoneNumber;
     private String userFullName;
+    private String userFirstName;
+    private String userLastName;
+    private String userEmail;
 
     private List<AddressDto> addresses = new ArrayList<>();
 

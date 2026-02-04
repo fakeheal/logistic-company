@@ -168,12 +168,15 @@ public class ModelMapperConfig {
                     mapping.map(ShipmentDto::getRecipientAddress,Shipment::setRecipientAddress);
                 });
 
-        // Client -> ClientDto: map phone and addresses list
         modelMapper.typeMap(Client.class, ClientDto.class)
                 .addMappings(mapping -> {
                     mapping.map(Client::getId,   ClientDto::setId);
                     mapping.map(Client::getPhoneNumber,   ClientDto::setPhoneNumber);
+                    mapping.map(src -> src.getUser().getId(), ClientDto::setUserId);
                     mapping.map(src -> src.getUser().getFullName(), ClientDto::setUserFullName);
+                    mapping.map(src -> src.getUser().getFirstName(), ClientDto::setUserFirstName);
+                    mapping.map(src -> src.getUser().getLastName(), ClientDto::setUserLastName);
+                    mapping.map(src -> src.getUser().getEmail(), ClientDto::setUserEmail);
                     mapping.map(src -> src.getAddresses(),  ClientDto::setAddresses);
                 });
 

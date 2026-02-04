@@ -14,6 +14,7 @@ import nbu.team11.repositories.ClientRepository;
 import nbu.team11.repositories.ShipmentRepository;
 import nbu.team11.repositories.UserRepository;
 import nbu.team11.services.contracts.IClientService;
+import nbu.team11.services.exceptions.AddressLinkedToShipment;
 import nbu.team11.services.exceptions.CannotDeleteClient;
 import nbu.team11.services.exceptions.EmailNotAvailable;
 import nbu.team11.services.exceptions.ResourceNotFound;
@@ -189,6 +190,100 @@ public class ClientService implements IClientService {
 
         Client saved = clientRepository.save(existingClient);
         return modelMapper.map(saved, ClientDto.class);
+    }
+
+    @Override
+    @Transactional
+    public ClientDto updateClientWithUser(Integer clientId, ClientDto clientDto, UserDto userDto, List<Integer> addressIdsToDelete)
+            throws ResourceNotFound, EmailNotAvailable, AddressLinkedToShipment {
+        Client client = clientRepository.findById(clientId).orElse(null);
+        if (client == null) {
+            throw new ResourceNotFound();
+        }
+
+        User user = client.getUser();
+
+        // Check if email is being changed and if the new email is available
+        if (!user.getEmail().equals(userDto.getEmail())) {
+            User existingUserWithEmail = userRepository.findByEmail(userDto.getEmail());
+            if (existingUserWithEmail != null && !existingUserWithEmail.getId().equals(user.getId())) {
+                throw new EmailNotAvailable();
+            }
+        }
+
+        // Check if any addresses to be deleted are linked to shipments
+        if (addressIdsToDelete != null && !addressIdsToDelete.isEmpty()) {
+            for (Integer addressId : addressIdsToDelete) {
+                if (shipmentRepository.existsByAddressId(addressId)) {
+                    throw new AddressLinkedToShipment("Cannot delete address that is linked to shipments.");
+                }
+            }
+        }
+
+        // Check if any existing addresses being updated are linked to shipments
+        if (clientDto.getAddresses() != null) {
+            for (AddressDto addressDto : clientDto.getAddresses()) {
+                if (addressDto.getId() != null) {
+                    // Find the existing address
+                    Address existingAddress = addressRepository.findById(addressDto.getId()).orElse(null);
+                    if (existingAddress != null) {
+                        // Check if address data is being modified
+                        boolean isModified = !existingAddress.getFormattedAddress().equals(addressDto.getFormattedAddress())
+                                || !existingAddress.getCoordinates().equals(addressDto.getCoordinates());
+
+                        if (isModified && shipmentRepository.existsByAddressId(addressDto.getId())) {
+                            throw new AddressLinkedToShipment("Cannot update address that is linked to shipments.");
+                        }
+                    }
+                }
+            }
+        }
+
+        // Update User fields
+        user.setFirstName(userDto.getFirstName());
+        user.setLastName(userDto.getLastName());
+        user.setEmail(userDto.getEmail());
+        userRepository.save(user);
+
+        // Update Client phone number
+        if (clientDto.getPhoneNumber() != null) {
+            client.setPhoneNumber(clientDto.getPhoneNumber());
+        }
+
+        // Handle address deletions
+        if (addressIdsToDelete != null && !addressIdsToDelete.isEmpty()) {
+            client.getAddresses().removeIf(addr -> addressIdsToDelete.contains(addr.getId()));
+        }
+
+        // Handle address updates and additions
+        if (clientDto.getAddresses() != null) {
+            for (AddressDto addressDto : clientDto.getAddresses()) {
+                if (addressDto.getId() != null) {
+                    // Update existing address
+                    for (Address addr : client.getAddresses()) {
+                        if (addr.getId().equals(addressDto.getId())) {
+                            addr.setFormattedAddress(addressDto.getFormattedAddress());
+                            addr.setCoordinates(addressDto.getCoordinates());
+                            break;
+                        }
+                    }
+                } else {
+                    // Add new address
+                    Address newAddress = new Address();
+                    newAddress.setFormattedAddress(addressDto.getFormattedAddress());
+                    newAddress.setCoordinates(addressDto.getCoordinates());
+                    client.addAddress(newAddress);
+                }
+            }
+        }
+
+        Client saved = clientRepository.save(client);
+        return modelMapper.map(saved, ClientDto.class);
+    }
+
+    @Override
+    public boolean isAddressLinkedToShipment(Integer addressId) {
+        return shipmentRepository.existsByAddressId(addressId);
     }
 
     @Transactional
