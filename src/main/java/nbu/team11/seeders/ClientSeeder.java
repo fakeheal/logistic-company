@@ -34,29 +34,58 @@ public class ClientSeeder implements CommandLineRunner {
 
         if (clientRepository.count() > 0) return;
 
-        User user = new User(Role.CLIENT,
+        User user1 = new User(
+                Role.CLIENT,
                 "client1@example.com",
                 passwordEncoder.encode("Client123!"),
                 "Client",
-                "Client");
-        userRepository.save(user);
+                "One"
+        );
+        userRepository.save(user1);
 
-        Client client = new Client();
-        client.setUser(user);
-        client.setPhoneNumber("0888123456");
+        Client client1 = new Client();
+        client1.setUser(user1);
+        client1.setPhoneNumber("0888123456");
 
-        client = clientRepository.save(client);
+        client1 = clientRepository.save(client1);
 
-        Address address1 = new Address();
-        address1.setFormattedAddress("456 Client Street, Sofia, Bulgaria");
-        address1.setCoordinates("42.6977,23.3219");
-        client.addAddress(address1);
+        Address c1Address1 = new Address();
+        c1Address1.setFormattedAddress("456 Client Street, Sofia, Bulgaria");
+        c1Address1.setCoordinates("42.6977,23.3219");
+        client1.addAddress(c1Address1);
 
-        Address address2 = new Address();
-        address2.setFormattedAddress("789 Second Ave, Sofia, Bulgaria");
-        address2.setCoordinates("42.7000,23.3333");
-        client.addAddress(address2);
+        Address c1Address2 = new Address();
+        c1Address2.setFormattedAddress("789 Second Ave, Sofia, Bulgaria");
+        c1Address2.setCoordinates("42.7000,23.3333");
+        client1.addAddress(c1Address2);
 
-        clientRepository.save(client);
+        clientRepository.save(client1);
+
+        User user2 = new User(
+                Role.CLIENT,
+                "client2@example.com",
+                passwordEncoder.encode("Client123!"),
+                "Client",
+                "Two"
+        );
+        userRepository.save(user2);
+
+        Client client2 = new Client();
+        client2.setUser(user2);
+        client2.setPhoneNumber("0888999888");
+
+        client2 = clientRepository.save(client2);
+
+        Address c2Address1 = new Address();
+        c2Address1.setFormattedAddress("12 Vitosha Blvd, Sofia, Bulgaria");
+        c2Address1.setCoordinates("42.6885,23.3196");
+        client2.addAddress(c2Address1);
+
+        Address c2Address2 = new Address();
+        c2Address2.setFormattedAddress("34 Graf Ignatiev St, Sofia, Bulgaria");
+        c2Address2.setCoordinates("42.6942,23.3251");
+        client2.addAddress(c2Address2);
+
+        clientRepository.save(client2);
     }
 }
