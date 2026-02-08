@@ -2,10 +2,13 @@ package nbu.team11.services.contracts;
 
 import nbu.team11.dtos.EmployeeDto;
 import nbu.team11.dtos.UserDto;
+import nbu.team11.entities.Employee;
 import nbu.team11.services.exceptions.EmailNotAvailable;
 import nbu.team11.services.exceptions.ResourceNotFound;
 import nbu.team11.services.exceptions.UsernameNotAvailable;
 import org.springframework.data.domain.Page;
+
+import java.util.List;
 
 public interface IEmployeeService {
     Page<EmployeeDto> paginate(int page, int size);
@@ -15,4 +18,6 @@ public interface IEmployeeService {
     void update(EmployeeDto employeeDto, UserDto userDto) throws UsernameNotAvailable, EmailNotAvailable, ResourceNotFound;
 
     EmployeeDto getById(Integer id) throws ResourceNotFound;
+
+    List<Employee> getAllEmployees();
 }
