@@ -24,7 +24,13 @@ public interface IShipmentService {
     Shipment registerShipmentByClient(ShipmentDto shipment, Authentication authentication)
             throws UnauthorizedAccess, ResourceNotFound;
 
+    Shipment assignShipmentToEmployee(Integer shipmentId, Integer employeeId);
+
     List<Shipment> getShipmentsForClient(Authentication authentication) throws UnauthorizedAccess;
+
+    List<ShipmentStatus> getShipmentHistoryOrdered(String uniqueId);
+
+    ShipmentStatus getLatestShipmentStatus(String uniqueId);
 
     Shipment updateShipmentStatus(Integer shipmentId, Status newStatus) throws ShipmentNotFound;
 

@@ -1,10 +1,11 @@
 package nbu.team11.controllers;
-
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import nbu.team11.controllers.forms.EmployeeRegisterShipmentForm;
 import nbu.team11.controllers.forms.RegisterShipmentForm;
 import nbu.team11.dtos.*;
 import nbu.team11.entities.Address;
 import nbu.team11.entities.Shipment;
+import nbu.team11.entities.ShipmentStatus;
 import nbu.team11.entities.enums.Role;
 import nbu.team11.entities.enums.Status;
 import nbu.team11.services.*;
@@ -30,7 +31,9 @@ import java.util.stream.Collectors;
 @RequestMapping
 public class ShipmentController {
 
+
     private final ClientService clientService;
+    private final EmployeeService employeeService;
     private final OfficeService officeService;
     private final ShipmentService shipmentService;
     private final AddressService addressService;
@@ -38,12 +41,14 @@ public class ShipmentController {
     private final UserService userService;
 
     public ShipmentController(ClientService clientService,
+                              EmployeeService employeeService,
                               OfficeService officeService,
                               ShipmentService shipmentService,
                               ModelMapper modelMapper,
                               UserService userService,
                               AddressService addressService) {
         this.clientService = clientService;
+        this.employeeService = employeeService;
         this.officeService = officeService;
         this.shipmentService = shipmentService;
         this.modelMapper = modelMapper;
@@ -55,26 +60,64 @@ public class ShipmentController {
         return shipments.stream()
                 .map(s -> {
                     ShipmentDto dto = modelMapper.map(s, ShipmentDto.class);
-                    String status = shipmentService.getShipmentHistory(dto.getUniqueID())
-                            .getFirst()
+                    String status = shipmentService
+                            .getLatestShipmentStatus(dto.getUniqueID())
                             .getStatus()
-                            .toString();
+                            .name();
                     dto.setStatus(status);
                     return dto;
                 })
                 .collect(Collectors.toList());
     }
 
+
     private String render(Model model, String contentFragment) {
         model.addAttribute("content", contentFragment);
         return "layouts/app";
     }
 
+    @GetMapping("/track")
+    public String trackShipment(@RequestParam(value = "shipmentId", required = false) String shipmentId,
+                                Model model) {
+
+        model.addAttribute("title", "Track Shipment");
+
+        if (shipmentId != null && !shipmentId.isBlank()) {
+            try {
+                List<ShipmentStatusDto> statusDtos =
+                        shipmentService.getShipmentHistoryOrdered(shipmentId)
+                                .stream()
+                                .map(status -> modelMapper.map(status, ShipmentStatusDto.class))
+                                .toList();
+
+                model.addAttribute("shipmentId", shipmentId);
+                model.addAttribute("shipmentStatuses", statusDtos);
+
+            } catch (ShipmentNotFound e) {
+                model.addAttribute("shipmentId", shipmentId);
+                model.addAttribute("error",
+                        "Shipment with tracking number \"" + shipmentId + "\" was not found.");
+            }
+        }
+
+        return render(model, "shipments/track");
+    }
+
     @GetMapping("/shipments/all")
     public String viewAllForEmployee(Authentication auth, Model model) {
+
         List<Shipment> shipments = shipmentService.getAllShipmentsForEmployee(auth);
+
+        List<EmployeeDto> employeeDtos = employeeService.getAllEmployees()
+                .stream()
+                .map(emp -> modelMapper.map(emp, EmployeeDto.class))
+                .toList();
+
         model.addAttribute("shipments", mapAndSetStatus(shipments));
+        model.addAttribute("employees", employeeDtos);
+        model.addAttribute("statuses", Status.values());
         model.addAttribute("title", "Employee Shipments");
+
         return render(model, "shipments/employee");
     }
 
@@ -106,6 +149,26 @@ public class ShipmentController {
         model.addAttribute("form", form);
         model.addAttribute("offices", officeService.getAll());
         return render(model, "client/registerShipment");
+    }
+
+    @PostMapping("/shipments/{id}/assign")
+    public String assignShipment(@PathVariable Integer id,
+                                 @RequestParam Integer employeeId) {
+        shipmentService.assignShipmentToEmployee(id, employeeId);
+        return "redirect:/shipments/all";
+    }
+
+    @PostMapping("/shipments/{id}/status")
+    public String changeStatus(@PathVariable Integer id,
+                               @RequestParam Status status,
+                               RedirectAttributes redirectAttributes) {
+        try {
+            shipmentService.updateShipmentStatus(id, status);
+        } catch (IllegalStateException e) {
+            redirectAttributes.addFlashAttribute(
+                    "error", "Shipment must be paid before changing status.");
+        }
+        return "redirect:/shipments/all";
     }
 
     @PostMapping("/client/registerShipment")

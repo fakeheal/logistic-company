@@ -7,5 +7,6 @@ import java.util.List;
 
 public interface ShipmentStatusRepository extends JpaRepository<ShipmentStatus, Integer> {
     List<ShipmentStatus> findByShipmentId(Integer shipmentId);
-
+    List<ShipmentStatus> findByShipmentIdOrderByCreatedOnDesc(Integer shipmentId);
+    List<ShipmentStatus> findByShipmentIdOrderByCreatedOnAsc(Integer shipmentId);
 }

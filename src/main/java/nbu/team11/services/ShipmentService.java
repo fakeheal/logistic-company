@@ -1,11 +1,6 @@
 package nbu.team11.services;
-import nbu.team11.entities.Client;
-import nbu.team11.entities.Address;
-import nbu.team11.entities.Office;
+import nbu.team11.entities.*;
 import nbu.team11.dtos.ShipmentDto;
-import nbu.team11.entities.Shipment;
-import nbu.team11.entities.ShipmentStatus;
-import nbu.team11.entities.User;
 import nbu.team11.entities.enums.Role;
 import nbu.team11.entities.enums.Status;
 import nbu.team11.repositories.*;
@@ -224,16 +219,53 @@ public class ShipmentService implements IShipmentService {
         return saved;
     }
 
+    public Shipment assignShipmentToEmployee(Integer shipmentId, Integer employeeId) {
+        Shipment shipment = shipmentRepository.findById(shipmentId)
+                .orElseThrow(() -> new ShipmentNotFound("Shipment not found"));
+
+        Employee employee = employeeRepository.findById(employeeId)
+                .orElseThrow(() -> new IllegalArgumentException("Employee not found"));
+
+        shipment.setEmployee(employee);
+        return shipmentRepository.save(shipment);
+    }
+
+
+    public List<ShipmentStatus> getShipmentHistoryOrdered(String uniqueId) {
+        Shipment shipment = shipmentRepository.findByUniqueId(uniqueId);
+
+        if (shipment == null) {
+            throw new ShipmentNotFound("Shipment not found with tracking ID: " + uniqueId);
+        }
+
+        return shipmentStatusRepository
+                .findByShipmentIdOrderByCreatedOnAsc(shipment.getId());
+    }
+
+
+    public ShipmentStatus getLatestShipmentStatus(String uniqueId) {
+        Shipment shipment = shipmentRepository.findByUniqueId(uniqueId);
+
+        return shipmentStatusRepository
+                .findByShipmentIdOrderByCreatedOnDesc(shipment.getId())
+                .stream()
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException("Shipment has no status"));
+    }
+
+
     public List<Shipment> getShipmentsForClient(Authentication authentication) {
         if (isClient(authentication)) {
             Integer userId = getUserIdFromAuthentication(authentication);
+
             return shipmentRepository.findAll().stream()
-                    .filter(s -> s.getSenderClient().getUser().getId().equals(userId)
-                            || s.getRecipientClient().getUser().getId().equals(userId))
+                    .filter(s -> s.getSenderClient().getUser().getId().equals(userId))
                     .toList();
         }
+
         throw new UnauthorizedAccess("Access denied. Only clients can view their shipments.");
     }
+
 
     private void validateShipment(Shipment shipment) {
         if (shipment.getWeight() <= 0) {
@@ -261,17 +293,21 @@ public class ShipmentService implements IShipmentService {
 
 
     public Shipment updateShipmentStatus(Integer shipmentId, Status newStatus) {
-
         Shipment shipment = shipmentRepository.findById(shipmentId)
-                .orElseThrow(() -> new ShipmentNotFound("Shipment not found with ID: " + shipmentId));
+                .orElseThrow(() -> new ShipmentNotFound("Shipment not found"));
+
+        if (!shipment.isPayed()) {
+            throw new IllegalStateException("Shipment must be paid before changing status");
+        }
 
         ShipmentStatus shipmentStatus = new ShipmentStatus();
         shipmentStatus.setShipment(shipment);
         shipmentStatus.setStatus(newStatus);
-        shipmentStatusRepository.save(shipmentStatus);
 
+        shipmentStatusRepository.save(shipmentStatus);
         return shipment;
     }
+
 
     public List<ShipmentStatus> getShipmentHistory(String uniqueId) {
         Shipment shipment = shipmentRepository.findByUniqueId(uniqueId);

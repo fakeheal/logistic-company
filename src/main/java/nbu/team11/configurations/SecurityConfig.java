@@ -39,7 +39,7 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/register", "/home", "/demo").permitAll()
+                        .requestMatchers("/register", "/home", "/demo", "/track").permitAll()
                         .requestMatchers(new AntPathRequestMatcher("/assets/**")).permitAll()
                         .anyRequest().authenticated()
                 )
