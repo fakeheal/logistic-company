@@ -187,6 +187,16 @@ public class ModelMapperConfig {
                     mapping.map(src -> src.getAddress(),  OfficeDto::setAddressDto);
                 });
 
+        modelMapper.typeMap(ShipmentStatus.class, ShipmentStatusDto.class)
+                .addMappings(mapping -> {
+                    mapping.map(ShipmentStatus::getId, ShipmentStatusDto::setId);
+                    mapping.map(src -> src.getShipment().getId(), ShipmentStatusDto::setShipmentId);
+                    mapping.map(ShipmentStatus::getStatus, ShipmentStatusDto::setStatus);
+                    mapping.map(ShipmentStatus::getComment, ShipmentStatusDto::setComment);
+                    mapping.map(ShipmentStatus::getCreatedOn, ShipmentStatusDto::setCreatedOn);
+                    mapping.map(ShipmentStatus::getUpdatedOn, ShipmentStatusDto::setUpdatedOn);
+                });
+
         return modelMapper;
     }
 }
