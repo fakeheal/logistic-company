@@ -1,44 +1,98 @@
 <!-- component -->
 <section class="container mx-auto p-6 font-mono">
-  <div class="w-full mb-8 overflow-hidden rounded-lg shadow-lg" th:if="${#lists.isEmpty(shipments)}">
-    <div class="w-full p-8 text-center">
-      <p class="text-xl text-gray-600 dark:text-gray-400">You don't have any shipments yet.</p>
-      <a th:href="@{/client/registerShipment}"
-         class="mt-4 inline-block px-6 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700">
-        Register Your First Shipment
-      </a>
+
+    <div th:if="${#lists.isEmpty(shipments)}"
+         class="max-w-3xl mx-auto bg-white rounded-2xl shadow-md p-10 text-center">
+
+        <p class="text-2xl font-semibold text-gray-700">
+            You don't have any shipments yet
+        </p>
+
+        <p class="mt-2 text-gray-500">
+            Once you create one, it will appear here.
+        </p>
+
+        <a th:href="@{/client/registerShipment}"
+           class="inline-block mt-6 px-8 py-3 text-white bg-blue-600 rounded-xl
+              hover:bg-blue-700 transition duration-200 shadow-sm">
+            Register Your First Shipment
+        </a>
     </div>
-  </div>
-  <div class="w-full mb-8 overflow-hidden rounded-lg shadow-lg" th:if="${!#lists.isEmpty(shipments)}">
-    <div class="w-full overflow-x-auto">
-      <table class="w-full">
-        <thead>
-          <tr class="text-md font-semibold tracking-wide text-left text-gray-900 bg-gray-100 uppercase border-b border-gray-600">
-            <th class="px-4 py-3">Recipient</th>
-            <th class="px-4 py-3">Recipient Address</th>
-            <th class="px-4 py-3">Sender</th>
-            <th class="px-4 py-3">Sender Address</th>
-            <th class="px-4 py-3">Price</th>
-            <th class="px-4 py-3">Weight</th>
-            <th class="px-4 py-3">Office</th>
-            <th class="px-4 py-3">Status</th>
-            <th class="px-4 py-3">Unique ID</th>
-          </tr>
-        </thead>
-        <tbody class="bg-white">
-          <tr class="text-gray-700" th:each="shipment, iterStat : ${shipments}">
-            <td class="px-4 py-3 text-sm border" th:text = "${shipment.recipientClient.userFullName}"></td>
-            <td class="px-4 py-3 text-sm border" th:text = "${shipment.recipientAddress?.formattedAddress}"></td>
-            <td class="px-4 py-3 text-sm border" th:text = "${shipment.senderClient.userFullName}"></td>
-            <td class="px-4 py-3 text-sm border" th:text = "${shipment.senderAddress?.formattedAddress}"></td>
-            <td class="px-4 py-3 text-sm border" th:text = "${shipment.price}"></td>
-            <td class="px-4 py-3 text-sm border" th:text = "${shipment.weight}"></td>
-            <td class="px-4 py-3 text-sm border" th:text = "${shipment.receivingOffice?.title}"></td>
-            <td class="px-4 py-3 text-sm border" th:text = "${shipment.status}"></td>
-            <td class="px-4 py-3 text-sm border" th:text = "${shipment.uniqueID}"></td>
-          </tr>
-        </tbody>
-      </table>
+
+    <div th:if="${!#lists.isEmpty(shipments)}"
+         class="bg-white rounded-2xl shadow-md overflow-hidden">
+
+        <div class="p-5 bg-white">
+            <input
+                    id="shipmentSearch"
+                    type="text"
+                    placeholder="Search shipments..."
+                    class="w-full px-5 py-3 rounded-xl border border-gray-200
+               focus:outline-none focus:ring-2 focus:ring-blue-500
+               transition duration-200"
+                    onkeyup="filterShipments()"
+            />
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="w-full border-collapse">
+                <thead>
+                <tr class="bg-gray-50 text-gray-700 text-sm uppercase tracking-wide">
+                    <th class="px-6 py-4 text-left">Recipient</th>
+                    <th class="px-6 py-4 text-left">Delivery Location</th>
+                    <th class="px-6 py-4 text-left">Your Address</th>
+                    <th class="px-6 py-4 text-left">Price</th>
+                    <th class="px-6 py-4 text-left">Weight</th>
+                    <th class="px-6 py-4 text-left">Status</th>
+                    <th class="px-6 py-4 text-left">Unique ID</th>
+                </tr>
+                </thead>
+
+                <tbody class="text-gray-700">
+                <tr th:each="shipment : ${shipments}"
+                    class="hover:bg-gray-50 transition">
+                    <td class="px-6 py-4 text-sm"
+                        th:text="${shipment.recipientClient.userFullName}"></td>
+
+                    <td class="px-6 py-4 text-sm"
+                        th:text="${shipment.recipientAddress != null
+              ? shipment.recipientAddress.formattedAddress
+              : (shipment.receivingOffice != null
+                    ? shipment.receivingOffice.title
+                    : '—')}">
+                    </td>
+
+                    <td class="px-6 py-4 text-sm"
+                        th:text="${shipment.senderAddress?.formattedAddress}"></td>
+
+                    <td class="px-6 py-4 text-sm font-medium"
+                        th:text="${shipment.price + ' EUR'}">
+                    </td>
+
+                    <td class="px-6 py-4 text-sm"
+                        th:text="${shipment.weight + ' kg'}"></td>
+
+                    <td class="px-6 py-4 text-sm font-medium"
+                        th:text="${shipment.status}"></td>
+
+                    <td class="px-6 py-4 text-sm font-mono"
+                        th:text="${shipment.uniqueID}"></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
-  </div>
 </section>
+
+<script>
+    function filterShipments() {
+      const input = document.getElementById("shipmentSearch");
+      const filter = input.value.toLowerCase();
+      const rows = document.querySelectorAll("tbody tr");
+
+      rows.forEach(row => {
+        row.style.display =
+          row.innerText.toLowerCase().includes(filter) ? "" : "none";
+      });
+    }
+</script>
