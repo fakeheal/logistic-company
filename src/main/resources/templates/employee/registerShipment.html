@@ -123,12 +123,16 @@
 
     <!-- Price display -->
     <div class="mb-4">
-        <label for="price" class="block mb-1 dark:text-white">Price</label>
-        <input th:field="*{price}"
-               type="text"
-               id="price"
+        <label class="block mb-1 dark:text-white">Price</label>
+
+        <input type="hidden"
+               th:field="*{price}"
+               id="price"/>
+
+        <input type="text"
+               id="priceDisplay"
                readonly
-               class="w-full p-2 border rounded bg-gray-100 dark:bg-gray-600 dark:text-white"/>
+               class="w-full p-2 border rounded bg-gray-100 dark:bg-gray-600 dark:text-white font-semibold"/>
     </div>
 
     <!-- Submit -->
@@ -283,8 +287,12 @@
             fetch(`/api/shipments/price?weight=${wt}&deliverToOffice=${toO}`)
                 .then(r => r.json())
                 .then(data => {
-                    document.getElementById('price').value = data.price;
-                    document.getElementById('submitBtn').disabled = false;
+            const numeric = Number(data.price).toFixed(2);
+
+            document.getElementById('price').value = numeric;              // submitted
+            document.getElementById('priceDisplay').value = numeric + ' EUR'; // shown
+
+            document.getElementById('submitBtn').disabled = false;
                 });
         });
 
