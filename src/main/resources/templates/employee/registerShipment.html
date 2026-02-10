@@ -1,149 +1,119 @@
-<script th:inline="javascript">
-    /*<![CDATA[*/
-    const allUsers = /*[[${users}]]*/ [];
-    /*]]>*/
-</script>
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Register Shipment</title>
+
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        const allUsers = /*[[${users}]]*/ [];
+        /*]]>*/
+    </script>
+
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/tailwindcss/dist/tailwind.min.css"/>
+</head>
+
+<body>
 
 <form th:action="@{/employee/registerShipment}"
       th:object="${form}"
       method="post"
-      class="max-w-lg mx-auto my-12 p-6 bg-white dark:bg-gray-800 border rounded shadow">
+      class="max-w-lg mx-auto my-12 p-6 bg-white border rounded shadow">
 
-    <h2 class="text-2xl font-bold mb-6 dark:text-white">Register Shipment</h2>
+    <h2 class="text-2xl font-bold mb-6">Register Shipment</h2>
 
     <!-- Weight -->
     <div class="mb-4">
-        <label for="weight" class="block mb-1 dark:text-white">Weight (kg)</label>
+        <label class="block mb-1">Weight (kg)</label>
         <input th:field="*{weight}"
                type="number"
                step="0.01"
-               id="weight"
-               class="w-full p-2 border rounded dark:bg-gray-700 dark:text-white"
+               class="w-full p-2 border rounded"
                required/>
     </div>
 
-    <!-- Sender client autocomplete -->
-    <div id="senderClientContainer" class="mb-4 relative">
-        <label for="senderClientSearch" class="block mb-1 dark:text-white">Sender Client</label>
-
-        <input type="text"
-               id="senderClientSearch"
-               class="w-full p-2 border rounded dark:bg-gray-700 dark:text-white"
-               placeholder="Type first/last name or phone…"
-               autocomplete="off" />
-
-        <input type="hidden"
-               th:field="*{senderClientId}"
-               id="senderClientId" />
-
+    <!-- Sender client -->
+    <div class="mb-4 relative">
+        <label class="block mb-1">Sender Client</label>
+        <input type="text" id="senderClientSearch"
+               class="w-full p-2 border rounded"
+               placeholder="Type name or phone…" autocomplete="off"/>
+        <input type="hidden" th:field="*{senderClientId}" id="senderClientId"/>
         <div id="senderClientSuggestions"
-             class="absolute z-10 w-full bg-white border rounded shadow mt-1 max-h-48 overflow-y-auto hidden dark:bg-gray-700">
-        </div>
+             class="absolute w-full bg-white border rounded shadow hidden max-h-40 overflow-y-auto"></div>
     </div>
 
-    <!-- Sending Office -->
+    <!-- Sending office -->
     <div class="mb-4">
-        <label for="sendingOfficeSelect" class="block mb-1 dark:text-white">Sending Office</label>
+        <label class="block mb-1">Sending Office</label>
         <select th:field="*{sendingOfficeId}"
-                id="sendingOfficeSelect"
-                class="w-full p-2 border rounded dark:bg-gray-700 dark:text-white"
-                required>
-            <option value="">Select Office</option>
+                class="w-full p-2 border rounded" required>
+            <option value="">Select office</option>
             <option th:each="office : ${offices}"
                     th:value="${office.id}"
                     th:text="${office.title + ' - ' + office.addressDto.formattedAddress}">
-                Office Name
             </option>
         </select>
     </div>
 
-    <!-- Recipient client autocomplete -->
-    <div id="recipientClientContainer" class="mb-4 relative">
-        <label for="recipientClientSearch" class="block mb-1 dark:text-white">Recipient Client</label>
-
-        <input type="text"
-               id="recipientClientSearch"
-               class="w-full p-2 border rounded dark:bg-gray-700 dark:text-white"
-               placeholder="Type first/last name or phone…"
-               autocomplete="off" />
-
-        <input type="hidden"
-               th:field="*{recipientClientId}"
-               id="recipientClientId" />
-
+    <!-- Recipient client -->
+    <div class="mb-4 relative">
+        <label class="block mb-1">Recipient Client</label>
+        <input type="text" id="recipientClientSearch"
+               class="w-full p-2 border rounded"
+               placeholder="Type name or phone…" autocomplete="off"/>
+        <input type="hidden" th:field="*{recipientClientId}" id="recipientClientId"/>
         <div id="recipientClientSuggestions"
-             class="absolute z-10 w-full bg-white border rounded shadow mt-1 max-h-48 overflow-y-auto hidden dark:bg-gray-700">
-        </div>
+             class="absolute w-full bg-white border rounded shadow hidden max-h-40 overflow-y-auto"></div>
     </div>
 
+    <!-- Deliver to office -->
     <div class="mb-4 flex items-center">
-        <input th:field="*{deliverToOffice}"
-               type="checkbox"
-               id="deliverToOffice"
-               class="mr-2"/>
-        <label for="deliverToOffice" class="dark:text-white">Deliver to Office</label>
+        <input th:field="*{deliverToOffice}" type="checkbox" id="deliverToOffice" class="mr-2"/>
+        <label>Deliver to Office</label>
     </div>
 
-    <!-- Office selection -->
+    <!-- Receiving office -->
     <div id="officeContainer" class="mb-4">
-        <label for="officeSelect" class="block mb-1 dark:text-white">Select Office</label>
-        <select th:field="*{officeId}"
-                id="officeSelect"
-                class="w-full p-2 border rounded dark:bg-gray-700 dark:text-white">
+        <label class="block mb-1">Receiving Office</label>
+        <select th:field="*{officeId}" class="w-full p-2 border rounded">
             <option th:each="office : ${offices}"
                     th:value="${office.id}"
                     th:text="${office.title + ' - ' + office.addressDto.formattedAddress}">
-                Office Name
             </option>
         </select>
     </div>
 
-    <!-- Recipient address (if not office) -->
-    <div id="recipientAddressContainer" class="mb-4 hidden">
-        <label for="recipientAutocomplete" class="block mb-1 dark:text-white">Recipient Address</label>
-        <input th:field="*{recipientAddress.formattedAddress}"
-               type="text"
-               id="recipientAutocomplete"
-               placeholder="Start typing recipient address..."
-               autocomplete="off"
-               class="w-full p-2 border rounded dark:bg-gray-700 dark:text-white"/>
-        <input th:field="*{recipientAddress.coordinates}"
-               type="hidden"
-               id="recipientCoordinates"/>
+    <!-- Recipient address dropdown -->
+    <div id="recipientAddressSelectContainer" class="mb-4 hidden">
+        <label class="block mb-1">Recipient Address</label>
+        <select th:field="*{selectedRecipientAddressId}"
+                id="recipientAddressSelect"
+                class="w-full p-2 border rounded">
+            <option value="">Select recipient address</option>
+        </select>
     </div>
 
-    <!-- Calculate Price -->
+    <!-- Price -->
     <div class="mb-4">
-        <button type="button"
-                id="calculatePrice"
-                class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+        <button type="button" id="calculatePrice"
+                class="px-4 py-2 bg-blue-600 text-white rounded">
             Calculate Price
         </button>
     </div>
 
-    <!-- Price display -->
     <div class="mb-4">
-        <label class="block mb-1 dark:text-white">Price</label>
-
-        <input type="hidden"
-               th:field="*{price}"
-               id="price"/>
-
-        <input type="text"
-               id="priceDisplay"
-               readonly
-               class="w-full p-2 border rounded bg-gray-100 dark:bg-gray-600 dark:text-white font-semibold"/>
+        <label class="block mb-1">Price</label>
+        <input type="hidden" th:field="*{price}" id="price"/>
+        <input type="text" id="priceDisplay" readonly
+               class="w-full p-2 border rounded bg-gray-100 font-semibold"/>
     </div>
 
-    <!-- Submit -->
-    <div>
-        <button type="submit"
-                id="submitBtn"
-                class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50"
-                disabled>
-            Submit
-        </button>
-    </div>
+    <button type="submit" id="submitBtn"
+            disabled
+            class="px-4 py-2 bg-green-600 text-white rounded disabled:opacity-50">
+        Submit
+    </button>
 
 </form>
 
@@ -151,154 +121,110 @@
     /*<![CDATA[*/
     document.addEventListener('DOMContentLoaded', () => {
 
-        const form = document.querySelector('form[action="/employee/registerShipment"], form[method="post"]') || document.querySelector('form');
+        const deliverChk = document.getElementById('deliverToOffice');
+        const officeCont = document.getElementById('officeContainer');
+        const recipAddrCont = document.getElementById('recipientAddressSelectContainer');
+        const recipSelect = document.getElementById('recipientAddressSelect');
 
-        // --- Sender client autocomplete ---
-        const senderSearchInput = form.querySelector('#senderClientSearch');
-        const hiddenSenderClientId = form.querySelector('#senderClientId');
-        const senderSuggestionsBox = form.querySelector('#senderClientSuggestions');
+        const setupAutocomplete = (inputId, hiddenId, boxId, onSelect) => {
+            const input = document.getElementById(inputId);
+            const hidden = document.getElementById(hiddenId);
+            const box = document.getElementById(boxId);
 
-        // --- Recipient client autocomplete ---
-        const recipientSearchInput = form.querySelector('#recipientClientSearch');
-        const hiddenRecipientClientId = form.querySelector('#recipientClientId');
-        const recipientSuggestionsBox = form.querySelector('#recipientClientSuggestions');
+            input.addEventListener('input', () => {
+                const q = input.value.toLowerCase().trim();
+                hidden.value = '';
+                box.innerHTML = '';
+                box.classList.add('hidden');
 
-        const getCandidateId = (c) => {
-            return (c && (c.id ?? c.clientId ?? c.clientDto?.id ?? c.clientDto?.clientId)) ?? null;
-        };
+                if (!q) return;
 
-        const clearSuggestions = (box) => {
-            box.innerHTML = '';
-            box.classList.add('hidden');
-        };
+                const matches = allUsers.filter(u =>
+                    (`${u.firstName} ${u.lastName}`.toLowerCase().includes(q) ||
+                     (u.clientDto?.phoneNumber ?? '').toString().includes(q))
+                );
 
-        const showSuggestions = (matches, box, searchInput, hiddenInput) => {
-            if (!matches.length) {
-                clearSuggestions(box);
-                return;
-            }
-            box.innerHTML = '';
-            matches.slice(0, 10).forEach(c => {
-                const phoneNum = (c.clientDto && c.clientDto.phoneNumber) ? c.clientDto.phoneNumber : '';
-                const label = `${c.firstName} ${c.lastName}` + (phoneNum ? ` – ${phoneNum}` : '');
-
-                const item = document.createElement('div');
-                item.classList.add('px-2','py-1','hover:bg-gray-200','cursor-pointer','dark:hover:bg-gray-600');
-
-                const id = getCandidateId(c);
-                item.textContent = `${label} (id: ${id})`;
-                item.dataset.clientId = id ?? '';
-
-                item.addEventListener('click', () => {
-                    searchInput.value = label;
-                    hiddenInput.value = id ?? '';
-                    clearSuggestions(box);
+                matches.slice(0, 10).forEach(u => {
+                    const div = document.createElement('div');
+                    div.className = 'px-2 py-1 hover:bg-gray-200 cursor-pointer';
+                    div.textContent = `${u.firstName} ${u.lastName}`;
+                    div.onclick = () => {
+                        const id = u.id ?? u.clientDto?.id;
+                        input.value = div.textContent;
+                        hidden.value = id;
+                        box.classList.add('hidden');
+                        onSelect?.(id);
+                    };
+                    box.appendChild(div);
                 });
 
-                box.appendChild(item);
+                box.classList.remove('hidden');
             });
 
-            box.classList.remove('hidden');
+            document.addEventListener('click', e => {
+                if (!box.contains(e.target) && e.target !== input) box.classList.add('hidden');
+            });
         };
 
-        // Sender autocomplete
-        senderSearchInput.addEventListener('input', () => {
-            const query = senderSearchInput.value.trim().toLowerCase();
-            hiddenSenderClientId.value = '';
+        setupAutocomplete('senderClientSearch', 'senderClientId', 'senderClientSuggestions');
+        setupAutocomplete(
+            'recipientClientSearch',
+            'recipientClientId',
+            'recipientClientSuggestions',
+            loadRecipientAddresses
+        );
 
-            if (!query) {
-                clearSuggestions(senderSuggestionsBox);
-                return;
-            }
+        function loadRecipientAddresses(clientId) {
+            fetch(`/api/clients/${clientId}/addresses`)
+                .then(r => r.json())
+                .then(addresses => {
+                    recipSelect.innerHTML = '<option value="">Select recipient address</option>';
+                    if (!addresses.length) return;
 
-            const matches = allUsers.filter(c => {
-                const fullName = ((c.firstName ?? '') + ' ' + (c.lastName ?? '')).toLowerCase();
-                const phone = (c.clientDto && c.clientDto.phoneNumber) ? String(c.clientDto.phoneNumber).toLowerCase() : '';
-                return fullName.includes(query) || phone.includes(query);
-            });
+                    addresses.forEach(a => {
+                        const opt = document.createElement('option');
+                        opt.value = a.id;
+                        opt.textContent = a.formattedAddress;
+                        recipSelect.appendChild(opt);
+                    });
 
-            showSuggestions(matches, senderSuggestionsBox, senderSearchInput, hiddenSenderClientId);
-        });
-
-        // Recipient autocomplete
-        recipientSearchInput.addEventListener('input', () => {
-            const query = recipientSearchInput.value.trim().toLowerCase();
-            hiddenRecipientClientId.value = '';
-
-            if (!query) {
-                clearSuggestions(recipientSuggestionsBox);
-                return;
-            }
-
-            const matches = allUsers.filter(c => {
-                const fullName = ((c.firstName ?? '') + ' ' + (c.lastName ?? '')).toLowerCase();
-                const phone = (c.clientDto && c.clientDto.phoneNumber) ? String(c.clientDto.phoneNumber).toLowerCase() : '';
-                return fullName.includes(query) || phone.includes(query);
-            });
-
-            showSuggestions(matches, recipientSuggestionsBox, recipientSearchInput, hiddenRecipientClientId);
-        });
-
-        document.addEventListener('click', (e) => {
-            if (!senderSuggestionsBox.contains(e.target) && e.target !== senderSearchInput) {
-                clearSuggestions(senderSuggestionsBox);
-            }
-            if (!recipientSuggestionsBox.contains(e.target) && e.target !== recipientSearchInput) {
-                clearSuggestions(recipientSuggestionsBox);
-            }
-        });
-
-        // --- Toggle deliver to office ---
-        const deliverChk = form.querySelector('#deliverToOffice');
-        const officeCont = document.getElementById('officeContainer');
-        const recipAddr = document.getElementById('recipientAddressContainer');
+                    if (!deliverChk.checked) {
+                        recipAddrCont.classList.remove('hidden');
+                    }
+                });
+        }
 
         const toggleDeliver = () => {
             if (deliverChk.checked) {
                 officeCont.style.display = 'block';
-                recipAddr.style.display = 'none';
+                recipAddrCont.classList.add('hidden');
             } else {
                 officeCont.style.display = 'none';
-                recipAddr.style.display = 'block';
-
-                // Initialize Google autocomplete for recipient address
-                if (window.google && google.maps && google.maps.places) {
-                    const recipientInput = document.getElementById('recipientAutocomplete');
-                    const autocomplete = new google.maps.places.Autocomplete(recipientInput);
-                    autocomplete.setFields(['formatted_address','geometry']);
-                    autocomplete.addListener('place_changed', () => {
-                        const place = autocomplete.getPlace();
-                        if (!place.geometry) return;
-                        recipientInput.value = place.formatted_address;
-                        document.getElementById('recipientCoordinates').value =
-                            place.geometry.location.lat() + ',' + place.geometry.location.lng();
-                    });
+                if (document.getElementById('recipientClientId').value) {
+                    recipAddrCont.classList.remove('hidden');
                 }
             }
         };
+
         deliverChk.addEventListener('change', toggleDeliver);
         toggleDeliver();
 
-        // --- Calculate price ---
-        document.getElementById('calculatePrice').addEventListener('click', () => {
+        document.getElementById('calculatePrice').onclick = () => {
             const wt = document.getElementById('weight').value;
-            const toO = deliverChk.checked;
-            if (!wt) { alert('Enter weight first'); return; }
-            fetch(`/api/shipments/price?weight=${wt}&deliverToOffice=${toO}`)
+            if (!wt) return alert('Enter weight');
+
+            fetch(`/api/shipments/price?weight=${wt}&deliverToOffice=${deliverChk.checked}`)
                 .then(r => r.json())
-                .then(data => {
-            const numeric = Number(data.price).toFixed(2);
-
-            document.getElementById('price').value = numeric;              // submitted
-            document.getElementById('priceDisplay').value = numeric + ' EUR'; // shown
-
-            document.getElementById('submitBtn').disabled = false;
+                .then(d => {
+                    const v = Number(d.price).toFixed(2);
+                    document.getElementById('price').value = v;
+                    document.getElementById('priceDisplay').value = v + ' EUR';
+                    document.getElementById('submitBtn').disabled = false;
                 });
-        });
-
+        };
     });
     /*]]>*/
 </script>
 
-<!-- Google Maps API -->
-<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAxIJvVWlMNNR22-FzoJshWD5kthDBtaaU&libraries=places" async defer></script>
+</body>
+</html>

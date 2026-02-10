@@ -24,7 +24,7 @@ public class EmployeeRegisterShipmentForm {
     private Integer officeId;
 
     // Recipient info
-    private AddressDto recipientAddress = new AddressDto();
     private Integer recipientClientId;
+    private Integer selectedRecipientAddressId;
     private BigDecimal price;
 }
