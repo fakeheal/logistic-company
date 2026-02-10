@@ -1,43 +1,37 @@
 <!-- component -->
 <section class="container mx-auto p-6 font-mono">
 
-    <div th:if="${#lists.isEmpty(shipments)}"
-         class="max-w-3xl mx-auto bg-white rounded-2xl shadow-md p-10 text-center">
-
-        <p class="text-2xl font-semibold text-gray-700">
-            You don't have any shipments yet
-        </p>
-
-        <p class="mt-2 text-gray-500">
-            Once you create one, it will appear here.
-        </p>
-
-        <a th:href="@{/client/registerShipment}"
-           class="inline-block mt-6 px-8 py-3 text-white bg-blue-600 rounded-xl
-              hover:bg-blue-700 transition duration-200 shadow-sm">
-            Register Your First Shipment
-        </a>
+    <!-- Search -->
+    <div class="mb-6 bg-white rounded-2xl shadow-md p-5">
+        <input
+                id="shipmentSearch"
+                type="text"
+                placeholder="Search all shipments..."
+                class="w-full px-5 py-3 rounded-xl border border-gray-200
+                   focus:outline-none focus:ring-2 focus:ring-blue-500
+                   transition duration-200"
+                onkeyup="filterShipments()"
+        />
     </div>
 
-    <div th:if="${!#lists.isEmpty(shipments)}"
-         class="bg-white rounded-2xl shadow-md overflow-hidden">
+    <!-- ================= SENT SHIPMENTS ================= -->
+    <div class="bg-white rounded-2xl shadow-md overflow-hidden mb-10">
 
-        <div class="p-5 bg-white">
-            <input
-                    id="shipmentSearch"
-                    type="text"
-                    placeholder="Search shipments..."
-                    class="w-full px-5 py-3 rounded-xl border border-gray-200
-               focus:outline-none focus:ring-2 focus:ring-blue-500
-               transition duration-200"
-                    onkeyup="filterShipments()"
-            />
+        <h3 class="px-6 py-4 text-xl font-semibold text-gray-700">
+             Shipments Sent by You
+        </h3>
+
+        <div th:if="${#lists.isEmpty(sentShipments)}"
+             class="p-8 text-center text-gray-500">
+            You haven’t sent any shipments yet.
         </div>
 
-        <div class="overflow-x-auto">
+        <div th:if="${!#lists.isEmpty(sentShipments)}"
+             class="overflow-x-auto">
             <table class="w-full border-collapse">
                 <thead>
                 <tr class="bg-gray-50 text-gray-700 text-sm uppercase tracking-wide">
+                    <th class="px-6 py-4 text-left">Updated on</th>
                     <th class="px-6 py-4 text-left">Recipient</th>
                     <th class="px-6 py-4 text-left">Delivery Location</th>
                     <th class="px-6 py-4 text-left">Your Address</th>
@@ -48,26 +42,96 @@
                 </tr>
                 </thead>
 
-                <tbody class="text-gray-700">
-                <tr th:each="shipment : ${shipments}"
+                <tbody class="text-gray-700 shipment-table">
+                <tr th:each="shipment : ${sentShipments}"
                     class="hover:bg-gray-50 transition">
+                    <td class="px-6 py-4 text-sm text-gray-600"
+                        th:text="${#temporals.format(shipment.updatedOn, 'yyyy-MM-dd HH:mm')}"></td>
+
                     <td class="px-6 py-4 text-sm"
                         th:text="${shipment.recipientClient.userFullName}"></td>
 
                     <td class="px-6 py-4 text-sm"
                         th:text="${shipment.recipientAddress != null
-              ? shipment.recipientAddress.formattedAddress
-              : (shipment.receivingOffice != null
-                    ? shipment.receivingOffice.title
-                    : '—')}">
+                            ? shipment.recipientAddress.formattedAddress
+                            : shipment.receivingOffice?.title}">
                     </td>
 
                     <td class="px-6 py-4 text-sm"
                         th:text="${shipment.senderAddress?.formattedAddress}"></td>
 
                     <td class="px-6 py-4 text-sm font-medium"
-                        th:text="${shipment.price + ' EUR'}">
+                        th:text="${shipment.price + ' EUR'}"></td>
+
+                    <td class="px-6 py-4 text-sm"
+                        th:text="${shipment.weight + ' kg'}"></td>
+
+                    <td class="px-6 py-4 text-sm font-medium"
+                        th:text="${shipment.status}"></td>
+
+                    <td class="px-6 py-4 text-sm font-mono">
+                        <a th:if="${!shipment.payed}"
+                           th:href="@{/shipments/{id}/pay(id=${shipment.id})}"
+                           class="text-blue-600 hover:underline font-semibold">
+                            Pay here: <span th:text="${shipment.uniqueID}"></span>
+                        </a>
+                        <span th:if="${shipment.payed}"
+                              th:text="${shipment.uniqueID}"></span>
                     </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- ================= RECEIVED SHIPMENTS ================= -->
+    <div class="bg-white rounded-2xl shadow-md overflow-hidden">
+
+        <h3 class="px-6 py-4 text-xl font-semibold text-gray-700">
+             Shipments Sent to You
+        </h3>
+
+        <div th:if="${#lists.isEmpty(receivedShipments)}"
+             class="p-8 text-center text-gray-500">
+            No shipments have been sent to you yet.
+        </div>
+
+        <div th:if="${!#lists.isEmpty(receivedShipments)}"
+             class="overflow-x-auto">
+            <table class="w-full border-collapse">
+                <thead>
+                <tr class="bg-gray-50 text-gray-700 text-sm uppercase tracking-wide">
+                    <th class="px-6 py-4 text-left">Updated on</th>
+                    <th class="px-6 py-4 text-left">Sender</th>
+                    <th class="px-6 py-4 text-left">Delivery Location</th>
+                    <th class="px-6 py-4 text-left">Sender Address</th>
+                    <th class="px-6 py-4 text-left">Price</th>
+                    <th class="px-6 py-4 text-left">Weight</th>
+                    <th class="px-6 py-4 text-left">Status</th>
+                    <th class="px-6 py-4 text-left">Unique ID</th>
+                </tr>
+                </thead>
+
+                <tbody class="text-gray-700 shipment-table">
+                <tr th:each="shipment : ${receivedShipments}"
+                    class="hover:bg-gray-50 transition">
+                    <td class="px-6 py-4 text-sm text-gray-600"
+                        th:text="${#temporals.format(shipment.updatedOn, 'yyyy-MM-dd HH:mm')}"></td>
+
+                    <td class="px-6 py-4 text-sm"
+                        th:text="${shipment.senderClient.userFullName}"></td>
+
+                    <td class="px-6 py-4 text-sm"
+                        th:text="${shipment.recipientAddress != null
+                            ? shipment.recipientAddress.formattedAddress
+                            : shipment.receivingOffice?.title}">
+                    </td>
+
+                    <td class="px-6 py-4 text-sm"
+                        th:text="${shipment.senderAddress?.formattedAddress}"></td>
+
+                    <td class="px-6 py-4 text-sm font-medium"
+                        th:text="${shipment.price + ' EUR'}"></td>
 
                     <td class="px-6 py-4 text-sm"
                         th:text="${shipment.weight + ' kg'}"></td>
@@ -82,17 +146,15 @@
             </table>
         </div>
     </div>
+
 </section>
 
 <script>
     function filterShipments() {
-      const input = document.getElementById("shipmentSearch");
-      const filter = input.value.toLowerCase();
-      const rows = document.querySelectorAll("tbody tr");
-
-      rows.forEach(row => {
-        row.style.display =
-          row.innerText.toLowerCase().includes(filter) ? "" : "none";
-      });
+        const filter = document.getElementById("shipmentSearch").value.toLowerCase();
+        document.querySelectorAll(".shipment-table tr").forEach(row => {
+            row.style.display =
+                row.innerText.toLowerCase().includes(filter) ? "" : "none";
+        });
     }
 </script>

@@ -1,4 +1,5 @@
 package nbu.team11.controllers;
+import nbu.team11.controllers.forms.PaymentForm;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import nbu.team11.controllers.forms.EmployeeRegisterShipmentForm;
 import nbu.team11.controllers.forms.RegisterShipmentForm;
@@ -30,8 +31,6 @@ import java.util.stream.Collectors;
 @Controller
 @RequestMapping
 public class ShipmentController {
-
-
     private final ClientService clientService;
     private final EmployeeService employeeService;
     private final OfficeService officeService;
@@ -198,12 +197,80 @@ public class ShipmentController {
             OfficeDto office = officeService.getById(form.getOfficeId());
             dto.setReceivingOffice(office);
         } else {
-            dto.setRecipientAddress(form.getRecipientAddress());
+            AddressDto selected = recipient.getAddresses().stream()
+                    .filter(a -> a.getId().equals(form.getSelectedRecipientAddressId()))
+                    .findFirst()
+                    .orElseThrow(() ->
+                            new IllegalArgumentException("Recipient address not selected"));
+
+            dto.setRecipientAddress(selected);
         }
+
 
         dto.setPrice(form.getPrice());
 
-        shipmentService.registerShipmentByClient(dto, auth);
+        Shipment shipment = shipmentService.registerShipmentByClient(dto, auth);
+        return "redirect:/shipments/" + shipment.getId() + "/pay";
+    }
+
+    @GetMapping("/shipments/{id}/pay")
+    public String showPaymentPage(@PathVariable Integer id,
+                                  Model model,
+                                  Authentication auth) {
+
+        Shipment shipment = shipmentService.getShipmentById(id);
+
+        if (!shipmentService.belongsToUser(shipment, auth)) {
+            return "redirect:/access-denied";
+        }
+
+        // ⛔ Already paid → redirect
+        if (shipment.isPayed()) {
+            return "redirect:/shipments/client";
+        }
+
+        model.addAttribute("shipment", shipment);
+        model.addAttribute("paymentForm", new PaymentForm());
+        model.addAttribute("title", "Pay Shipment");
+
+        return render(model, "payments/pay");
+    }
+
+    @PostMapping("/shipments/{id}/pay")
+    public String processPayment(@PathVariable Integer id,
+                                 @ModelAttribute PaymentForm paymentForm,
+                                 Authentication auth,
+                                 RedirectAttributes redirectAttributes) {
+
+        Shipment shipment = shipmentService.getShipmentById(id);
+
+        //Security check
+        if (!shipmentService.belongsToUser(shipment, auth)) {
+            return "redirect:/access-denied";
+        }
+
+        // Prevent double payment
+        if (shipment.isPayed()) {
+            redirectAttributes.addFlashAttribute(
+                    "error", "Shipment is already paid.");
+            return "redirect:/shipments/client";
+        }
+
+        //Basic validation (safe)
+        if (paymentForm.getCardNumber() == null
+                || paymentForm.getCardNumber().trim().length() < 16) {
+
+            redirectAttributes.addFlashAttribute(
+                    "error", "Invalid card number.");
+            return "redirect:/shipments/" + id + "/pay";
+        }
+
+        shipmentService.markAsPaid(id);
+        shipmentService.updateShipmentStatus(id, Status.SUBMITTED_PAID);
+
+        redirectAttributes.addFlashAttribute(
+                "success", "Payment successful! Shipment is now paid.");
+
         return "redirect:/shipments/client";
     }
 
@@ -234,7 +301,6 @@ public class ShipmentController {
 
         OfficeDto sendingOffice = officeService.getById(form.getSendingOfficeId());
         dto.setSendingOffice(sendingOffice);
-        dto.setSenderAddress(sendingOffice.getAddressDto());
 
         ClientDto recipient = clientService.getClientById(form.getRecipientClientId());
         dto.setRecipientClient(recipient);
@@ -243,15 +309,62 @@ public class ShipmentController {
             OfficeDto office = officeService.getById(form.getOfficeId());
             dto.setReceivingOffice(office);
         } else {
-            dto.setRecipientAddress(form.getRecipientAddress());
+            AddressDto selected = recipient.getAddresses().stream()
+                    .filter(a -> a.getId().equals(form.getSelectedRecipientAddressId()))
+                    .findFirst()
+                    .orElseThrow(() ->
+                            new IllegalArgumentException("Recipient address not selected"));
+
+            dto.setRecipientAddress(selected);
         }
 
         dto.setPrice(form.getPrice());
 
-        shipmentService.registerShipmentByEmployee(dto, auth);
-        return "redirect:/shipments/all";
+        Shipment shipment = shipmentService.registerShipmentByEmployee(dto, auth);
+        return "redirect:/employee/shipments/" + shipment.getId() + "/confirm-payment";
     }
 
+    @GetMapping("/employee/shipments/{id}/confirm-payment")
+    public String confirmPosPaymentPage(@PathVariable Integer id,
+                                        Authentication auth,
+                                        Model model) {
+
+        Shipment shipment = shipmentService.getShipmentById(id);
+
+
+        // Optional safety: only employees
+        if (!auth.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals(Role.EMPLOYEE.name()))) {
+            return "redirect:/access-denied";
+        }
+
+        model.addAttribute("shipment", shipment);
+        model.addAttribute("title", "Confirm POS Payment");
+
+        return render(model, "employee/confirmPayment");
+    }
+
+    @PostMapping("/employee/shipments/{id}/confirm-payment")
+    public String confirmPosPayment(@PathVariable Integer id,
+                                    Authentication auth,
+                                    RedirectAttributes redirectAttributes) {
+
+        Shipment shipment = shipmentService.getShipmentById(id);
+
+        if (shipment.isPayed()) {
+            redirectAttributes.addFlashAttribute(
+                    "error", "Shipment is already paid.");
+            return "redirect:/shipments/all";
+        }
+
+        shipmentService.markAsPaid(id);
+        shipmentService.updateShipmentStatus(id, Status.SUBMITTED_PAID);
+
+        redirectAttributes.addFlashAttribute(
+                "success", "Payment confirmed successfully.");
+
+        return "redirect:/shipments/all";
+    }
 
 
     @GetMapping("/api/shipments/price")
@@ -268,9 +381,13 @@ public class ShipmentController {
 
     @GetMapping("/shipments/client")
     public String viewClientShipments(Model model, Authentication auth) {
-        List<Shipment> shipments = shipmentService.getShipmentsForClient(auth);
-        model.addAttribute("shipments", mapAndSetStatus(shipments));
+        List<Shipment> sent = shipmentService.getShipmentsFromClient(auth);
+        List<Shipment> received = shipmentService.getShipmentsToClient(auth);
+
+        model.addAttribute("sentShipments", mapAndSetStatus(sent));
+        model.addAttribute("receivedShipments", mapAndSetStatus(received));
         model.addAttribute("title", "My Shipments");
+
         return render(model, "shipments/client");
     }
 

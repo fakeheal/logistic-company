@@ -31,10 +31,6 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-//TODO: Revise all methods
-//TODO: Test all methods
-//TODO: Exception handling
-//TODO: Create interface
 @Service
 public class ClientService implements IClientService {
     @Autowired
@@ -65,6 +61,7 @@ public class ClientService implements IClientService {
         client.setUser(user);
         client.setPhoneNumber(clientDto.getPhoneNumber());
 
+        //Create addresses along with client creation
         if (clientDto.getAddresses() != null && !clientDto.getAddresses().isEmpty()) {
             Type listType = new TypeToken<List<AddressDto>>() {}.getType(); // for clarity; not strictly required
             for (AddressDto adto : clientDto.getAddresses()) {
