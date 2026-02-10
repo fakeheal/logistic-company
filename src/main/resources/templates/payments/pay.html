@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:fragment="payPage" class="max-w-lg mx-auto my-12 p-6 bg-white dark:bg-gray-800 border rounded shadow">
+
+    <h2 class="text-2xl font-bold mb-6 dark:text-white">
+        Pay for Shipment
+    </h2>
+
+    <div class="mb-6 p-4 bg-gray-100 dark:bg-gray-700 rounded">
+        <p class="dark:text-white">
+            <span class="font-semibold">Shipment ID:</span>
+            <span th:text="${shipment.uniqueId}"></span>
+        </p>
+        <p class="dark:text-white mt-1">
+            <span class="font-semibold">Amount:</span>
+            <span th:text="${shipment.price} + ' BGN'"></span>
+        </p>
+    </div>
+
+    <form th:action="@{/shipments/{id}/pay(id=${shipment.id})}"
+          th:object="${paymentForm}"
+          method="post">
+
+        <div class="mb-4">
+            <label class="block mb-1 dark:text-white">Card Holder</label>
+            <input th:field="*{cardHolderName}"
+                   class="w-full p-2 border rounded dark:bg-gray-700 dark:text-white"
+                   required />
+        </div>
+
+        <div class="mb-4">
+            <label class="block mb-1 dark:text-white">Card Number</label>
+            <input th:field="*{cardNumber}"
+                   maxlength="16"
+                   class="w-full p-2 border rounded dark:bg-gray-700 dark:text-white"
+                   required />
+        </div>
+
+        <div class="grid grid-cols-2 gap-4 mb-6">
+            <div>
+                <label class="block mb-1 dark:text-white">Expiry</label>
+                <input th:field="*{expiryDate}"
+                       class="w-full p-2 border rounded dark:bg-gray-700 dark:text-white"
+                       required />
+            </div>
+            <div>
+                <label class="block mb-1 dark:text-white">CVV</label>
+                <input th:field="*{cvv}"
+                       maxlength="4"
+                       class="w-full p-2 border rounded dark:bg-gray-700 dark:text-white"
+                       required />
+            </div>
+        </div>
+
+        <button type="submit"
+                class="w-full px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">
+            Pay Now
+        </button>
+
+    </form>
+</div>
+</body>
+</html>

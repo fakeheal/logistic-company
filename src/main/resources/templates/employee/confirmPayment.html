@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:fragment="confirmPaymentPage" class="max-w-lg mx-auto my-12 p-6 bg-white dark:bg-gray-800 border rounded shadow">
+
+    <h2 class="text-2xl font-bold mb-6 dark:text-white">
+        Confirm POS Payment
+    </h2>
+
+    <div class="mb-6 p-4 bg-gray-100 dark:bg-gray-700 rounded">
+        <p class="dark:text-white">
+            <strong>Shipment ID:</strong>
+            <span th:text="${shipment.uniqueId}"></span>
+        </p>
+        <p class="dark:text-white mt-2">
+            <strong>Amount:</strong>
+            <span th:text="${shipment.price} + ' BGN'"></span>
+        </p>
+    </div>
+
+    <form th:action="@{/employee/shipments/{id}/confirm-payment(id=${shipment.id})}"
+          method="post">
+
+        <button type="submit"
+                class="w-full px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">
+                Client has paid on POS terminal
+        </button>
+    </form>
+
+    <a href="/shipments/all"
+       class="block text-center mt-4 text-blue-600 hover:underline">
+        Cancel
+    </a>
+
+</div>
+
+</body>
+</html>
