@@ -37,8 +37,8 @@ public class RegisterShipmentForm {
     private boolean deliverToOffice;
     private Integer officeId;
 
-    // Recipient info (kept as before)
-    private AddressDto recipientAddress = new AddressDto();
     private Integer recipientClientId;
+    private AddressDto recipientAddress = new AddressDto();
     private BigDecimal price;
+    private Integer selectedRecipientAddressId;
 }

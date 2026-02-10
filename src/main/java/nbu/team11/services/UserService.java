@@ -1,5 +1,4 @@
 package nbu.team11.services;
-import nbu.team11.dtos.ClientDto;
 import nbu.team11.dtos.UserDtoSanitized;
 import nbu.team11.entities.enums.Role;
 import nbu.team11.services.contracts.IUserService;
@@ -11,17 +10,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
 import nbu.team11.dtos.UserDto;
 import nbu.team11.entities.*;
 import nbu.team11.repositories.UserRepository;
-
 import java.util.List;
 import java.util.stream.Collectors;
 
-//TODO: Revise all methods
-//TODO: Test all methods
-//TODO: Exception handling
 @Service
 public class UserService implements IUserService {
     @Autowired
@@ -40,6 +34,7 @@ public class UserService implements IUserService {
     @Override
     public List<UserDtoSanitized> getAllUsers() {
         List<User> allUsers = userRepository.findAll();
+
         return allUsers.stream().map(user -> {
             UserDtoSanitized dto = modelMapper.map(user, UserDtoSanitized.class);
             return dto;
@@ -58,13 +53,11 @@ public class UserService implements IUserService {
         return this.modelMapper.map(user, UserDto.class);
     }
 
-    //TODO: Return UserDTO with automapper
     @Override
     public User getUserById(Integer id) {
         return userRepository.findById(id).orElse(null);
     }
 
-    //TODO: Return UserDTO with automapper
     @Override
     public List<User> getUsersByRole(Role role) {
         return userRepository.findByRole(role);
@@ -86,7 +79,6 @@ public class UserService implements IUserService {
         Page<User> users = this.userRepository.findByRole(role, PageRequest.of(page, size));
         return users.map(user -> this.modelMapper.map(user, UserDto.class));
     }
-
 
     @Override
     public void delete(Integer id) {
