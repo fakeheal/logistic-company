@@ -14,6 +14,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Component
 @Order(2)
 public class EmployeeSeeder implements CommandLineRunner {
@@ -39,37 +41,26 @@ public class EmployeeSeeder implements CommandLineRunner {
 
         if (employeeRepository.count() > 0) return;
 
-        Office office = officeRepository.findAll().stream().findFirst().orElse(null);
-        if (office == null) return;
+        List<Office> offices = officeRepository.findAll();
+        if (offices.isEmpty()) return;
 
-        User adminUser = new User(Role.EMPLOYEE,
-                "admin@example.com",
-                passwordEncoder.encode("Admin123!"),
-                "Admin",
-                "Administrator");
-        userRepository.save(adminUser);
+        Office sofia = offices.get(0);
+        Office plovdiv = offices.size() > 1 ? offices.get(1) : sofia;
+        Office varna = offices.size() > 2 ? offices.get(2) : sofia;
 
-        Employee admin = new Employee(adminUser, office, PositionType.ADMIN);
-        employeeRepository.save(admin);
+        createEmployee("admin@example.com", "Admin123!", "Ivan", "Petrov", sofia, PositionType.ADMIN);
+        createEmployee("coordinator@example.com", "Coordinator123!", "Maria", "Ivanova", sofia, PositionType.COORDINATOR);
+        createEmployee("deliveryman@example.com", "Deliveryman123!", "Georgi", "Dimitrov", sofia, PositionType.DELIVERYMAN);
+        createEmployee("coordinator2@example.com", "Coordinator123!", "Elena", "Todorova", plovdiv, PositionType.COORDINATOR);
+        createEmployee("deliveryman2@example.com", "Deliveryman123!", "Nikolay", "Georgiev", varna, PositionType.DELIVERYMAN);
+    }
 
-        User coordinatorUser = new User(Role.EMPLOYEE,
-                "coordinator@example.com",
-                passwordEncoder.encode("Coordinator123!"),
-                "Coordinator",
-                "Smith");
-        userRepository.save(coordinatorUser);
+    private void createEmployee(String email, String password, String firstName, String lastName,
+                                Office office, PositionType position) {
+        User user = new User(Role.EMPLOYEE, email, passwordEncoder.encode(password), firstName, lastName);
+        userRepository.save(user);
 
-        Employee coordinator = new Employee(coordinatorUser, office, PositionType.COORDINATOR);
-        employeeRepository.save(coordinator);
-
-        User deliverymanUser = new User(Role.EMPLOYEE,
-                "deliveryman@example.com",
-                passwordEncoder.encode("Deliveryman123!"),
-                "Delivery",
-                "Person");
-        userRepository.save(deliverymanUser);
-
-        Employee deliveryman = new Employee(deliverymanUser, office, PositionType.DELIVERYMAN);
-        employeeRepository.save(deliveryman);
+        Employee employee = new Employee(user, office, position);
+        employeeRepository.save(employee);
     }
 }

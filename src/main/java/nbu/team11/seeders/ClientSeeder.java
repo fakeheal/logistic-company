@@ -34,58 +34,44 @@ public class ClientSeeder implements CommandLineRunner {
 
         if (clientRepository.count() > 0) return;
 
-        User user1 = new User(
-                Role.CLIENT,
-                "client1@example.com",
-                passwordEncoder.encode("Client123!"),
-                "Client",
-                "One"
-        );
-        userRepository.save(user1);
+        // Client 1 - Sofia
+        Client c1 = createClient("client1@example.com", "Client123!", "Petar", "Stoyanov", "0888123456");
+        addAddress(c1, "456 Client Street, Sofia, Bulgaria", "42.6977,23.3219");
+        addAddress(c1, "789 Second Ave, Sofia, Bulgaria", "42.7000,23.3333");
+        clientRepository.save(c1);
 
-        Client client1 = new Client();
-        client1.setUser(user1);
-        client1.setPhoneNumber("0888123456");
+        // Client 2 - Sofia
+        Client c2 = createClient("client2@example.com", "Client123!", "Anna", "Koleva", "0888999888");
+        addAddress(c2, "12 Vitosha Blvd, Sofia, Bulgaria", "42.6885,23.3196");
+        addAddress(c2, "34 Graf Ignatiev St, Sofia, Bulgaria", "42.6942,23.3251");
+        clientRepository.save(c2);
 
-        client1 = clientRepository.save(client1);
+        // Client 3 - Plovdiv
+        Client c3 = createClient("client3@example.com", "Client123!", "Dimitar", "Hristov", "0877111222");
+        addAddress(c3, "5 Kapana District, Plovdiv, Bulgaria", "42.1490,24.7510");
+        clientRepository.save(c3);
 
-        Address c1Address1 = new Address();
-        c1Address1.setFormattedAddress("456 Client Street, Sofia, Bulgaria");
-        c1Address1.setCoordinates("42.6977,23.3219");
-        client1.addAddress(c1Address1);
+        // Client 4 - Varna
+        Client c4 = createClient("client4@example.com", "Client123!", "Silvia", "Marinova", "0899333444");
+        addAddress(c4, "22 Slivnitsa Blvd, Varna, Bulgaria", "43.2073,27.9105");
+        addAddress(c4, "8 Primorski Park, Varna, Bulgaria", "43.2100,27.9250");
+        clientRepository.save(c4);
+    }
 
-        Address c1Address2 = new Address();
-        c1Address2.setFormattedAddress("789 Second Ave, Sofia, Bulgaria");
-        c1Address2.setCoordinates("42.7000,23.3333");
-        client1.addAddress(c1Address2);
+    private Client createClient(String email, String password, String firstName, String lastName, String phone) {
+        User user = new User(Role.CLIENT, email, passwordEncoder.encode(password), firstName, lastName);
+        userRepository.save(user);
 
-        clientRepository.save(client1);
+        Client client = new Client();
+        client.setUser(user);
+        client.setPhoneNumber(phone);
+        return clientRepository.save(client);
+    }
 
-        User user2 = new User(
-                Role.CLIENT,
-                "client2@example.com",
-                passwordEncoder.encode("Client123!"),
-                "Client",
-                "Two"
-        );
-        userRepository.save(user2);
-
-        Client client2 = new Client();
-        client2.setUser(user2);
-        client2.setPhoneNumber("0888999888");
-
-        client2 = clientRepository.save(client2);
-
-        Address c2Address1 = new Address();
-        c2Address1.setFormattedAddress("12 Vitosha Blvd, Sofia, Bulgaria");
-        c2Address1.setCoordinates("42.6885,23.3196");
-        client2.addAddress(c2Address1);
-
-        Address c2Address2 = new Address();
-        c2Address2.setFormattedAddress("34 Graf Ignatiev St, Sofia, Bulgaria");
-        c2Address2.setCoordinates("42.6942,23.3251");
-        client2.addAddress(c2Address2);
-
-        clientRepository.save(client2);
+    private void addAddress(Client client, String formattedAddress, String coordinates) {
+        Address address = new Address();
+        address.setFormattedAddress(formattedAddress);
+        address.setCoordinates(coordinates);
+        client.addAddress(address);
     }
 }

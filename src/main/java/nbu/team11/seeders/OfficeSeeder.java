@@ -28,14 +28,20 @@ public class OfficeSeeder implements CommandLineRunner {
             return;
         }
 
-        Office office1 = new Office();
-        office1.setTitle("TheBestOffice");
+        createOffice("Sofia Central", "123 Main St, Sofia, Bulgaria", "42.6977,23.3219");
+        createOffice("Plovdiv Office", "45 Maritsa Blvd, Plovdiv, Bulgaria", "42.1354,24.7453");
+        createOffice("Varna Office", "78 Sea Garden, Varna, Bulgaria", "43.2141,27.9147");
+    }
 
-        Address officeAddress = new Address();
-        officeAddress.setCoordinates("42.6977,23.3219");
-        officeAddress.setFormattedAddress("123 Main St, Sofia, Bulgaria");
-        addressRepository.save(officeAddress);
-        office1.setAddress(officeAddress);
-        officeRepository.save(office1);
+    private void createOffice(String title, String formattedAddress, String coordinates) {
+        Address address = new Address();
+        address.setFormattedAddress(formattedAddress);
+        address.setCoordinates(coordinates);
+        addressRepository.save(address);
+
+        Office office = new Office();
+        office.setTitle(title);
+        office.setAddress(address);
+        officeRepository.save(office);
     }
 }
