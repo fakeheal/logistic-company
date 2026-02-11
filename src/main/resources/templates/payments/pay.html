@@ -3,7 +3,7 @@
 <body>
 
 <div th:fragment="payPage"
-     class="max-w-lg mx-auto my-12 p-6 bg-white dark:bg-gray-800 border rounded shadow">
+     class="max-w-lg mx-auto my-12 p-6 bg-white dark:bg-gray-800 border dark:border-gray-700 rounded shadow">
 
     <h2 class="text-2xl font-bold mb-6 dark:text-white">
         Pay for Shipment
@@ -27,7 +27,7 @@
 
         <!-- Errors -->
         <div th:if="${#fields.hasGlobalErrors()}"
-             class="mb-4 p-3 bg-red-100 text-red-700 rounded">
+             class="mb-4 p-3 bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-400 rounded">
             <p th:each="err : ${#fields.globalErrors()}"
                th:text="${err}"></p>
         </div>
@@ -35,10 +35,10 @@
         <div class="mb-4">
             <label class="block mb-1 dark:text-white">Card Holder</label>
             <input th:field="*{cardHolderName}"
-                   class="w-full p-2 border rounded dark:bg-gray-700 dark:text-white"/>
+                   class="w-full p-2 border dark:border-gray-600 rounded dark:bg-gray-700 dark:text-white"/>
             <p th:if="${#fields.hasErrors('cardHolderName')}"
                th:errors="*{cardHolderName}"
-               class="mt-1 text-sm text-red-600"></p>
+               class="mt-1 text-sm text-red-600 dark:text-red-400"></p>
         </div>
 
         <div class="mb-4">
@@ -47,10 +47,10 @@
                    placeholder="1234 5678 9012 3456"
                    maxlength="19"
                    inputmode="numeric"
-                   class="w-full p-2 border rounded dark:bg-gray-700 dark:text-white"/>
+                   class="w-full p-2 border dark:border-gray-600 rounded dark:bg-gray-700 dark:text-white dark:placeholder-gray-400"/>
             <p th:if="${#fields.hasErrors('cardNumber')}"
                th:errors="*{cardNumber}"
-               class="mt-1 text-sm text-red-600"></p>
+               class="mt-1 text-sm text-red-600 dark:text-red-400"></p>
         </div>
 
         <div class="grid grid-cols-2 gap-4 mb-6">
@@ -59,10 +59,10 @@
                 <label class="block mb-1 dark:text-white">Expiry (MM/YY)</label>
                 <input th:field="*{expiryDate}"
                        placeholder="MM/YY"
-                       class="w-full p-2 border rounded dark:bg-gray-700 dark:text-white"/>
+                       class="w-full p-2 border dark:border-gray-600 rounded dark:bg-gray-700 dark:text-white dark:placeholder-gray-400"/>
                 <p th:if="${#fields.hasErrors('expiryDate')}"
                    th:errors="*{expiryDate}"
-                   class="mt-1 text-sm text-red-600"></p>
+                   class="mt-1 text-sm text-red-600 dark:text-red-400"></p>
             </div>
 
             <div>
@@ -70,10 +70,10 @@
                 <input th:field="*{cvv}"
                        maxlength="4"
                        inputmode="numeric"
-                       class="w-full p-2 border rounded dark:bg-gray-700 dark:text-white"/>
+                       class="w-full p-2 border dark:border-gray-600 rounded dark:bg-gray-700 dark:text-white"/>
                 <p th:if="${#fields.hasErrors('cvv')}"
                    th:errors="*{cvv}"
-                   class="mt-1 text-sm text-red-600"></p>
+                   class="mt-1 text-sm text-red-600 dark:text-red-400"></p>
             </div>
         </div>
 

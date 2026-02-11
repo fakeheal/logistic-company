@@ -2,12 +2,14 @@
 <section class="container mx-auto p-6 font-mono">
 
     <!-- Search -->
-    <div class="mb-6 bg-white rounded-2xl shadow-md p-5">
+    <div class="mb-6 bg-white dark:bg-gray-800 rounded-2xl shadow-md p-5">
         <input
                 id="shipmentSearch"
                 type="text"
                 placeholder="Search all shipments..."
-                class="w-full px-5 py-3 rounded-xl border border-gray-200
+                class="w-full px-5 py-3 rounded-xl border border-gray-200 dark:border-gray-600
+                   bg-white dark:bg-gray-700 text-gray-900 dark:text-white
+                   placeholder-gray-400 dark:placeholder-gray-400
                    focus:outline-none focus:ring-2 focus:ring-blue-500
                    transition duration-200"
                 onkeyup="filterShipments()"
@@ -15,22 +17,22 @@
     </div>
 
     <!-- ================= SENT SHIPMENTS ================= -->
-    <div class="bg-white rounded-2xl shadow-md overflow-hidden mb-10">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-md overflow-hidden mb-10">
 
-        <h3 class="px-6 py-4 text-xl font-semibold text-gray-700">
+        <h3 class="px-6 py-4 text-xl font-semibold text-gray-700 dark:text-white">
              Shipments Sent by You
         </h3>
 
         <div th:if="${#lists.isEmpty(sentShipments)}"
-             class="p-8 text-center text-gray-500">
-            You haven’t sent any shipments yet.
+             class="p-8 text-center text-gray-500 dark:text-gray-400">
+            You haven't sent any shipments yet.
         </div>
 
         <div th:if="${!#lists.isEmpty(sentShipments)}"
              class="overflow-x-auto">
             <table class="w-full border-collapse">
                 <thead>
-                <tr class="bg-gray-50 text-gray-700 text-sm uppercase tracking-wide">
+                <tr class="bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-200 text-sm uppercase tracking-wide">
                     <th class="px-6 py-4 text-left">Updated on</th>
                     <th class="px-6 py-4 text-left">Recipient</th>
                     <th class="px-6 py-4 text-left">Delivery Location</th>
@@ -42,10 +44,10 @@
                 </tr>
                 </thead>
 
-                <tbody class="text-gray-700 shipment-table">
+                <tbody class="text-gray-700 dark:text-white shipment-table">
                 <tr th:each="shipment : ${sentShipments}"
-                    class="hover:bg-gray-50 transition">
-                    <td class="px-6 py-4 text-sm text-gray-600"
+                    class="hover:bg-gray-50 dark:hover:bg-gray-700 transition">
+                    <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-400"
                         th:text="${#temporals.format(shipment.updatedOn, 'yyyy-MM-dd HH:mm')}"></td>
 
                     <td class="px-6 py-4 text-sm"
@@ -72,7 +74,7 @@
                     <td class="px-6 py-4 text-sm font-mono">
                         <a th:if="${!shipment.payed}"
                            th:href="@{/shipments/{id}/pay(id=${shipment.id})}"
-                           class="text-blue-600 hover:underline font-semibold">
+                           class="text-blue-600 dark:text-blue-400 hover:underline font-semibold">
                             Pay here: <span th:text="${shipment.uniqueID}"></span>
                         </a>
                         <span th:if="${shipment.payed}"
@@ -85,14 +87,14 @@
     </div>
 
     <!-- ================= RECEIVED SHIPMENTS ================= -->
-    <div class="bg-white rounded-2xl shadow-md overflow-hidden">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-md overflow-hidden">
 
-        <h3 class="px-6 py-4 text-xl font-semibold text-gray-700">
+        <h3 class="px-6 py-4 text-xl font-semibold text-gray-700 dark:text-white">
              Shipments Sent to You
         </h3>
 
         <div th:if="${#lists.isEmpty(receivedShipments)}"
-             class="p-8 text-center text-gray-500">
+             class="p-8 text-center text-gray-500 dark:text-gray-400">
             No shipments have been sent to you yet.
         </div>
 
@@ -100,7 +102,7 @@
              class="overflow-x-auto">
             <table class="w-full border-collapse">
                 <thead>
-                <tr class="bg-gray-50 text-gray-700 text-sm uppercase tracking-wide">
+                <tr class="bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-200 text-sm uppercase tracking-wide">
                     <th class="px-6 py-4 text-left">Updated on</th>
                     <th class="px-6 py-4 text-left">Sender</th>
                     <th class="px-6 py-4 text-left">Delivery Location</th>
@@ -112,10 +114,10 @@
                 </tr>
                 </thead>
 
-                <tbody class="text-gray-700 shipment-table">
+                <tbody class="text-gray-700 dark:text-white shipment-table">
                 <tr th:each="shipment : ${receivedShipments}"
-                    class="hover:bg-gray-50 transition">
-                    <td class="px-6 py-4 text-sm text-gray-600"
+                    class="hover:bg-gray-50 dark:hover:bg-gray-700 transition">
+                    <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-400"
                         th:text="${#temporals.format(shipment.updatedOn, 'yyyy-MM-dd HH:mm')}"></td>
 
                     <td class="px-6 py-4 text-sm"

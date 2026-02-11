@@ -20,18 +20,18 @@
     <form th:action="@{/client/registerShipment}"
           th:object="${form}"
           method="post"
-          class="max-w-lg mx-auto my-12 p-6 bg-white border rounded shadow">
+          class="max-w-lg mx-auto my-12 p-6 bg-white border rounded shadow dark:bg-gray-800 dark:border-gray-700">
 
-        <h2 class="text-2xl font-bold mb-6">Register Shipment</h2>
+        <h2 class="text-2xl font-bold mb-6 dark:text-white">Register Shipment</h2>
 
         <!-- Weight -->
         <div class="mb-4">
-            <label for="weight" class="block mb-1">Weight (kg)</label>
+            <label for="weight" class="block mb-1 dark:text-gray-300">Weight (kg)</label>
             <input th:field="*{weight}"
                    type="number"
                    step="0.01"
                    id="weight"
-                   class="w-full p-2 border rounded"
+                   class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400"
                    required/>
         </div>
 
@@ -41,17 +41,17 @@
                    type="checkbox"
                    id="createNewAddress"
                    class="mr-2"/>
-            <label for="createNewAddress">Create New Address</label>
+            <label for="createNewAddress" class="dark:text-gray-300">Create New Address</label>
         </div>
 
         <!-- Profile sender address -->
         <div id="profileAddressContainer" class="mb-4">
-            <label class="block mb-1">Your Address</label>
+            <label class="block mb-1 dark:text-gray-300">Your Address</label>
 
             <select th:if="${form.addresses != null and #lists.size(form.addresses) > 0}"
                     th:field="*{selectedSenderAddressId}"
                     id="senderAddressSelect"
-                    class="w-full p-2 border rounded">
+                    class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white">
                 <option th:each="addr : ${form.addresses}"
                         th:value="${addr.id}"
                         th:text="${addr.formattedAddress + ' — ' + addr.coordinates}">
@@ -62,17 +62,17 @@
                    type="text"
                    th:value="${form.senderAddress.formattedAddress}"
                    readonly
-                   class="w-full p-2 border rounded bg-gray-100"/>
+                   class="w-full p-2 border rounded bg-gray-100 dark:bg-gray-600 dark:border-gray-600 dark:text-white"/>
         </div>
 
         <!-- Manual sender address -->
         <div id="senderAddressContainer" class="mb-4 hidden">
-            <label for="senderAutocomplete" class="block mb-1">Your Address</label>
+            <label for="senderAutocomplete" class="block mb-1 dark:text-gray-300">Your Address</label>
             <input th:field="*{senderAddress.formattedAddress}"
                    type="text"
                    id="senderAutocomplete"
                    autocomplete="off"
-                   class="w-full p-2 border rounded"/>
+                   class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400"/>
             <input th:field="*{senderAddress.coordinates}"
                    type="hidden"
                    id="senderCoordinates"/>
@@ -80,11 +80,11 @@
 
         <!-- Recipient client autocomplete -->
         <div class="mb-4 relative">
-            <label class="block mb-1">Recipient Client</label>
+            <label class="block mb-1 dark:text-gray-300">Recipient Client</label>
 
             <input type="text"
                    id="recipientClientSearch"
-                   class="w-full p-2 border rounded"
+                   class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400"
                    placeholder="Type first/last name or phone…"
                    autocomplete="off"/>
 
@@ -93,7 +93,7 @@
                    id="recipientClientId"/>
 
             <div id="recipientClientSuggestions"
-                 class="absolute z-10 w-full bg-white border rounded shadow mt-1 max-h-48 overflow-y-auto hidden">
+                 class="absolute z-10 w-full bg-white border rounded shadow mt-1 max-h-48 overflow-y-auto hidden dark:bg-gray-700 dark:border-gray-600">
             </div>
         </div>
 
@@ -103,15 +103,15 @@
                    type="checkbox"
                    id="deliverToOffice"
                    class="mr-2"/>
-            <label for="deliverToOffice">Deliver to Office</label>
+            <label for="deliverToOffice" class="dark:text-gray-300">Deliver to Office</label>
         </div>
 
         <!-- Office selection -->
         <div id="officeContainer" class="mb-4">
-            <label class="block mb-1">Select Office</label>
+            <label class="block mb-1 dark:text-gray-300">Select Office</label>
             <select th:field="*{officeId}"
                     id="officeSelect"
-                    class="w-full p-2 border rounded">
+                    class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white">
                 <option th:each="office : ${offices}"
                         th:value="${office.id}"
                         th:text="${office.title + ' - ' + office.addressDto.formattedAddress}">
@@ -121,10 +121,10 @@
 
         <!-- Recipient address dropdown ONLY -->
         <div id="recipientAddressSelectContainer" class="mb-4 hidden">
-            <label class="block mb-1">Recipient Address</label>
+            <label class="block mb-1 dark:text-gray-300">Recipient Address</label>
             <select th:field="*{selectedRecipientAddressId}"
                     id="recipientAddressSelect"
-                    class="w-full p-2 border rounded">
+                    class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white">
                 <option value="">Select recipient address</option>
             </select>
         </div>
@@ -133,24 +133,24 @@
         <div class="mb-4">
             <button type="button"
                     id="calculatePrice"
-                    class="px-4 py-2 bg-blue-600 text-white rounded">
+                    class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-700">
                 Calculate Price
             </button>
         </div>
 
         <div class="mb-4">
-            <label class="block mb-1">Price</label>
+            <label class="block mb-1 dark:text-gray-300">Price</label>
             <input type="hidden" th:field="*{price}" id="price"/>
             <input type="text"
                    id="priceDisplay"
                    readonly
-                   class="w-full p-2 border rounded bg-gray-100 font-semibold"/>
+                   class="w-full p-2 border rounded bg-gray-100 font-semibold dark:bg-gray-600 dark:border-gray-600 dark:text-white"/>
         </div>
 
         <button type="submit"
                 id="submitBtn"
                 disabled
-                class="px-4 py-2 bg-green-600 text-white rounded disabled:opacity-50">
+                class="px-4 py-2 bg-green-600 text-white rounded disabled:opacity-50 hover:bg-green-700 dark:bg-green-600 dark:hover:bg-green-700">
             Submit
         </button>
 
@@ -216,7 +216,7 @@
             suggestionsBox.innerHTML = '';
             matches.slice(0, 10).forEach(u => {
                 const div = document.createElement('div');
-                div.className = 'px-2 py-1 cursor-pointer hover:bg-gray-200';
+                div.className = 'px-2 py-1 cursor-pointer hover:bg-gray-200 dark:text-white dark:hover:bg-gray-600';
                 div.textContent = `${u.firstName} ${u.lastName}`;
 
                 div.onclick = () => {

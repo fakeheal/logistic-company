@@ -8,7 +8,7 @@
           th:action="@{/employee/store}"
           th:object="${form}">
 
-        <h2 class="font-bold text-xl mb-4">New Employee</h2>
+        <h2 class="font-bold text-xl mb-4 dark:text-white">New Employee</h2>
         <div class="mb-5"
              th:insert="~{ /ui/forms :: textInput(labelText='First Name', inputName='firstName', inputType='text') }"></div>
         <div class="mb-5"

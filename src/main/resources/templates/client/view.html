@@ -44,7 +44,7 @@
                         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-4">
                             <div>
                                 <div class="italic text-sm text-gray-600 dark:text-gray-400">phone</div>
-                                <div th:text="${client.getPhoneNumber()}">0888123456</div>
+                                <div class="dark:text-white" th:text="${client.getPhoneNumber()}">0888123456</div>
                             </div>
                         </div>
                         <div th:if="${client.getAddresses() != null && !client.getAddresses().isEmpty()}">
@@ -60,10 +60,10 @@
                                             Linked to shipment(s)
                                         </span>
                                     </div>
-                                    <div th:text="${address.getFormattedAddress()}">123 Main St</div>
+                                    <div class="dark:text-white" th:text="${address.getFormattedAddress()}">123 Main St</div>
                                     <div class="mt-2">
                                         <div class="italic text-sm text-gray-600 dark:text-gray-400">coordinates</div>
-                                        <div th:text="${address.getCoordinates()}">42.6977,23.3219</div>
+                                        <div class="dark:text-white" th:text="${address.getCoordinates()}">42.6977,23.3219</div>
                                     </div>
                                 </div>
                             </div>

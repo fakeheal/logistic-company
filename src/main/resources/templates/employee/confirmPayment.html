@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <body>
-<div th:fragment="confirmPaymentPage" class="max-w-lg mx-auto my-12 p-6 bg-white dark:bg-gray-800 border rounded shadow">
+<div th:fragment="confirmPaymentPage" class="max-w-lg mx-auto my-12 p-6 bg-white dark:bg-gray-800 border dark:border-gray-700 rounded shadow">
 
     <h2 class="text-2xl font-bold mb-6 dark:text-white">
         Confirm POS Payment
@@ -28,7 +28,7 @@
     </form>
 
     <a href="/shipments/all"
-       class="block text-center mt-4 text-blue-600 hover:underline">
+       class="block text-center mt-4 text-blue-600 dark:text-blue-400 hover:underline">
         Cancel
     </a>
 
