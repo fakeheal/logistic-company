@@ -7,5 +7,6 @@ public enum Status {
     SHIPPED,
     IN_TRANSIT,
     OUT_FOR_DELIVERY,
-    DELIVERED
+    DELIVERED,
+    CANCELED
 }

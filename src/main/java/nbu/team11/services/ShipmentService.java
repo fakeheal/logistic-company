@@ -313,7 +313,12 @@ public class ShipmentService {
         Shipment shipment = shipmentRepository.findById(shipmentId)
                 .orElseThrow(() -> new ShipmentNotFound("Shipment not found"));
 
-        if (!shipment.isPayed()) {
+        if (newStatus == Status.CANCELED) {
+            Status currentStatus = getLatestShipmentStatus(shipment.getUniqueId()).getStatus();
+            if (currentStatus != Status.SUBMITTED) {
+                throw new IllegalStateException("Shipment can only be canceled when in SUBMITTED status");
+            }
+        } else if (!shipment.isPayed()) {
             throw new IllegalStateException("Shipment must be paid before changing status");
         }
 

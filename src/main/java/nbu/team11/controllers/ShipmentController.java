@@ -201,9 +201,37 @@ public class ShipmentController {
             shipmentService.updateShipmentStatus(id, status);
         } catch (IllegalStateException e) {
             redirectAttributes.addFlashAttribute(
-                    "error", "Shipment must be paid before changing status.");
+                    "error", e.getMessage());
         }
         return "redirect:/shipments/" + id;
+    }
+
+    @PostMapping("/shipments/{id}/cancel")
+    public String cancelShipment(@PathVariable Integer id,
+                                 Authentication auth,
+                                 RedirectAttributes redirectAttributes) {
+        Shipment shipment = shipmentService.getShipmentById(id);
+
+        if (!shipmentService.belongsToUser(shipment, auth)) {
+            return "redirect:/access-denied";
+        }
+
+        try {
+            shipmentService.updateShipmentStatus(id, Status.CANCELED);
+            redirectAttributes.addFlashAttribute("success", "Shipment has been canceled.");
+        } catch (IllegalStateException e) {
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
+        }
+
+        if (isClient(auth)) {
+            return "redirect:/shipments/client";
+        }
+        return "redirect:/shipments/" + id;
+    }
+
+    private boolean isClient(Authentication auth) {
+        return auth.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals(Role.CLIENT.name()));
     }
 
     @PostMapping("/client/registerShipment")

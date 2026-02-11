@@ -41,6 +41,7 @@
                     <th class="px-6 py-4 text-left">Weight</th>
                     <th class="px-6 py-4 text-left">Status</th>
                     <th class="px-6 py-4 text-left">Unique ID</th>
+                    <th class="px-6 py-4 text-left">Actions</th>
                 </tr>
                 </thead>
 
@@ -72,13 +73,25 @@
                         th:text="${shipment.status}"></td>
 
                     <td class="px-6 py-4 text-sm font-mono">
-                        <a th:if="${!shipment.payed}"
+                        <a th:if="${!shipment.payed and shipment.status != 'CANCELED'}"
                            th:href="@{/shipments/{id}/pay(id=${shipment.id})}"
                            class="text-blue-600 dark:text-blue-400 hover:underline font-semibold">
                             Pay here: <span th:text="${shipment.uniqueID}"></span>
                         </a>
-                        <span th:if="${shipment.payed}"
+                        <span th:if="${shipment.payed or shipment.status == 'CANCELED'}"
                               th:text="${shipment.uniqueID}"></span>
+                    </td>
+
+                    <td class="px-6 py-4 text-sm">
+                        <form th:if="${shipment.status == 'SUBMITTED'}"
+                              th:action="@{/shipments/{id}/cancel(id=${shipment.id})}"
+                              method="post">
+                            <button type="submit"
+                                    class="text-red-600 dark:text-red-400 hover:underline text-sm font-medium"
+                                    onclick="return confirm('Are you sure you want to cancel this shipment?')">
+                                Cancel
+                            </button>
+                        </form>
                     </td>
                 </tr>
                 </tbody>
