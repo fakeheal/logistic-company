@@ -1,7 +1,9 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <body>
-<div th:fragment="payPage" class="max-w-lg mx-auto my-12 p-6 bg-white dark:bg-gray-800 border rounded shadow">
+
+<div th:fragment="payPage"
+     class="max-w-lg mx-auto my-12 p-6 bg-white dark:bg-gray-800 border rounded shadow">
 
     <h2 class="text-2xl font-bold mb-6 dark:text-white">
         Pay for Shipment
@@ -20,36 +22,58 @@
 
     <form th:action="@{/shipments/{id}/pay(id=${shipment.id})}"
           th:object="${paymentForm}"
-          method="post">
+          method="post"
+          novalidate>
+
+        <!-- Errors -->
+        <div th:if="${#fields.hasGlobalErrors()}"
+             class="mb-4 p-3 bg-red-100 text-red-700 rounded">
+            <p th:each="err : ${#fields.globalErrors()}"
+               th:text="${err}"></p>
+        </div>
 
         <div class="mb-4">
             <label class="block mb-1 dark:text-white">Card Holder</label>
             <input th:field="*{cardHolderName}"
-                   class="w-full p-2 border rounded dark:bg-gray-700 dark:text-white"
-                   required />
+                   class="w-full p-2 border rounded dark:bg-gray-700 dark:text-white"/>
+            <p th:if="${#fields.hasErrors('cardHolderName')}"
+               th:errors="*{cardHolderName}"
+               class="mt-1 text-sm text-red-600"></p>
         </div>
 
         <div class="mb-4">
             <label class="block mb-1 dark:text-white">Card Number</label>
             <input th:field="*{cardNumber}"
-                   maxlength="16"
-                   class="w-full p-2 border rounded dark:bg-gray-700 dark:text-white"
-                   required />
+                   placeholder="1234 5678 9012 3456"
+                   maxlength="19"
+                   inputmode="numeric"
+                   class="w-full p-2 border rounded dark:bg-gray-700 dark:text-white"/>
+            <p th:if="${#fields.hasErrors('cardNumber')}"
+               th:errors="*{cardNumber}"
+               class="mt-1 text-sm text-red-600"></p>
         </div>
 
         <div class="grid grid-cols-2 gap-4 mb-6">
+
             <div>
-                <label class="block mb-1 dark:text-white">Expiry</label>
+                <label class="block mb-1 dark:text-white">Expiry (MM/YY)</label>
                 <input th:field="*{expiryDate}"
-                       class="w-full p-2 border rounded dark:bg-gray-700 dark:text-white"
-                       required />
+                       placeholder="MM/YY"
+                       class="w-full p-2 border rounded dark:bg-gray-700 dark:text-white"/>
+                <p th:if="${#fields.hasErrors('expiryDate')}"
+                   th:errors="*{expiryDate}"
+                   class="mt-1 text-sm text-red-600"></p>
             </div>
+
             <div>
                 <label class="block mb-1 dark:text-white">CVV</label>
                 <input th:field="*{cvv}"
                        maxlength="4"
-                       class="w-full p-2 border rounded dark:bg-gray-700 dark:text-white"
-                       required />
+                       inputmode="numeric"
+                       class="w-full p-2 border rounded dark:bg-gray-700 dark:text-white"/>
+                <p th:if="${#fields.hasErrors('cvv')}"
+                   th:errors="*{cvv}"
+                   class="mt-1 text-sm text-red-600"></p>
             </div>
         </div>
 
@@ -60,5 +84,18 @@
 
     </form>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const input = document.querySelector('input[name="cardNumber"]');
+        if (!input) return;
+
+        input.addEventListener('input', () => {
+            let v = input.value.replace(/\D/g, '').substring(0, 16);
+            input.value = v.replace(/(.{4})/g, '$1 ').trim();
+        });
+    });
+</script>
+
 </body>
 </html>

@@ -1,5 +1,7 @@
 package nbu.team11.controllers;
+import jakarta.validation.Valid;
 import nbu.team11.controllers.forms.PaymentForm;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import nbu.team11.controllers.forms.EmployeeRegisterShipmentForm;
 import nbu.team11.controllers.forms.RegisterShipmentForm;
@@ -216,7 +218,8 @@ public class ShipmentController {
     @GetMapping("/shipments/{id}/pay")
     public String showPaymentPage(@PathVariable Integer id,
                                   Model model,
-                                  Authentication auth) {
+                                  Authentication auth)
+    {
 
         Shipment shipment = shipmentService.getShipmentById(id);
 
@@ -224,7 +227,6 @@ public class ShipmentController {
             return "redirect:/access-denied";
         }
 
-        // ⛔ Already paid → redirect
         if (shipment.isPayed()) {
             return "redirect:/shipments/client";
         }
@@ -238,41 +240,39 @@ public class ShipmentController {
 
     @PostMapping("/shipments/{id}/pay")
     public String processPayment(@PathVariable Integer id,
-                                 @ModelAttribute PaymentForm paymentForm,
+                                 @Valid @ModelAttribute("paymentForm") PaymentForm paymentForm,
+                                 BindingResult bindingResult,
                                  Authentication auth,
-                                 RedirectAttributes redirectAttributes) {
-
+                                 Model model)
+    {
         Shipment shipment = shipmentService.getShipmentById(id);
 
-        //Security check
+        // Security check
         if (!shipmentService.belongsToUser(shipment, auth)) {
             return "redirect:/access-denied";
         }
 
-        // Prevent double payment
-        if (shipment.isPayed()) {
-            redirectAttributes.addFlashAttribute(
-                    "error", "Shipment is already paid.");
-            return "redirect:/shipments/client";
+        // Validation
+        if (bindingResult.hasErrors()) {
+            model.addAttribute("shipment", shipment);
+            return render(model, "payments/pay");
         }
 
-        //Basic validation (safe)
-        if (paymentForm.getCardNumber() == null
-                || paymentForm.getCardNumber().trim().length() < 16) {
-
-            redirectAttributes.addFlashAttribute(
-                    "error", "Invalid card number.");
-            return "redirect:/shipments/" + id + "/pay";
+        if (shipment.isPayed()) {
+            bindingResult.reject(
+                    "payment.alreadyPaid",
+                    "Shipment is already paid."
+            );
+            model.addAttribute("shipment", shipment);
+            return "payments/pay";
         }
 
         shipmentService.markAsPaid(id);
         shipmentService.updateShipmentStatus(id, Status.SUBMITTED_PAID);
 
-        redirectAttributes.addFlashAttribute(
-                "success", "Payment successful! Shipment is now paid.");
-
         return "redirect:/shipments/client";
     }
+
 
     @GetMapping("/employee/registerShipment")
     public String showEmployeeRegisterForm(Model model, Authentication auth) throws ResourceNotFound {
@@ -332,7 +332,6 @@ public class ShipmentController {
         Shipment shipment = shipmentService.getShipmentById(id);
 
 
-        // Optional safety: only employees
         if (!auth.getAuthorities().stream()
                 .anyMatch(a -> a.getAuthority().equals(Role.EMPLOYEE.name()))) {
             return "redirect:/access-denied";
