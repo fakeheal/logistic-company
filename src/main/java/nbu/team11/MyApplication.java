@@ -18,13 +18,6 @@ public class MyApplication {
         return "layouts/app";
     }
 
-    @GetMapping("/hello")
-    String hello(@RequestParam(name = "name", required = false, defaultValue = "World") String name, Model model) {
-        model.addAttribute("name", name);
-        return "hello";
-
-    }
-
     public static void main(String[] args) {
         SpringApplication.run(MyApplication.class, args);
     }
