@@ -161,11 +161,36 @@ public class ShipmentController {
         return render(model, "client/registerShipment");
     }
 
+    @GetMapping("/shipments/{id}")
+    public String viewShipmentDetail(@PathVariable Integer id, Authentication auth, Model model) {
+        Shipment shipment = shipmentService.getShipmentById(id);
+
+        if (!shipmentService.belongsToUser(shipment, auth)) {
+            return "redirect:/access-denied";
+        }
+
+        ShipmentDto dto = modelMapper.map(shipment, ShipmentDto.class);
+        dto.setStatus(shipmentService.getLatestShipmentStatus(dto.getUniqueID()).getStatus().name());
+
+        List<ShipmentStatusDto> history = shipmentService.getShipmentHistoryOrdered(shipment.getUniqueId())
+                .stream().map(s -> modelMapper.map(s, ShipmentStatusDto.class)).toList();
+
+        List<EmployeeDto> employees = employeeService.getAllEmployees()
+                .stream().map(e -> modelMapper.map(e, EmployeeDto.class)).toList();
+
+        model.addAttribute("shipment", dto);
+        model.addAttribute("history", history);
+        model.addAttribute("employees", employees);
+        model.addAttribute("statuses", Status.values());
+        model.addAttribute("title", "Shipment #" + shipment.getUniqueId());
+        return render(model, "shipments/view");
+    }
+
     @PostMapping("/shipments/{id}/assign")
     public String assignShipment(@PathVariable Integer id,
                                  @RequestParam Integer employeeId) {
         shipmentService.assignShipmentToEmployee(id, employeeId);
-        return "redirect:/shipments/all";
+        return "redirect:/shipments/" + id;
     }
 
     @PostMapping("/shipments/{id}/status")
@@ -178,7 +203,7 @@ public class ShipmentController {
             redirectAttributes.addFlashAttribute(
                     "error", "Shipment must be paid before changing status.");
         }
-        return "redirect:/shipments/all";
+        return "redirect:/shipments/" + id;
     }
 
     @PostMapping("/client/registerShipment")

@@ -45,18 +45,12 @@
 
             <thead>
             <tr class="bg-gray-50 dark:bg-gray-600 text-gray-700 dark:text-gray-200 text-xs uppercase">
-                <th class="px-6 py-4 text-left">Employee</th>
-                <th class="px-6 py-4 text-left">Recipient</th>
-                <th class="px-6 py-4 text-left">Recipient Address</th>
+                <th class="px-6 py-4 text-left">Tracking ID</th>
                 <th class="px-6 py-4 text-left">Sender</th>
-                <th class="px-6 py-4 text-left">Sender Address</th>
-                <th class="px-6 py-4 text-left">Price</th>
-                <th class="px-6 py-4 text-left">Weight</th>
+                <th class="px-6 py-4 text-left">Recipient</th>
                 <th class="px-6 py-4 text-left">Office</th>
                 <th class="px-6 py-4 text-left">Status</th>
-                <th class="px-6 py-4 text-left">Tracking ID</th>
-                <th class="px-6 py-4 text-left">Assign</th>
-                <th class="px-6 py-4 text-left">Set Status</th>
+                <th class="px-6 py-4 text-left">Paid</th>
             </tr>
             </thead>
 
@@ -64,18 +58,11 @@
 
             <tr th:each="shipment : ${shipments}">
 
-                <td class="px-6 py-4 text-sm"
-                    th:text="${shipment.employee != null
-                                  ? shipment.employee.userFullName
-                                  : 'Unassigned'}">
-                </td>
-
-                <td class="px-6 py-4 text-sm"
-                    th:text="${shipment.recipientClient?.userFullName}">
-                </td>
-
-                <td class="px-6 py-4 text-sm"
-                    th:text="${shipment.recipientAddress?.formattedAddress}">
+                <td class="px-6 py-4 text-sm font-mono">
+                    <a th:href="@{/shipments/{id}(id=${shipment.id})}"
+                       th:text="${shipment.uniqueID}"
+                       class="text-blue-600 dark:text-blue-400 hover:underline">
+                    </a>
                 </td>
 
                 <td class="px-6 py-4 text-sm"
@@ -83,15 +70,7 @@
                 </td>
 
                 <td class="px-6 py-4 text-sm"
-                    th:text="${shipment.senderAddress?.formattedAddress}">
-                </td>
-
-                <td class="px-6 py-4 text-sm font-medium"
-                    th:text="${shipment.price + ' EUR'}">
-                </td>
-
-                <td class="px-6 py-4 text-sm"
-                    th:text="${shipment.weight + ' kg'}">
+                    th:text="${shipment.recipientClient?.userFullName}">
                 </td>
 
                 <td class="px-6 py-4 text-sm"
@@ -104,61 +83,11 @@
                     th:text="${shipment.status}">
                 </td>
 
-                <td class="px-6 py-4 text-sm font-mono"
-                    th:text="${shipment.uniqueID}">
-                </td>
-
                 <td class="px-6 py-4 text-sm">
-                    <form th:if="${employees != null}"
-                          th:action="@{/shipments/{id}/assign(id=${shipment.id})}"
-                          method="post"
-                          class="space-y-1">
-
-                        <select name="employeeId"
-                                class="w-full text-sm border rounded-lg px-2 py-1">
-                            <option disabled selected>Assign</option>
-                            <option th:each="emp : ${employees}"
-                                    th:value="${emp.id}"
-                                    th:text="${emp.userFullName}">
-                            </option>
-                        </select>
-
-                        <button type="submit"
-                                class="w-full bg-gray-100 hover:bg-gray-200
-                                           rounded-lg py-1 text-xs">
-                            Assign
-                        </button>
-                    </form>
+                    <span th:if="${shipment.payed}" class="text-green-600 dark:text-green-400">&#10003;</span>
+                    <span th:if="${!shipment.payed}" class="text-red-500">Not paid</span>
                 </td>
 
-                <td class="px-6 py-4 text-sm">
-
-                    <form th:if="${shipment.payed}"
-                          th:action="@{/shipments/{id}/status(id=${shipment.id})}"
-                          method="post"
-                          class="space-y-1">
-
-                        <select name="status"
-                                class="w-full text-sm border rounded-lg px-2 py-1">
-                            <option th:each="st : ${statuses}"
-                                    th:value="${st}"
-                                    th:text="${st}">
-                            </option>
-                        </select>
-
-                        <button type="submit"
-                                class="w-full bg-blue-600 hover:bg-blue-700
-                                           text-white rounded-lg py-1 text-xs">
-                            Update
-                        </button>
-                    </form>
-
-                    <p th:if="${!shipment.payed}"
-                       class="text-xs text-red-500 text-center mt-1">
-                        Not paid
-                    </p>
-
-                </td>
             </tr>
 
             </tbody>

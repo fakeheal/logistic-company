@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:fragment="shipmentViewPage">
+    <div class="container my-6 lg:my-12 mx-auto">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-12">
+            <!-- Left panel: details + actions -->
+            <div class="col-span-2">
+                <div class="bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
+                    <div class="border-b-2 border-neutral-100 p-4 dark:border-white/10">
+                        <div class="flex justify-between items-center">
+                            <h2 class="font-semibold text-lg dark:text-white"
+                                th:text="'Shipment #' + ${shipment.uniqueID}">Shipment #ABC123</h2>
+                            <a th:href="@{/shipments/all}"
+                               class="flex items-center text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-4 py-2.5 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                     stroke-width="1.5" stroke="currentColor" class="size-4 mr-2">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                          d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18"/>
+                                </svg>
+                                Back to list
+                            </a>
+                        </div>
+                    </div>
+                    <div class="p-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-4">
+                            <div>
+                                <div class="italic text-sm text-gray-600 dark:text-gray-400">Tracking ID</div>
+                                <div class="font-mono" th:text="${shipment.uniqueID}">ABC123</div>
+                            </div>
+                            <div>
+                                <div class="italic text-sm text-gray-600 dark:text-gray-400">Sender</div>
+                                <div th:text="${shipment.senderClient?.userFullName}">John Doe</div>
+                            </div>
+                            <div>
+                                <div class="italic text-sm text-gray-600 dark:text-gray-400">Sender Address</div>
+                                <div th:text="${shipment.senderAddress != null ? shipment.senderAddress.formattedAddress : '—'}">123 Main St</div>
+                            </div>
+                            <div>
+                                <div class="italic text-sm text-gray-600 dark:text-gray-400">Recipient</div>
+                                <div th:text="${shipment.recipientClient?.userFullName}">Jane Doe</div>
+                            </div>
+                            <div>
+                                <div class="italic text-sm text-gray-600 dark:text-gray-400">Recipient Address</div>
+                                <div th:text="${shipment.recipientAddress != null ? shipment.recipientAddress.formattedAddress : '—'}">456 Oak Ave</div>
+                            </div>
+                            <div>
+                                <div class="italic text-sm text-gray-600 dark:text-gray-400">Receiving Office</div>
+                                <div th:text="${shipment.receivingOffice != null ? shipment.receivingOffice.title : '—'}">Sofia</div>
+                            </div>
+                            <div>
+                                <div class="italic text-sm text-gray-600 dark:text-gray-400">Weight</div>
+                                <div th:text="${shipment.weight + ' kg'}">2.5 kg</div>
+                            </div>
+                            <div>
+                                <div class="italic text-sm text-gray-600 dark:text-gray-400">Price</div>
+                                <div class="font-medium" th:text="${shipment.price + ' EUR'}">10.50 EUR</div>
+                            </div>
+                            <div>
+                                <div class="italic text-sm text-gray-600 dark:text-gray-400">Paid</div>
+                                <div>
+                                    <span th:if="${shipment.payed}" class="text-green-600 dark:text-green-400 font-medium">&#10003; Paid</span>
+                                    <span th:if="${!shipment.payed}" class="text-red-500 font-medium">Not paid</span>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="italic text-sm text-gray-600 dark:text-gray-400">Assigned Employee</div>
+                                <div th:text="${shipment.employee != null ? shipment.employee.userFullName : 'Unassigned'}">Unassigned</div>
+                            </div>
+                            <div>
+                                <div class="italic text-sm text-gray-600 dark:text-gray-400">Status</div>
+                                <div class="font-medium" th:text="${shipment.status}">SUBMITTED</div>
+                            </div>
+                            <div>
+                                <div class="italic text-sm text-gray-600 dark:text-gray-400">Created On</div>
+                                <div th:text="${shipment.createdOn != null ? #temporals.format(shipment.createdOn, 'dd MMM yyyy HH:mm') : '—'}">01 Jan 2025</div>
+                            </div>
+                        </div>
+
+                        <div class="border-b-2 my-6 dark:border-white/10"></div>
+
+                        <!-- Action forms -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <!-- Assign Employee -->
+                            <div>
+                                <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Assign Employee</h3>
+                                <form th:if="${employees != null}"
+                                      th:action="@{/shipments/{id}/assign(id=${shipment.id})}"
+                                      method="post"
+                                      class="flex gap-2">
+                                    <select name="employeeId"
+                                            class="flex-1 text-sm border border-gray-300 rounded-lg px-3 py-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                                        <option disabled selected>Select employee...</option>
+                                        <option th:each="emp : ${employees}"
+                                                th:value="${emp.id}"
+                                                th:text="${emp.userFullName}">
+                                        </option>
+                                    </select>
+                                    <button type="submit"
+                                            class="bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-white rounded-lg px-4 py-2 text-sm font-medium">
+                                        Assign
+                                    </button>
+                                </form>
+                            </div>
+
+                            <!-- Change Status -->
+                            <div>
+                                <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Change Status</h3>
+                                <form th:if="${shipment.payed}"
+                                      th:action="@{/shipments/{id}/status(id=${shipment.id})}"
+                                      method="post"
+                                      class="flex gap-2">
+                                    <select name="status"
+                                            class="flex-1 text-sm border border-gray-300 rounded-lg px-3 py-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                                        <option th:each="st : ${statuses}"
+                                                th:value="${st}"
+                                                th:text="${st}">
+                                        </option>
+                                    </select>
+                                    <button type="submit"
+                                            class="bg-blue-600 hover:bg-blue-700 text-white rounded-lg px-4 py-2 text-sm font-medium">
+                                        Update
+                                    </button>
+                                </form>
+                                <p th:if="${!shipment.payed}"
+                                   class="text-sm text-red-500 mt-1">
+                                    Shipment must be paid before changing status.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right panel: status history timeline -->
+            <div class="col-span-1">
+                <div class="bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700 p-4">
+                    <h3 class="font-semibold text-md text-gray-900 dark:text-white mb-4">Status History</h3>
+                    <ol class="relative border-s border-gray-200 dark:border-gray-700">
+                        <li th:each="entry : ${history}" class="mb-8 ms-6">
+                            <span class="absolute -start-3 flex h-6 w-6 items-center
+                                         justify-center rounded-full bg-blue-600 dark:bg-blue-500">
+                            </span>
+                            <div class="flex items-center mb-1">
+                                <time class="text-sm text-gray-400 dark:text-gray-500"
+                                      th:text="${#temporals.format(entry.createdOn, 'dd MMM yyyy HH:mm')}">
+                                </time>
+                            </div>
+                            <h3 class="text-md font-medium text-gray-900 dark:text-white"
+                                th:text="${#strings.capitalizeWords(
+                                    #strings.replace(
+                                        entry.status.name(),
+                                        '_',
+                                        ' '
+                                    ).toLowerCase()
+                                )}">
+                            </h3>
+                            <p th:if="${entry.comment != null}"
+                               class="text-sm text-gray-500 dark:text-gray-400 mt-1"
+                               th:text="${entry.comment}">
+                            </p>
+                        </li>
+                    </ol>
+                    <p th:if="${#lists.isEmpty(history)}"
+                       class="text-sm text-gray-500 dark:text-gray-400">No status history available.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

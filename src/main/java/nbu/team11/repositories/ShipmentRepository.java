@@ -35,10 +35,8 @@ public interface ShipmentRepository extends JpaRepository<Shipment, Integer> {
            "LEFT JOIN s.recipientClient rc LEFT JOIN rc.user ru " +
            "LEFT JOIN s.receivingOffice ro " +
            "WHERE (:search IS NULL OR :search = '' OR " +
-           "  LOWER(su.firstName) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
-           "  LOWER(su.lastName) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
-           "  LOWER(ru.firstName) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
-           "  LOWER(ru.lastName) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
+           "  LOWER(CONCAT(su.firstName, ' ', su.lastName)) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
+           "  LOWER(CONCAT(ru.firstName, ' ', ru.lastName)) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
            "  LOWER(ro.title) LIKE LOWER(CONCAT('%', :search, '%'))) " +
            "AND (:status IS NULL OR " +
            "  (SELECT ss.status FROM ShipmentStatus ss WHERE ss.shipment = s AND ss.createdOn = " +
