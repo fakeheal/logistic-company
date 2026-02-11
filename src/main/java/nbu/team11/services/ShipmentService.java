@@ -52,6 +52,13 @@ public class ShipmentService {
         throw new UnauthorizedAccess("Access denied. Only employees can view all shipments.");
     }
 
+    public List<Shipment> searchShipmentsForEmployee(Authentication authentication, String search, Status status) {
+        if (!isEmployee(authentication)) {
+            throw new UnauthorizedAccess("Access denied. Only employees can view all shipments.");
+        }
+        return shipmentRepository.searchShipments(search, status);
+    }
+
     public BigDecimal calculatePrice(Double weight, boolean toOffice) {
         if (weight == null || weight <= 0) {
             throw new IllegalArgumentException("Weight must be positive");

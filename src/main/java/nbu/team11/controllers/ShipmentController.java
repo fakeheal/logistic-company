@@ -105,9 +105,16 @@ public class ShipmentController {
     }
 
     @GetMapping("/shipments/all")
-    public String viewAllForEmployee(Authentication auth, Model model) {
+    public String viewAllForEmployee(Authentication auth, Model model,
+                                     @RequestParam(required = false) String search,
+                                     @RequestParam(required = false) Status status) {
 
-        List<Shipment> shipments = shipmentService.getAllShipmentsForEmployee(auth);
+        List<Shipment> shipments;
+        if ((search != null && !search.isBlank()) || status != null) {
+            shipments = shipmentService.searchShipmentsForEmployee(auth, search, status);
+        } else {
+            shipments = shipmentService.getAllShipmentsForEmployee(auth);
+        }
 
         List<EmployeeDto> employeeDtos = employeeService.getAllEmployees()
                 .stream()
@@ -118,6 +125,8 @@ public class ShipmentController {
         model.addAttribute("employees", employeeDtos);
         model.addAttribute("statuses", Status.values());
         model.addAttribute("title", "Employee Shipments");
+        model.addAttribute("search", search);
+        model.addAttribute("selectedStatus", status);
 
         return render(model, "shipments/employee");
     }

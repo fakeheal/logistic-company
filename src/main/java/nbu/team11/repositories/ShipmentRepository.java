@@ -29,4 +29,20 @@ public interface ShipmentRepository extends JpaRepository<Shipment, Integer> {
     @Query("SELECT CASE WHEN COUNT(s) > 0 THEN true ELSE false END FROM Shipment s " +
            "WHERE s.senderAddress.id = :addressId OR s.recipientAddress.id = :addressId")
     boolean existsByAddressId(@Param("addressId") Integer addressId);
+
+    @Query("SELECT s FROM Shipment s " +
+           "LEFT JOIN s.senderClient sc LEFT JOIN sc.user su " +
+           "LEFT JOIN s.recipientClient rc LEFT JOIN rc.user ru " +
+           "LEFT JOIN s.receivingOffice ro " +
+           "WHERE (:search IS NULL OR :search = '' OR " +
+           "  LOWER(su.firstName) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
+           "  LOWER(su.lastName) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
+           "  LOWER(ru.firstName) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
+           "  LOWER(ru.lastName) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
+           "  LOWER(ro.title) LIKE LOWER(CONCAT('%', :search, '%'))) " +
+           "AND (:status IS NULL OR " +
+           "  (SELECT ss.status FROM ShipmentStatus ss WHERE ss.shipment = s AND ss.createdOn = " +
+           "    (SELECT MAX(ss2.createdOn) FROM ShipmentStatus ss2 WHERE ss2.shipment = s)) = :status) " +
+           "ORDER BY s.createdOn DESC")
+    List<Shipment> searchShipments(@Param("search") String search, @Param("status") Status status);
 }

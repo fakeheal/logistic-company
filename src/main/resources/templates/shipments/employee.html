@@ -1,150 +1,167 @@
-<section class="container mx-auto p-6 font-mono">
-
-    <div class="bg-white rounded-2xl shadow-md overflow-hidden">
-
-        <div class="p-5">
-            <input id="shipmentSearch"
-                   type="text"
-                   placeholder="Search shipments (employee, recipient, status, ID...)"
-                   class="w-full px-5 py-3 rounded-xl border border-gray-200
-                          focus:outline-none focus:ring-2 focus:ring-blue-500"
-                   onkeyup="filterShipments()" />
-        </div>
-
-        <div class="overflow-x-auto">
-            <table class="w-full border-collapse" id="shipmentsTable">
-
-                <thead>
-                <tr class="bg-gray-50 text-gray-700 text-sm uppercase">
-                    <th class="px-6 py-4 text-left">Employee</th>
-                    <th class="px-6 py-4 text-left">Recipient</th>
-                    <th class="px-6 py-4 text-left">Recipient Address</th>
-                    <th class="px-6 py-4 text-left">Sender</th>
-                    <th class="px-6 py-4 text-left">Sender Address</th>
-                    <th class="px-6 py-4 text-left">Price</th>
-                    <th class="px-6 py-4 text-left">Weight</th>
-                    <th class="px-6 py-4 text-left">Office</th>
-                    <th class="px-6 py-4 text-left">Status</th>
-                    <th class="px-6 py-4 text-left">Tracking ID</th>
-                    <th class="px-6 py-4 text-left">Assign</th>
-                    <th class="px-6 py-4 text-left">Set Status</th>
-                </tr>
-                </thead>
-
-                <tbody class="text-gray-700">
-
-                <tr th:each="shipment : ${shipments}"
-                    class="hover:bg-gray-50 transition">
-
-                    <td class="px-6 py-4 text-sm"
-                        th:text="${shipment.employee != null
-                                  ? shipment.employee.userFullName
-                                  : 'Unassigned'}">
-                    </td>
-
-                    <td class="px-6 py-4 text-sm"
-                        th:text="${shipment.recipientClient?.userFullName}">
-                    </td>
-
-                    <td class="px-6 py-4 text-sm"
-                        th:text="${shipment.recipientAddress?.formattedAddress}">
-                    </td>
-
-                    <td class="px-6 py-4 text-sm"
-                        th:text="${shipment.senderClient?.userFullName}">
-                    </td>
-
-                    <td class="px-6 py-4 text-sm"
-                        th:text="${shipment.senderAddress?.formattedAddress}">
-                    </td>
-
-                    <td class="px-6 py-4 text-sm font-medium"
-                        th:text="${shipment.price + ' EUR'}">
-                    </td>
-
-                    <td class="px-6 py-4 text-sm"
-                        th:text="${shipment.weight + ' kg'}">
-                    </td>
-
-                    <td class="px-6 py-4 text-sm"
-                        th:text="${shipment.receivingOffice != null
-                                  ? shipment.receivingOffice.title
-                                  : '—'}">
-                    </td>
-
-                    <td class="px-6 py-4 text-sm font-medium"
-                        th:text="${shipment.status}">
-                    </td>
-
-                    <td class="px-6 py-4 text-sm font-mono"
-                        th:text="${shipment.uniqueID}">
-                    </td>
-
-                    <td class="px-6 py-4 text-sm">
-                        <form th:if="${employees != null}"
-                              th:action="@{/shipments/{id}/assign(id=${shipment.id})}"
-                              method="post"
-                              class="space-y-1">
-
-                            <select name="employeeId"
-                                    class="w-full text-sm border rounded-lg px-2 py-1">
-                                <option disabled selected>Assign</option>
-                                <option th:each="emp : ${employees}"
-                                        th:value="${emp.id}"
-                                        th:text="${emp.userFullName}">
-                                </option>
-                            </select>
-
-                            <button type="submit"
-                                    class="w-full bg-gray-100 hover:bg-gray-200
-                                           rounded-lg py-1 text-xs">
-                                Assign
-                            </button>
-                        </form>
-                    </td>
-
-                    <td class="px-6 py-4 text-sm">
-
-                        <form th:if="${shipment.payed}"
-                              th:action="@{/shipments/{id}/status(id=${shipment.id})}"
-                              method="post"
-                              class="space-y-1">
-
-                            <select name="status"
-                                    class="w-full text-sm border rounded-lg px-2 py-1">
-                                <option th:each="st : ${statuses}"
-                                        th:value="${st}"
-                                        th:text="${st}">
-                                </option>
-                            </select>
-
-                            <button type="submit"
-                                    class="w-full bg-blue-600 hover:bg-blue-700
-                                           text-white rounded-lg py-1 text-xs">
-                                Update
-                            </button>
-                        </form>
-
-                        <p th:if="${!shipment.payed}"
-                           class="text-xs text-red-500 text-center mt-1">
-                            Not paid
-                        </p>
-
-                    </td>
-                </tr>
-
-                </tbody>
-            </table>
+<div class="container mx-auto my-12 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
+    <div class="border-b-2 border-neutral-100 p-4 dark:border-white/10">
+        <div class="flex justify-between items-center">
+            <form th:action="@{/shipments/all}" method="get" class="flex gap-2 items-center">
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                        <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
+                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
+                        </svg>
+                    </div>
+                    <input type="text" name="search" th:value="${search}"
+                           class="block w-full md:w-80 p-2 pl-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                           placeholder="Search by client or office name..."/>
+                </div>
+                <select name="status"
+                        class="block p-2 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                    <option value="">All statuses</option>
+                    <option th:each="st : ${statuses}"
+                            th:value="${st}"
+                            th:text="${st}"
+                            th:selected="${selectedStatus != null and selectedStatus == st}">
+                    </option>
+                </select>
+                <button type="submit"
+                        class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">
+                    Search
+                </button>
+                <a th:if="${(search != null and !search.isEmpty()) or selectedStatus != null}" th:href="@{/shipments/all}"
+                   class="text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-4 py-2 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700">
+                    Clear
+                </a>
+            </form>
+            <a href="/employee/registerShipment"
+               class="flex items-center text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                     stroke="currentColor" class="size-4 mr-2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
+                </svg>
+                New Shipment
+            </a>
         </div>
     </div>
-</section>
+    <div class="relative overflow-x-auto">
+        <table class="w-full border-collapse" id="shipmentsTable">
 
-<script>
-    function filterShipments() {
-        const filter = document.getElementById("shipmentSearch").value.toLowerCase();
-        document.querySelectorAll("#shipmentsTable tbody tr")
-            .forEach(row =>
-                row.style.display = row.innerText.toLowerCase().includes(filter) ? "" : "none"
-            );
-    }
-</script>
+            <thead>
+            <tr class="bg-gray-50 dark:bg-gray-600 text-gray-700 dark:text-gray-200 text-xs uppercase">
+                <th class="px-6 py-4 text-left">Employee</th>
+                <th class="px-6 py-4 text-left">Recipient</th>
+                <th class="px-6 py-4 text-left">Recipient Address</th>
+                <th class="px-6 py-4 text-left">Sender</th>
+                <th class="px-6 py-4 text-left">Sender Address</th>
+                <th class="px-6 py-4 text-left">Price</th>
+                <th class="px-6 py-4 text-left">Weight</th>
+                <th class="px-6 py-4 text-left">Office</th>
+                <th class="px-6 py-4 text-left">Status</th>
+                <th class="px-6 py-4 text-left">Tracking ID</th>
+                <th class="px-6 py-4 text-left">Assign</th>
+                <th class="px-6 py-4 text-left">Set Status</th>
+            </tr>
+            </thead>
+
+            <tbody class="text-gray-700 dark:text-white">
+
+            <tr th:each="shipment : ${shipments}">
+
+                <td class="px-6 py-4 text-sm"
+                    th:text="${shipment.employee != null
+                                  ? shipment.employee.userFullName
+                                  : 'Unassigned'}">
+                </td>
+
+                <td class="px-6 py-4 text-sm"
+                    th:text="${shipment.recipientClient?.userFullName}">
+                </td>
+
+                <td class="px-6 py-4 text-sm"
+                    th:text="${shipment.recipientAddress?.formattedAddress}">
+                </td>
+
+                <td class="px-6 py-4 text-sm"
+                    th:text="${shipment.senderClient?.userFullName}">
+                </td>
+
+                <td class="px-6 py-4 text-sm"
+                    th:text="${shipment.senderAddress?.formattedAddress}">
+                </td>
+
+                <td class="px-6 py-4 text-sm font-medium"
+                    th:text="${shipment.price + ' EUR'}">
+                </td>
+
+                <td class="px-6 py-4 text-sm"
+                    th:text="${shipment.weight + ' kg'}">
+                </td>
+
+                <td class="px-6 py-4 text-sm"
+                    th:text="${shipment.receivingOffice != null
+                                  ? shipment.receivingOffice.title
+                                  : '—'}">
+                </td>
+
+                <td class="px-6 py-4 text-sm font-medium"
+                    th:text="${shipment.status}">
+                </td>
+
+                <td class="px-6 py-4 text-sm font-mono"
+                    th:text="${shipment.uniqueID}">
+                </td>
+
+                <td class="px-6 py-4 text-sm">
+                    <form th:if="${employees != null}"
+                          th:action="@{/shipments/{id}/assign(id=${shipment.id})}"
+                          method="post"
+                          class="space-y-1">
+
+                        <select name="employeeId"
+                                class="w-full text-sm border rounded-lg px-2 py-1">
+                            <option disabled selected>Assign</option>
+                            <option th:each="emp : ${employees}"
+                                    th:value="${emp.id}"
+                                    th:text="${emp.userFullName}">
+                            </option>
+                        </select>
+
+                        <button type="submit"
+                                class="w-full bg-gray-100 hover:bg-gray-200
+                                           rounded-lg py-1 text-xs">
+                            Assign
+                        </button>
+                    </form>
+                </td>
+
+                <td class="px-6 py-4 text-sm">
+
+                    <form th:if="${shipment.payed}"
+                          th:action="@{/shipments/{id}/status(id=${shipment.id})}"
+                          method="post"
+                          class="space-y-1">
+
+                        <select name="status"
+                                class="w-full text-sm border rounded-lg px-2 py-1">
+                            <option th:each="st : ${statuses}"
+                                    th:value="${st}"
+                                    th:text="${st}">
+                            </option>
+                        </select>
+
+                        <button type="submit"
+                                class="w-full bg-blue-600 hover:bg-blue-700
+                                           text-white rounded-lg py-1 text-xs">
+                            Update
+                        </button>
+                    </form>
+
+                    <p th:if="${!shipment.payed}"
+                       class="text-xs text-red-500 text-center mt-1">
+                        Not paid
+                    </p>
+
+                </td>
+            </tr>
+
+            </tbody>
+        </table>
+    </div>
+</div>
