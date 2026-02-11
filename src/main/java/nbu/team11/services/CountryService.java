@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Service for managing countries in the system.
@@ -79,7 +80,9 @@ public class CountryService {
         Country country = countryRepository.findById(id)
                 .orElseThrow(() -> new CountryNotFound("Country with ID " + id + " not found"));
 
-        if (countryRepository.existsByName(countryDto.getName()) && !country.getId().equals(id)) {
+        Optional<Country> existing = countryRepository.findByName(countryDto.getName());
+
+        if (existing.isPresent() && !existing.get().getId().equals(id)) {
             throw new IllegalArgumentException("A country with this name already exists.");
         }
 
