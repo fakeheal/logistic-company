@@ -18,36 +18,36 @@
 <form th:action="@{/employee/registerShipment}"
       th:object="${form}"
       method="post"
-      class="max-w-lg mx-auto my-12 p-6 bg-white border rounded shadow">
+      class="max-w-lg mx-auto my-12 p-6 bg-white border rounded shadow dark:bg-gray-800 dark:border-gray-700">
 
-    <h2 class="text-2xl font-bold mb-6">Register Shipment</h2>
+    <h2 class="text-2xl font-bold mb-6 dark:text-white">Register Shipment</h2>
 
     <!-- Weight -->
     <div class="mb-4">
-        <label class="block mb-1">Weight (kg)</label>
+        <label class="block mb-1 dark:text-gray-300">Weight (kg)</label>
         <input th:field="*{weight}"
                type="number"
                step="0.01"
-               class="w-full p-2 border rounded"
+               class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400"
                required/>
     </div>
 
     <!-- Sender client -->
     <div class="mb-4 relative">
-        <label class="block mb-1">Sender Client</label>
+        <label class="block mb-1 dark:text-gray-300">Sender Client</label>
         <input type="text" id="senderClientSearch"
-               class="w-full p-2 border rounded"
+               class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400"
                placeholder="Type name or phone…" autocomplete="off"/>
         <input type="hidden" th:field="*{senderClientId}" id="senderClientId"/>
         <div id="senderClientSuggestions"
-             class="absolute w-full bg-white border rounded shadow hidden max-h-40 overflow-y-auto"></div>
+             class="absolute w-full bg-white border rounded shadow hidden max-h-40 overflow-y-auto dark:bg-gray-700 dark:border-gray-600"></div>
     </div>
 
     <!-- Sending office -->
     <div class="mb-4">
-        <label class="block mb-1">Sending Office</label>
+        <label class="block mb-1 dark:text-gray-300">Sending Office</label>
         <select th:field="*{sendingOfficeId}"
-                class="w-full p-2 border rounded" required>
+                class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white" required>
             <option value="">Select office</option>
             <option th:each="office : ${offices}"
                     th:value="${office.id}"
@@ -58,25 +58,25 @@
 
     <!-- Recipient client -->
     <div class="mb-4 relative">
-        <label class="block mb-1">Recipient Client</label>
+        <label class="block mb-1 dark:text-gray-300">Recipient Client</label>
         <input type="text" id="recipientClientSearch"
-               class="w-full p-2 border rounded"
+               class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400"
                placeholder="Type name or phone…" autocomplete="off"/>
         <input type="hidden" th:field="*{recipientClientId}" id="recipientClientId"/>
         <div id="recipientClientSuggestions"
-             class="absolute w-full bg-white border rounded shadow hidden max-h-40 overflow-y-auto"></div>
+             class="absolute w-full bg-white border rounded shadow hidden max-h-40 overflow-y-auto dark:bg-gray-700 dark:border-gray-600"></div>
     </div>
 
     <!-- Deliver to office -->
     <div class="mb-4 flex items-center">
         <input th:field="*{deliverToOffice}" type="checkbox" id="deliverToOffice" class="mr-2"/>
-        <label>Deliver to Office</label>
+        <label class="dark:text-gray-300">Deliver to Office</label>
     </div>
 
     <!-- Receiving office -->
     <div id="officeContainer" class="mb-4">
-        <label class="block mb-1">Receiving Office</label>
-        <select th:field="*{officeId}" class="w-full p-2 border rounded">
+        <label class="block mb-1 dark:text-gray-300">Receiving Office</label>
+        <select th:field="*{officeId}" class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white">
             <option th:each="office : ${offices}"
                     th:value="${office.id}"
                     th:text="${office.title + ' - ' + office.addressDto.formattedAddress}">
@@ -86,10 +86,10 @@
 
     <!-- Recipient address dropdown -->
     <div id="recipientAddressSelectContainer" class="mb-4 hidden">
-        <label class="block mb-1">Recipient Address</label>
+        <label class="block mb-1 dark:text-gray-300">Recipient Address</label>
         <select th:field="*{selectedRecipientAddressId}"
                 id="recipientAddressSelect"
-                class="w-full p-2 border rounded">
+                class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white">
             <option value="">Select recipient address</option>
         </select>
     </div>
@@ -97,21 +97,21 @@
     <!-- Price -->
     <div class="mb-4">
         <button type="button" id="calculatePrice"
-                class="px-4 py-2 bg-blue-600 text-white rounded">
+                class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-700">
             Calculate Price
         </button>
     </div>
 
     <div class="mb-4">
-        <label class="block mb-1">Price</label>
+        <label class="block mb-1 dark:text-gray-300">Price</label>
         <input type="hidden" th:field="*{price}" id="price"/>
         <input type="text" id="priceDisplay" readonly
-               class="w-full p-2 border rounded bg-gray-100 font-semibold"/>
+               class="w-full p-2 border rounded bg-gray-100 font-semibold dark:bg-gray-600 dark:border-gray-600 dark:text-white"/>
     </div>
 
     <button type="submit" id="submitBtn"
             disabled
-            class="px-4 py-2 bg-green-600 text-white rounded disabled:opacity-50">
+            class="px-4 py-2 bg-green-600 text-white rounded disabled:opacity-50 hover:bg-green-700 dark:bg-green-600 dark:hover:bg-green-700">
         Submit
     </button>
 
@@ -146,7 +146,7 @@
 
                 matches.slice(0, 10).forEach(u => {
                     const div = document.createElement('div');
-                    div.className = 'px-2 py-1 hover:bg-gray-200 cursor-pointer';
+                    div.className = 'px-2 py-1 hover:bg-gray-200 cursor-pointer dark:text-white dark:hover:bg-gray-600';
                     div.textContent = `${u.firstName} ${u.lastName}`;
                     div.onclick = () => {
                         const id = u.id ?? u.clientDto?.id;
