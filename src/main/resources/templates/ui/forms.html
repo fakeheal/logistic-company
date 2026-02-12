@@ -36,7 +36,7 @@
     >
         <th:block th:each="option : ${options}">
             <!--/*@thymesVar id="option" type="java.util.List<nbu.team11.controllers.forms.ui.SelectOption>"*/-->
-            <option th:value="${option.value}" th:text="${option.label}" th:selected="${option.value} == *{__${inputName}__}?.toString()"></option>
+            <option th:value="${option.value}" th:text="${option.label}"></option>
         </th:block>
     </select>
     <p th:if="${#fields.hasErrors(inputName)}"
