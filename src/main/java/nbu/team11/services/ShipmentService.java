@@ -1,20 +1,26 @@
 package nbu.team11.services;
+
 import nbu.team11.configurations.ShipmentPricingProperties;
+import nbu.team11.dtos.AddressDto;
+import nbu.team11.dtos.OfficeDto;
+import nbu.team11.dtos.ShipmentDto;
 import nbu.team11.entities.*;
-import nbu.team11.dtos.*;
 import nbu.team11.entities.enums.Role;
 import nbu.team11.entities.enums.Status;
 import nbu.team11.repositories.*;
-import nbu.team11.services.contracts.IShipmentService;
 import nbu.team11.services.exceptions.ShipmentNotFound;
 import nbu.team11.services.exceptions.UnauthorizedAccess;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
-import java.math.RoundingMode;
-import java.util.*;
+
 import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 /**
  * Service implementation for managing shipments.

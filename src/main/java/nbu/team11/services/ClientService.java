@@ -13,7 +13,6 @@ import nbu.team11.repositories.AddressRepository;
 import nbu.team11.repositories.ClientRepository;
 import nbu.team11.repositories.ShipmentRepository;
 import nbu.team11.repositories.UserRepository;
-import nbu.team11.services.contracts.IClientService;
 import nbu.team11.services.exceptions.AddressLinkedToShipment;
 import nbu.team11.services.exceptions.CannotDeleteClient;
 import nbu.team11.services.exceptions.EmailNotAvailable;
@@ -32,7 +31,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
-public class ClientService implements IClientService {
+public class ClientService {
     @Autowired
     private ClientRepository clientRepository;
 
@@ -51,7 +50,6 @@ public class ClientService implements IClientService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    @Override
     @Transactional
     public ClientDto createClient(ClientDto clientDto, Integer userId) throws ResourceNotFound {
         User user = userRepository.findById(userId)
@@ -63,7 +61,8 @@ public class ClientService implements IClientService {
 
         //Create addresses along with client creation
         if (clientDto.getAddresses() != null && !clientDto.getAddresses().isEmpty()) {
-            Type listType = new TypeToken<List<AddressDto>>() {}.getType(); // for clarity; not strictly required
+            Type listType = new TypeToken<List<AddressDto>>() {
+            }.getType(); // for clarity; not strictly required
             for (AddressDto adto : clientDto.getAddresses()) {
                 Address addr = modelMapper.map(adto, Address.class);
                 client.addAddress(addr);
@@ -75,7 +74,6 @@ public class ClientService implements IClientService {
         return modelMapper.map(savedClient, ClientDto.class);
     }
 
-    @Override
     @Transactional
     public ClientDto createClientWithGeneratedPassword(ClientDto clientDto, UserDto userDto) throws EmailNotAvailable {
         // Check if email is already in use
@@ -158,7 +156,7 @@ public class ClientService implements IClientService {
         return modelMapper.map(client, ClientDto.class);
     }
 
-    public AddressDto addAddress(Integer id, Address address){
+    public AddressDto addAddress(Integer id, Address address) {
         Client client = clientRepository.getById(id);
         client.addAddress(address);
         clientRepository.save(client);
@@ -189,7 +187,6 @@ public class ClientService implements IClientService {
         return modelMapper.map(saved, ClientDto.class);
     }
 
-    @Override
     @Transactional
     public ClientDto updateClientWithUser(Integer clientId, ClientDto clientDto, UserDto userDto, List<Integer> addressIdsToDelete)
             throws ResourceNotFound, EmailNotAvailable, AddressLinkedToShipment {
@@ -278,7 +275,6 @@ public class ClientService implements IClientService {
         return modelMapper.map(saved, ClientDto.class);
     }
 
-    @Override
     public boolean isAddressLinkedToShipment(Integer addressId) {
         return shipmentRepository.existsByAddressId(addressId);
     }
@@ -291,7 +287,6 @@ public class ClientService implements IClientService {
         clientRepository.deleteById(id);
     }
 
-    @Override
     @Transactional
     public void anonymizeClient(Integer clientId, Integer currentUserId) throws ResourceNotFound, CannotDeleteClient {
         Client client = clientRepository.findById(clientId).orElse(null);

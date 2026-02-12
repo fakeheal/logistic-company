@@ -10,26 +10,23 @@ import nbu.team11.entities.Employee;
 import nbu.team11.entities.Office;
 import nbu.team11.entities.User;
 import nbu.team11.entities.enums.PositionType;
-import nbu.team11.entities.enums.Role;
 import nbu.team11.repositories.EmployeeRepository;
-import nbu.team11.services.contracts.IEmployeeService;
 import nbu.team11.repositories.ShipmentRepository;
 import nbu.team11.services.exceptions.CannotDeleteEmployee;
 import nbu.team11.services.exceptions.EmailNotAvailable;
 import nbu.team11.services.exceptions.ResourceNotFound;
 import nbu.team11.services.exceptions.UsernameNotAvailable;
-
-import java.util.List;
-import java.util.Arrays;
-import java.util.stream.Collectors;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
 @AllArgsConstructor
-public class EmployeeService implements IEmployeeService {
+public class EmployeeService {
     private final EmployeeRepository employeeRepository;
     private final UserService userService;
     private final OfficeService officeService;
@@ -41,7 +38,6 @@ public class EmployeeService implements IEmployeeService {
         return employees.map(employee -> (new ModelMapperConfig()).modelMapper().map(employee, EmployeeDto.class));
     }
 
-    @Override
     @Transactional
     public void create(EmployeeDto employeeDto, UserDto userDto) throws UsernameNotAvailable, EmailNotAvailable {
         User user = this.userService.create(userDto);
@@ -67,7 +63,6 @@ public class EmployeeService implements IEmployeeService {
         return employees;
     }
 
-    @Override
     public void update(EmployeeDto employeeDto, UserDto userDto)
             throws UsernameNotAvailable, EmailNotAvailable, ResourceNotFound {
         this.userService.update(userDto);
@@ -79,7 +74,6 @@ public class EmployeeService implements IEmployeeService {
         this.employeeRepository.save(employee);
     }
 
-    @Override
     public EmployeeDto getById(Integer id) throws ResourceNotFound {
         return (new ModelMapperConfig()).modelMapper()
                 .map(employeeRepository.findById(id).orElseThrow(ResourceNotFound::new), EmployeeDto.class);

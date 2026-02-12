@@ -6,7 +6,6 @@ import nbu.team11.entities.Address;
 import nbu.team11.entities.Office;
 import nbu.team11.repositories.AddressRepository;
 import nbu.team11.repositories.OfficeRepository;
-import nbu.team11.services.contracts.IOfficeService;
 import nbu.team11.services.exceptions.ResourceNotFound;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +19,7 @@ import java.util.List;
 
 @Service
 @AllArgsConstructor
-public class OfficeService implements IOfficeService {
+public class OfficeService {
     @Autowired
     private final OfficeRepository officeRepository;
 
@@ -30,7 +29,6 @@ public class OfficeService implements IOfficeService {
     @Autowired
     private final ModelMapper modelMapper;
 
-    @Override
     public List<OfficeDto> getAll() {
         return this.officeRepository
                 .findAll()
@@ -39,7 +37,6 @@ public class OfficeService implements IOfficeService {
                 .toList();
     }
 
-    @Override
     public OfficeDto getById(Integer id) throws ResourceNotFound {
         return modelMapper.map(officeRepository.findById(id).orElseThrow(ResourceNotFound::new), OfficeDto.class);
     }

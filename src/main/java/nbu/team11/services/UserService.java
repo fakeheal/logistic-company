@@ -1,7 +1,10 @@
 package nbu.team11.services;
+
+import nbu.team11.dtos.UserDto;
 import nbu.team11.dtos.UserDtoSanitized;
+import nbu.team11.entities.User;
 import nbu.team11.entities.enums.Role;
-import nbu.team11.services.contracts.IUserService;
+import nbu.team11.repositories.UserRepository;
 import nbu.team11.services.exceptions.EmailNotAvailable;
 import nbu.team11.services.exceptions.UsernameNotAvailable;
 import org.modelmapper.ModelMapper;
@@ -10,14 +13,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import nbu.team11.dtos.UserDto;
-import nbu.team11.entities.*;
-import nbu.team11.repositories.UserRepository;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-public class UserService implements IUserService {
+public class UserService {
     @Autowired
     PasswordEncoder passwordEncoder;
 
@@ -31,7 +32,6 @@ public class UserService implements IUserService {
         this.modelMapper = modelMapper;
     }
 
-    @Override
     public List<UserDtoSanitized> getAllUsers() {
         List<User> allUsers = userRepository.findAll();
 
@@ -41,29 +41,24 @@ public class UserService implements IUserService {
         }).collect(Collectors.toList());
     }
 
-    @Override
     public UserDto getByEmail(String email) {
         User user = userRepository.findByEmail(email);
 
-        if(user == null)
-        {
+        if (user == null) {
             return null;
         }
 
         return this.modelMapper.map(user, UserDto.class);
     }
 
-    @Override
     public User getUserById(Integer id) {
         return userRepository.findById(id).orElse(null);
     }
 
-    @Override
     public List<User> getUsersByRole(Role role) {
         return userRepository.findByRole(role);
     }
 
-    @Override
     public boolean update(UserDto updatedUser) {
         User user = userRepository.findByEmail(updatedUser.getEmail());
         if (user == null) return false;
@@ -80,12 +75,10 @@ public class UserService implements IUserService {
         return users.map(user -> this.modelMapper.map(user, UserDto.class));
     }
 
-    @Override
     public void delete(Integer id) {
         userRepository.deleteById(id);
     }
 
-    @Override
     public User create(UserDto userDto) throws UsernameNotAvailable, EmailNotAvailable {
         if (this.userRepository.findByEmail(userDto.getEmail()) != null) {
             throw new UsernameNotAvailable();
