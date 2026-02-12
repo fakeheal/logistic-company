@@ -59,7 +59,7 @@
                     <th class="px-6 py-4 text-left">Sender</th>
                     <th class="px-6 py-4 text-left">Recipient</th>
                     <th class="px-6 py-4 text-left">Price</th>
-                    <th class="px-6 py-4 text-left">Paid On</th>
+                    <th class="px-6 py-4 text-left">Created On</th>
                 </tr>
                 </thead>
 
@@ -87,7 +87,7 @@
                     </td>
 
                     <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-400"
-                        th:text="${#temporals.format(shipment.updatedOn, 'yyyy-MM-dd HH:mm')}">
+                        th:text="${#temporals.format(shipment.createdOn, 'yyyy-MM-dd HH:mm')}">
                     </td>
                 </tr>
                 </tbody>
