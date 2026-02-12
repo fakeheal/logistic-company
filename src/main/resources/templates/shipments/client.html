@@ -92,6 +92,9 @@
                                 Cancel
                             </button>
                         </form>
+                    <p th:if="${shipment.status != 'SUBMITTED'}">
+                        No Actions Available
+                    </p>
                     </td>
                 </tr>
                 </tbody>
