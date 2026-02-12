@@ -15,6 +15,7 @@ import nbu.team11.services.*;
 import nbu.team11.services.exceptions.ResourceNotFound;
 import nbu.team11.services.exceptions.ShipmentNotFound;
 import org.modelmapper.ModelMapper;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -23,6 +24,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -227,6 +231,29 @@ public class ShipmentController {
             return "redirect:/shipments/client";
         }
         return "redirect:/shipments/" + id;
+    }
+
+    @GetMapping("/shipments/revenue")
+    public String revenueReport(
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
+            Authentication auth, Model model) {
+
+        if (from == null) from = LocalDate.now().minusDays(7);
+        if (to == null) to = LocalDate.now();
+
+        Instant fromInstant = from.atStartOfDay(ZoneId.systemDefault()).toInstant();
+        Instant toInstant = to.plusDays(1).atStartOfDay(ZoneId.systemDefault()).toInstant();
+
+        Map<String, Object> report = shipmentService.getRevenueReport(fromInstant, toInstant);
+
+        model.addAttribute("shipments", report.get("shipments"));
+        model.addAttribute("totalRevenue", report.get("totalRevenue"));
+        model.addAttribute("shipmentCount", report.get("shipmentCount"));
+        model.addAttribute("from", from);
+        model.addAttribute("to", to);
+        model.addAttribute("title", "Revenue Report");
+        return render(model, "shipments/revenue");
     }
 
     private boolean isClient(Authentication auth) {

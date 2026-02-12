@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -360,6 +361,21 @@ public class ShipmentService {
         stats.put("totalRevenue", totalRevenue);
 
         return stats;
+    }
+
+    public Map<String, Object> getRevenueReport(Instant from, Instant to) {
+        List<Shipment> paidShipments = shipmentStatusRepository
+                .findShipmentsByStatusAndDateRange(Status.SUBMITTED_PAID, from, to);
+
+        BigDecimal totalRevenue = paidShipments.stream()
+                .map(Shipment::getPrice)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        Map<String, Object> report = new HashMap<>();
+        report.put("shipments", paidShipments);
+        report.put("totalRevenue", totalRevenue);
+        report.put("shipmentCount", paidShipments.size());
+        return report;
     }
 
     public List<Shipment> getAllShipments() {

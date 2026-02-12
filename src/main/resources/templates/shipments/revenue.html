@@ -1,0 +1,98 @@
+<section class="container mx-auto p-6">
+
+    <!-- Date Range Filter -->
+    <div class="mb-6 bg-white dark:bg-gray-800 rounded-2xl shadow-md p-5">
+        <form th:action="@{/shipments/revenue}" method="get" class="flex flex-wrap gap-4 items-end">
+            <div>
+                <label for="from" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">From</label>
+                <input type="date" id="from" name="from" th:value="${from}"
+                       class="px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-600
+                              bg-white dark:bg-gray-700 text-gray-900 dark:text-white
+                              focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200"/>
+            </div>
+            <div>
+                <label for="to" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">To</label>
+                <input type="date" id="to" name="to" th:value="${to}"
+                       class="px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-600
+                              bg-white dark:bg-gray-700 text-gray-900 dark:text-white
+                              focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200"/>
+            </div>
+            <button type="submit"
+                    class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">
+                Generate
+            </button>
+            <a th:href="@{/shipments/revenue}"
+               class="text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700">
+                Reset
+            </a>
+        </form>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-md p-6">
+            <p class="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Total Revenue</p>
+            <p class="mt-2 text-3xl font-bold text-gray-900 dark:text-white">
+                <span th:text="${totalRevenue}">0.00</span> EUR
+            </p>
+        </div>
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-md p-6">
+            <p class="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Shipments Paid</p>
+            <p class="mt-2 text-3xl font-bold text-gray-900 dark:text-white"
+               th:text="${shipmentCount}">0</p>
+        </div>
+    </div>
+
+    <!-- Shipments Table -->
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-md overflow-hidden">
+
+        <div th:if="${shipmentCount == 0}"
+             class="p-8 text-center text-gray-500 dark:text-gray-400">
+            No paid shipments found in the selected date range.
+        </div>
+
+        <div th:if="${shipmentCount > 0}" class="overflow-x-auto">
+            <table class="w-full border-collapse">
+                <thead>
+                <tr class="bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-200 text-xs uppercase tracking-wide">
+                    <th class="px-6 py-4 text-left">Tracking ID</th>
+                    <th class="px-6 py-4 text-left">Sender</th>
+                    <th class="px-6 py-4 text-left">Recipient</th>
+                    <th class="px-6 py-4 text-left">Price</th>
+                    <th class="px-6 py-4 text-left">Paid On</th>
+                </tr>
+                </thead>
+
+                <tbody class="text-gray-700 dark:text-white">
+                <tr th:each="shipment : ${shipments}"
+                    class="hover:bg-gray-50 dark:hover:bg-gray-700 transition">
+
+                    <td class="px-6 py-4 text-sm font-mono">
+                        <a th:href="@{/shipments/{id}(id=${shipment.id})}"
+                           th:text="${shipment.uniqueId}"
+                           class="text-blue-600 dark:text-blue-400 hover:underline">
+                        </a>
+                    </td>
+
+                    <td class="px-6 py-4 text-sm"
+                        th:text="${shipment.senderClient?.user?.firstName + ' ' + shipment.senderClient?.user?.lastName}">
+                    </td>
+
+                    <td class="px-6 py-4 text-sm"
+                        th:text="${shipment.recipientClient?.user?.firstName + ' ' + shipment.recipientClient?.user?.lastName}">
+                    </td>
+
+                    <td class="px-6 py-4 text-sm font-medium"
+                        th:text="${shipment.price + ' EUR'}">
+                    </td>
+
+                    <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-400"
+                        th:text="${#temporals.format(shipment.updatedOn, 'yyyy-MM-dd HH:mm')}">
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</section>
